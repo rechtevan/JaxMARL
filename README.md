@@ -137,7 +137,20 @@ make run
 ```
 
 ## Contributing 🔨
-Please contribute! Please take a look at our [contributing guide](https://github.com/FLAIROx/JaxMARL/blob/main/CONTRIBUTING.md) for how to add an environment/algorithm or submit a bug report. If you're looking for a project, we also have a few suggestions listed under the roadmap :) 
+Please contribute! Please take a look at our [contributing guide](https://github.com/FLAIROx/JaxMARL/blob/main/CONTRIBUTING.md) for how to add an environment/algorithm or submit a bug report. If you're looking for a project, we also have a few suggestions listed under the roadmap :)
+
+## Contributors 👥
+
+JaxMARL is developed and maintained by the **Foerster Lab for AI Research** at the University of Oxford.
+
+This fork (rechtevan/JaxMARL) includes contributions from **Booz Allen Hamilton** focused on:
+- Quality improvement infrastructure and testing enhancements
+- Test coverage measurement and expansion
+- Security scanning integration (CodeQL)
+- CI/CD improvements and workflow automation
+- Static analysis integration (Ruff, MyPy)
+
+All contributions are licensed under the Apache License 2.0. For detailed contribution history, see the [NOTICE](NOTICE) file and git commit log.
 
 <h2 name="cite" id="cite">Citing JaxMARL 📜 </h2>
 If you use JaxMARL in your work, please cite us as follows:

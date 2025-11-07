@@ -1,0 +1,23 @@
+JaxMARL
+Copyright 2023 FLAIR (Foerster Lab for AI Research)
+
+This product includes contributions from:
+
+* Foerster Lab for AI Research, University of Oxford
+  - Original JaxMARL implementation
+  - Core multi-agent reinforcement learning algorithms and environments
+  - Baseline implementations (IPPO, MAPPO, Q-learning variants)
+
+* Booz Allen Hamilton
+  - Quality improvement infrastructure and testing enhancements
+  - Test coverage measurement and expansion
+  - Security scanning integration (CodeQL)
+  - CI/CD improvements and workflow automation
+  - Static analysis integration (Ruff, MyPy)
+  - Pre-commit hooks and code quality tooling
+
+This software is licensed under the Apache License 2.0.
+See the LICENSE file for the full license text.
+
+For detailed contribution history and attribution, see the git commit log:
+  git log --format="%an <%ae>" --all
