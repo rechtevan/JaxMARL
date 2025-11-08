@@ -6,7 +6,7 @@ import jax
 import jax.numpy as jnp
 from jaxmarl.environments.mpe.simple_world_comm import SimpleWorldCommMPE
 #from ._test_utils.rollout_manager import RolloutManager
-from pettingzoo.mpe import simple_v3, simple_tag_v3, simple_world_comm_v3
+from mpe2 import simple_v3, simple_tag_v3, simple_world_comm_v3
 import time
 
 # Simple world comm for 1000 steps, with randomly sampled actions

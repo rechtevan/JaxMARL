@@ -15,7 +15,7 @@ from jax import numpy as jnp
 from jaxmarl import make
 from jaxmarl.wrappers.baselines import load_params, get_space_dim
 from baselines.QLearning.iql_rnn import AgentRNN, ScannedRNN
-from pettingzoo.mpe import simple_speaker_listener_v4, simple_spread_v3, simple_adversary_v3
+from mpe2 import simple_speaker_listener_v4, simple_spread_v3, simple_adversary_v3
 import tqdm
 
 

@@ -405,7 +405,7 @@ def test_policy(key, state: State):
 
 
 if __name__ == "__main__":
-    from pettingzoo.mpe import simple_world_comm_v3
+    from mpe2 import simple_world_comm_v3
 
     ### Petting zoo env
     zoo_env = simple_world_comm_v3.parallel_env(max_cycles=25, continuous_actions=True)

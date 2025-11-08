@@ -25,7 +25,7 @@ jobs:
         docker run --rm -v $PWD:/home/workdir --shm-size 20G jaxmarl:latest /bin/bash -c "pytest --cov=jaxmarl --cov-report=xml:/home/workdir/coverage.xml --cov-report=term ./tests/"
 
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v4
+      uses: codecov/codecov-action@v5
       with:
         file: ./coverage.xml
         flags: unittests

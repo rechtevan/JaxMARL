@@ -5,7 +5,7 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 from pettingzoo.test import parallel_api_test
-from pettingzoo.mpe import simple_v3, simple_world_comm_v3, simple_tag_v3, simple_spread_v3, simple_crypto_v3, simple_speaker_listener_v4, simple_push_v3, simple_adversary_v3, simple_reference_v3
+from mpe2 import simple_v3, simple_world_comm_v3, simple_tag_v3, simple_spread_v3, simple_crypto_v3, simple_speaker_listener_v4, simple_push_v3, simple_adversary_v3, simple_reference_v3
 import tqdm
 from jaxmarl import make
 import pytest
