@@ -11,9 +11,11 @@
         <img src="https://colab.research.google.com/assets/colab-badge.svg" /></a>
        <a href= "https://arxiv.org/abs/2311.10090">
         <img src="https://img.shields.io/badge/arXiv-2311.10090-b31b1b.svg" /></a>
+       <a href="https://codecov.io/gh/rechtevan/JaxMARL">
+        <img src="https://codecov.io/gh/rechtevan/JaxMARL/branch/main/graph/badge.svg" /></a>
        <a href= "https://jaxmarl.foersterlab.com/">
         <img src="https://img.shields.io/badge/docs-green" /></a>
-       
+
 </p>
 
 [**Installation**](#install) | [**Quick Start**](#start) | [**Environments**](#environments) | [**Algorithms**](#algorithms) | [**Citation**](#cite)

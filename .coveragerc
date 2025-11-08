@@ -28,13 +28,6 @@ show_missing = True
 skip_empty = True
 # Sort by coverage percentage (lowest first)
 sort = Cover
-
-[html]
-directory = .local/htmlcov
-
-[json]
-output = .local/coverage.json
-
 exclude_lines =
     # Standard pragmas
     pragma: no cover
@@ -51,3 +44,9 @@ exclude_lines =
     if typing.TYPE_CHECKING:
     # Ellipsis for abstract/stub methods
     \.\.\.
+
+[html]
+directory = .local/htmlcov
+
+[json]
+output = .local/coverage.json
