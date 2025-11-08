@@ -96,6 +96,24 @@ pytest --cov=jaxmarl --cov-report=term --cov-report=html --cov-report=json ./tes
 - JSON reports: `.local/coverage.json`
 - Configuration: `.coveragerc`
 
+**Coverage Scope (What's Measured)**:
+
+Coverage targets (80-90%+) apply to **core production code only**:
+- ✅ Environment implementations (`jaxmarl/environments/*/`)
+- ✅ Wrappers (`jaxmarl/wrappers/`)
+- ✅ Registration system (`jaxmarl/registration.py`)
+- ✅ Multi-agent base classes (`jaxmarl/environments/multi_agent_env.py`)
+
+**Excluded from coverage requirements** (per `.coveragerc`):
+- ❌ Visualization utilities (`*/viz/*`, `*visualizer.py`, `*_viz.py`)
+- ❌ Interactive modules (`*/interactive.py`, `*/manual_game*.py`)
+- ❌ Pretrained models (`*/pretrained/*`)
+- ❌ Experimental code (`*/gridworld/*`)
+- ❌ Test files (`*/tests/*`, `*_test.py`)
+- ❌ Debug/development code (`if __name__ == "__main__"`)
+
+**Rationale**: Coverage focuses on core functionality that's used in production (environments, algorithms). Visualization, interactive tools, and experimental code are tested manually and don't need automated coverage tracking.
+
 ## CI/CD and Security
 
 ### Automated Workflows
