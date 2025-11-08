@@ -93,7 +93,7 @@ class GridMapCircleAgents(Map):
                 connected_region = _graph_utils.component_mask_with_pos(map_data, actual_idx).at[1:-1, 1:-1].get()
             else:
                 connected_region = 1-inside_grid
-            masked_start = connected_region.at[start[1], start[0]].set(0)
+            masked_start = connected_region.at[start[1], start[0]].set(jnp.array(0, dtype=connected_region.dtype))
             goal_possibilities = masked_start & (1 - goal_masks)
             valid = jnp.any(goal_possibilities)  # only valid if possible goal locations
                         
@@ -126,8 +126,8 @@ class GridMapCircleAgents(Map):
             
             start = pos.at[i, 0].get().astype(jnp.int32)
             goal = pos.at[i, 1].get().astype(jnp.int32)
-            start_mask = start_mask.at[start[1], start[0]].set(1)
-            goal_mask = goal_mask.at[goal[1], goal[0]].set(1)
+            start_mask = start_mask.at[start[1], start[0]].set(jnp.array(1, dtype=start_mask.dtype))
+            goal_mask = goal_mask.at[goal[1], goal[0]].set(jnp.array(1, dtype=goal_mask.dtype))
             return (i+1, pos, start_mask, goal_mask), None
         
                 
@@ -598,8 +598,8 @@ class GridMapPolygonAgents(GridMapCircleAgents):
         valid_idx = (idx_pairs[:, 0] >= 0) & (idx_pairs[:, 0] < self.height) & (idx_pairs[:, 1] >= 0) & (idx_pairs[:, 1] < self.width) & collisions
         idx_pairs = jnp.where(jnp.repeat(valid_idx[:, None], 1, 1), idx_pairs, jnp.zeros(idx_pairs.shape)).astype(int)
         map_mask = jnp.zeros(map_grid.shape, dtype=jnp.int32)
-        
-        return map_mask.at[idx_pairs[:, 0], idx_pairs[:, 1]].set(1)
+
+        return map_mask.at[idx_pairs[:, 0], idx_pairs[:, 1]].set(jnp.array(1, dtype=map_mask.dtype))
 
     
     def _checkGrid(self, x1y1, x2y2, grid_idx, map_grid):

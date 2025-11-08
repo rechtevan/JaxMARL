@@ -560,9 +560,9 @@ class InTheGrid(MultiAgentEnv):
             state = state.replace(grid=grid)
             def update_interacted_agents(i, val):
                 interacted_agents, pairs = val
-                # IDFK IF THIS WORKS. DOES IT AUTOMATICALLY TURN IT INTO BOOL???
-                interacted_agents = interacted_agents.at[pairs[i, 0], pairs[i, 1]].set(selected_pairs[i,0])
-                interacted_agents = interacted_agents.at[pairs[i, 1], pairs[i, 0]].set(selected_pairs[i,0])
+                # Convert int32 to bool to avoid scatter type incompatibility warning
+                interacted_agents = interacted_agents.at[pairs[i, 0], pairs[i, 1]].set(jnp.bool_(selected_pairs[i,0]))
+                interacted_agents = interacted_agents.at[pairs[i, 1], pairs[i, 0]].set(jnp.bool_(selected_pairs[i,0]))
                 return interacted_agents, pairs
 
             # Initialize an interacted_agents matrix with False values

@@ -786,7 +786,7 @@ class SMAX(MultiAgentEnv):
                 max_segment_angle = (2 * math.pi) * (
                     (j + 1) / self.num_sections
                 ) - math.pi
-                self_mask = jnp.zeros((self.num_agents,)).at[i].set(1)
+                self_mask = jnp.zeros((self.num_agents,)).at[i].set(jnp.float32(1))
                 in_range_mask = (
                     (angle > min_segment_angle)
                     & (angle < max_segment_angle)
@@ -913,7 +913,7 @@ class SMAX(MultiAgentEnv):
             is_alive = state.unit_alive[i]
             mask = jnp.zeros((num_actions,), dtype=jnp.uint8)
             # always can take the stop action
-            mask = mask.at[self.num_movement_actions - 1].set(1)
+            mask = mask.at[self.num_movement_actions - 1].set(jnp.uint8(1))
             mask = mask.at[: self.num_movement_actions - 1].set(
                 jax.lax.select(
                     is_alive,

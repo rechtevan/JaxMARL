@@ -421,8 +421,8 @@ def test_episode_end(ally_health, enemy_health, done_unit, reward_unit, do_jit):
         unit_positions = state.unit_positions.at[unit_1_idx].set(jnp.array([1.0, 1.0]))
         unit_positions = unit_positions.at[unit_2_idx].set(jnp.array([1.0, 2.0]))
         unit_alive = jnp.zeros((env.num_agents,), dtype=jnp.bool_)
-        unit_alive = unit_alive.at[unit_1_idx].set(1)
-        unit_alive = unit_alive.at[unit_2_idx].set(1)
+        unit_alive = unit_alive.at[unit_1_idx].set(True)
+        unit_alive = unit_alive.at[unit_2_idx].set(True)
 
         unit_health = jnp.zeros((env.num_agents,))
         unit_health = unit_health.at[unit_1_idx].set(unit_1_health)
@@ -553,8 +553,8 @@ def test_obs_function(do_jit):
             jnp.zeros((len(env.unit_features),)),
         )
         # test a dead agent sees nothing
-        unit_alive = state.unit_alive.at[0].set(0)
-        unit_health = state.unit_health.at[0].set(0)
+        unit_alive = state.unit_alive.at[0].set(False)
+        unit_health = state.unit_health.at[0].set(0.0)
         # test that the right unit corresponds to the right agent
         unit_positions = state.unit_positions.at[0].set(jnp.array([1.0, 1.0]))
         unit_positions = unit_positions.at[env.num_allies].set(jnp.array([1.0, 2.0]))
@@ -604,8 +604,8 @@ def test_world_state(do_jit):
         unit_2_idx = env.num_allies
 
         unit_alive = jnp.zeros((env.num_agents,), dtype=jnp.bool_)
-        unit_alive = unit_alive.at[unit_1_idx].set(1)
-        unit_alive = unit_alive.at[unit_2_idx].set(1)
+        unit_alive = unit_alive.at[unit_1_idx].set(True)
+        unit_alive = unit_alive.at[unit_2_idx].set(True)
 
         unit_health = jnp.zeros((env.num_agents,))
         unit_health = unit_health.at[unit_1_idx].set(0.5)

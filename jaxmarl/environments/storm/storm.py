@@ -299,13 +299,13 @@ class InTheMatrix(MultiAgentEnv):
             ).astype(jnp.int16)
 
             # update conflict bools to reflect the post-conflict state
-            _conflicts = conflicts.at[agent_conflicts_idx].set(0)
+            _conflicts = conflicts.at[agent_conflicts_idx].set(False)
             conflicts = jnp.where(
                 agent_conflicts,
-                0,
+                False,
                 conflicts
             )
-            conflicts = conflicts.at[conflict_idx].set(0)
+            conflicts = conflicts.at[conflict_idx].set(False)
             conflicts_matrix = jax.vmap(
                 lambda c, x: jnp.where(c, x, jnp.array([False]*conflicts.shape[0]))
             )(conflicts, conflicts_matrix)

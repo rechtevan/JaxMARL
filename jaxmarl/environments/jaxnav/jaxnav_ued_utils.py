@@ -78,7 +78,7 @@ def flip_wall(rng, map: GridMapPolygonAgents, state: State):
     
 
     goal = jnp.floor(state.goal).astype(jnp.int32)
-    goal_map_mask = goal_map_mask.at[goal[:, 1], goal[:, 0]].set(1)
+    goal_map_mask = goal_map_mask.at[goal[:, 1], goal[:, 0]].set(jnp.array(1, dtype=goal_map_mask.dtype))
 
     map_mask = start_map_mask | map._gen_base_grid() | goal_map_mask
     
@@ -109,7 +109,7 @@ def move_goal(rng, map:GridMapPolygonAgents, state:State):
     # goal_map_masks = goal_map_masks.at[agent_idx].set(jnp.zeros(wall_map.shape, dtype=jnp.int32))
     goal_map_mask = jnp.any(goal_map_masks, axis=0)
     current_goal = jnp.floor(state.goal[agent_idx]).astype(jnp.int32)
-    goal_map_mask = goal_map_mask.at[current_goal[1], current_goal[0]].set(0)
+    goal_map_mask = goal_map_mask.at[current_goal[1], current_goal[0]].set(jnp.array(0, dtype=goal_map_mask.dtype))
     
     start_map_mask = jnp.any(jax.vmap(
         map.get_agent_map_occupancy_mask, in_axes=(0,0,None)

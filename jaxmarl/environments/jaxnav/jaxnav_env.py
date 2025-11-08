@@ -354,9 +354,9 @@ class JaxNav(MultiAgentEnv):
         rc = jnp.where(rc_m==jnp.inf, -1, rc_m).astype(int)
         
         lidar_hits = point_fn(beam_coords.reshape(-1, 2), state.map_data).reshape(beam_coords.shape[0], beam_coords.shape[1], -1)
-        
+
         idxs = jnp.arange(0, beam_coords.shape[0])
-        lidar_hits = lidar_hits.at[idxs, rc].set(1)
+        lidar_hits = lidar_hits.at[idxs, rc].set(jnp.array(1, dtype=lidar_hits.dtype))
         fh_idx = jnp.argmax(lidar_hits>0, axis=1)
         return self.lidar_ranges[fh_idx]
     
