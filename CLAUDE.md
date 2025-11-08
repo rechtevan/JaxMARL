@@ -114,6 +114,44 @@ Coverage targets (80-90%+) apply to **core production code only**:
 
 **Rationale**: Coverage focuses on core functionality that's used in production (environments, algorithms). Visualization, interactive tools, and experimental code are tested manually and don't need automated coverage tracking.
 
+## Code Quality and Linting
+
+### Python Code
+
+**Recommended tools** (to be implemented in issues #5 and #6):
+- **Ruff** - Fast Python linter and formatter
+- **MyPy** - Static type checking
+- **Pre-commit hooks** - Automatic checks before commit
+
+### Markdown Documentation
+
+**Markdown linting and formatting** (planned for issues #5 and #6):
+- **mdformat** - Auto-formatter for markdown files (Python-based)
+  - Supports GitHub Flavored Markdown (GFM)
+  - Auto-fixes formatting issues
+  - Integrates with pre-commit hooks
+
+- **pymarkdownlnt** - Markdown linter (Python-based)
+  - 46 built-in rules for markdown quality
+  - GFM compliant
+  - Catches syntax errors and inconsistencies
+
+**Files to lint**:
+- README.md, CLAUDE.md, CONTRIBUTING.md
+- All .md files in repository
+- Ensures consistent documentation style
+
+**Run markdown checks**:
+```bash
+# Format markdown files
+pip install mdformat mdformat-gfm mdformat-black
+mdformat .
+
+# Lint markdown files
+pip install pymarkdownlnt
+pymarkdown scan .
+```
+
 ## CI/CD and Security
 
 ### Automated Workflows
