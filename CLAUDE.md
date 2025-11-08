@@ -102,11 +102,11 @@ pytest --cov=jaxmarl --cov-report=term --cov-report=html --cov-report=json ./tes
 
 The repository uses GitHub Actions for continuous integration and security scanning:
 
-**CodeQL Security Scanning** (`.github/workflows/codeql.yml`):
+**CodeQL Security Scanning** (GitHub Default):
 - Automated security vulnerability detection for Python code
-- Runs on: push to main, pull requests, weekly schedule (Mondays)
-- Uses GitHub's security-extended query suite
-- Results viewable in GitHub Security tab
+- Runs automatically on push to main
+- Results viewable in GitHub Security tab → Code scanning alerts
+- Uses GitHub's default security query suite
 
 **Test Coverage** (`.github/workflows/coverage.yml`):
 - Runs pytest with coverage reporting
@@ -123,7 +123,7 @@ The repository uses GitHub Actions for continuous integration and security scann
 # CodeQL findings appear in:
 # - GitHub Security tab → Code scanning alerts
 # - Pull request checks (if issues found)
-# - Weekly scheduled scan results
+# - Automatic scans on push to main
 ```
 
 **Security Best Practices:**
