@@ -76,6 +76,26 @@ pytest tests/smax/
 pytest tests/overcooked/
 ```
 
+**Run tests with coverage:**
+```bash
+# Generate coverage report with terminal output
+pytest --cov=jaxmarl --cov-report=term ./tests/
+
+# Generate coverage with HTML report
+pytest --cov=jaxmarl --cov-report=html ./tests/
+
+# Generate coverage with JSON output
+pytest --cov=jaxmarl --cov-report=json ./tests/
+
+# Generate all report types
+pytest --cov=jaxmarl --cov-report=term --cov-report=html --cov-report=json ./tests/
+```
+
+**Coverage reports location:**
+- HTML reports: `.local/htmlcov/index.html`
+- JSON reports: `.local/coverage.json`
+- Configuration: `.coveragerc`
+
 ## Running Baselines
 
 All baseline algorithms use Hydra for configuration management. Config files are located in `baselines/<ALGORITHM>/config/`.

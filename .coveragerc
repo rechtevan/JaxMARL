@@ -1,0 +1,53 @@
+[run]
+source = jaxmarl
+omit =
+    # Test files
+    */tests/*
+    *_test.py
+    # Interactive/manual modules (not designed for automated testing)
+    */interactive.py
+    */manual_game*.py
+    # Visualization utilities (tested manually)
+    */viz/*
+    */visualizer.py
+    *_viz.py
+    # Pretrained models (external dependencies)
+    */pretrained/*
+    # Experimental/unused modules
+    */gridworld/*
+    # Setup/config files
+    setup.py
+    */setup.py
+
+[report]
+# Precision for coverage percentage
+precision = 2
+# Show lines that weren't executed
+show_missing = True
+# Skip files with no code
+skip_empty = True
+# Sort by coverage percentage (lowest first)
+sort = Cover
+
+[html]
+directory = .local/htmlcov
+
+[json]
+output = .local/coverage.json
+
+exclude_lines =
+    # Standard pragmas
+    pragma: no cover
+    # Defensive programming
+    raise AssertionError
+    raise NotImplementedError
+    # Debugging code
+    if __name__ == .__main__.:
+    if TYPE_CHECKING:
+    # Abstract methods
+    @abstractmethod
+    @abc.abstractmethod
+    # Type checking blocks
+    if typing.TYPE_CHECKING:
+    # Ellipsis for abstract/stub methods
+    \.\.\.
