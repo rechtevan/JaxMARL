@@ -18,3 +18,8 @@ models/
 
 # AI-generated analysis and reports (should NOT be committed)
 .local/
+
+# Coverage reports
+.coverage
+.coverage.*
+htmlcov/
