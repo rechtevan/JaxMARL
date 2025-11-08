@@ -96,6 +96,45 @@ pytest --cov=jaxmarl --cov-report=term --cov-report=html --cov-report=json ./tes
 - JSON reports: `.local/coverage.json`
 - Configuration: `.coveragerc`
 
+## CI/CD and Security
+
+### Automated Workflows
+
+The repository uses GitHub Actions for continuous integration and security scanning:
+
+**CodeQL Security Scanning** (`.github/workflows/codeql.yml`):
+- Automated security vulnerability detection for Python code
+- Runs on: push to main, pull requests, weekly schedule (Mondays)
+- Uses GitHub's security-extended query suite
+- Results viewable in GitHub Security tab
+
+**Test Coverage** (`.github/workflows/coverage.yml`):
+- Runs pytest with coverage reporting
+- Uploads results to Codecov
+- Runs on: push to main, pull requests
+
+**Docker Tests** (`.github/workflows/docker-tests.yml`):
+- Validates tests pass in Docker environment
+- Ensures reproducible test execution
+- Runs on: all pushes and pull requests
+
+**Viewing Security Results:**
+```bash
+# CodeQL findings appear in:
+# - GitHub Security tab → Code scanning alerts
+# - Pull request checks (if issues found)
+# - Weekly scheduled scan results
+```
+
+**Security Best Practices:**
+- All dependencies must be Apache 2.0 compatible (see Licensing section)
+- CodeQL scans for common Python security issues:
+  - SQL injection vulnerabilities
+  - Command injection risks
+  - Path traversal issues
+  - Unsafe deserialization
+  - And more...
+
 ## Running Baselines
 
 All baseline algorithms use Hydra for configuration management. Config files are located in `baselines/<ALGORITHM>/config/`.
