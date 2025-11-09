@@ -146,6 +146,8 @@ dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 force-single-line = false
 lines-after-imports = 2
 known-first-party = ["jaxmarl"]
+# Prevent circular imports by forcing MultiAgentEnv to be imported first
+force-to-top = ["jaxmarl.environments.multi_agent_env"]
 section-order = [
     "future",
     "standard-library",
