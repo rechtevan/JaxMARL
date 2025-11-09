@@ -148,7 +148,6 @@ class SimpleFacmacMPE(SimpleMPE):
         return rew
 
     def _prey_policy(self, key: chex.PRNGKey, state: State, aidx: int):
-        action = None
         n = 100  # number of positions sampled
         # sample actions randomly from a target circle
         # length = jnp.sqrt(jnp.random.uniform(0, 1, n))

@@ -119,7 +119,7 @@ def main():
         # actions[env.agents[0]] = sampled_action
         actions = jnp.array([sampled_action, sample_random_action(action_key[1])])
         key, state_key = jax.random.split(key)
-        next_obs, state, rewards, dones, infos = env.step(state_key, state, actions)
+        next_obs, state, rewards, dones, _infos = env.step(state_key, state, actions)
         cum_reward += rewards
 
         if not evaluate:
@@ -168,7 +168,7 @@ def main():
         )
         actions = jnp.array([sampled_optimal_action, sample_random_action(action_key)])
         rng, state_key = jax.random.split(rng)
-        obs, state, rewards, dones, infos = env.step(state_key, state, actions)
+        obs, state, _rewards, _dones, _infos = env.step(state_key, state, actions)
         viz.render(env_params, state, highlight=False)
 
 

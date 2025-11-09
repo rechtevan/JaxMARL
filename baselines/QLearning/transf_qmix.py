@@ -1252,7 +1252,7 @@ def tune(default_config):
         rng = jax.random.PRNGKey(config["SEED"])
         rngs = jax.random.split(rng, config["NUM_SEEDS"])
         train_vjit = jax.jit(jax.vmap(make_train(config, env)))
-        outs = jax.block_until_ready(train_vjit(rngs))
+        jax.block_until_ready(train_vjit(rngs))
 
     sweep_config = {
         "name": f"{alg_name}_{env_name}",

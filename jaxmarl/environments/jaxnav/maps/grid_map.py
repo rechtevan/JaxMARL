@@ -1035,7 +1035,7 @@ class GridMapBarn(GridMapPolygonAgents):
     @partial(jax.jit, static_argnums=[0])
     def sample_barn_test_case(self, rng):
         def _cond_fun(val):
-            valid, test_case, rng = val
+            valid, _test_case, _rng = val
             # jax.debug.print('valid {v}', v=valid)
             return ~valid
 
@@ -1054,7 +1054,7 @@ class GridMapBarn(GridMapPolygonAgents):
         test_case = jax.lax.while_loop(
             _cond_fun, _body_fun, (False, init_test_case, rng)
         )
-        valid, test_case, rng = test_case
+        _valid, test_case, rng = test_case
 
         start, goal, smoothed_map = test_case
 

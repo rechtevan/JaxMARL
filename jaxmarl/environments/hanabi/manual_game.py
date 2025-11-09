@@ -113,7 +113,7 @@ def play_game(args):
         @jax.jit
         def _step_env(rng, env_state, actions):
             rng, _rng = jax.random.split(rng)
-            new_obs, new_env_state, reward, dones, infos = env.step(
+            new_obs, new_env_state, reward, dones, _infos = env.step(
                 _rng, env_state, actions
             )
             new_legal_moves = env.get_legal_moves(new_env_state)

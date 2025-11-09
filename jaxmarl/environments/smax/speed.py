@@ -198,7 +198,7 @@ def main():
     rng = jax.random.PRNGKey(config["SEED"])
     benchmark_jit = jax.jit(benchmark_fn).lower(rng).compile()
     before = time.perf_counter_ns()
-    runner_state = jax.block_until_ready(benchmark_jit(rng))
+    jax.block_until_ready(benchmark_jit(rng))
     after = time.perf_counter_ns()
     num_steps = config["NUM_ENVS"] * config["NUM_STEPS"]
     total_time = (after - before) / 1e9

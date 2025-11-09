@@ -212,7 +212,7 @@ def make_train(config, env):
                 for i, agent in enumerate(env.agents)
             }
             avail_actions = wrapped_env.get_valid_actions(env_state.env_state)
-            obs, env_state, rewards, dones, infos = wrapped_env.batch_step(
+            obs, env_state, rewards, dones, _infos = wrapped_env.batch_step(
                 key_s, env_state, actions
             )
             timestep = Timestep(
@@ -533,7 +533,7 @@ def make_train(config, env):
                 hstate,
                 _rng,
             )
-            step_state, (rewards, dones, infos) = jax.lax.scan(
+            step_state, (_rewards, _dones, infos) = jax.lax.scan(
                 _greedy_env_step, step_state, None, config["TEST_NUM_STEPS"]
             )
             if config.get("LOG_AGENTS_SEPARATELY", False):
@@ -678,7 +678,7 @@ def tune(default_config):
         rng = jax.random.PRNGKey(config["SEED"])
         rngs = jax.random.split(rng, config["NUM_SEEDS"])
         train_vjit = jax.jit(jax.vmap(make_train(config, env)))
-        outs = jax.block_until_ready(train_vjit(rngs))
+        jax.block_until_ready(train_vjit(rngs))
 
     sweep_config = {
         "name": f"{alg_name}_{env_name}",

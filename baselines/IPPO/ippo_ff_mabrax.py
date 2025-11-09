@@ -354,7 +354,7 @@ def main(config):
         train_jit = jax.jit(
             make_train(config, _rng), device=jax.devices()[config["DEVICE"]]
         )
-        out = train_jit(rng)
+        train_jit(rng)
 
     # mean_returns = out["metrics"]["returned_episode_returns"].mean(-1).reshape(-1)
     # x = np.arange(len(mean_returns)) * config["NUM_ACTORS"]

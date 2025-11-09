@@ -222,7 +222,7 @@ class MAMaze(Environment):
         agent_dir = state.agent_dir[agent_idx]
         agent_dir_idx = state.agent_dir_idx[agent_idx]
 
-        agent_x, agent_y = agent_pos
+        _agent_x, _agent_y = agent_pos
 
         obs_fwd_bound1 = agent_pos
         obs_fwd_bound2 = agent_pos + agent_dir * (self.obs_shape[0] - 1)

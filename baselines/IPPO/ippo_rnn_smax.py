@@ -458,7 +458,7 @@ def make_train(config):
             init_hstate,
             _rng,
         )
-        runner_state, metric = jax.lax.scan(
+        runner_state, _metric = jax.lax.scan(
             _update_step, (runner_state, 0), None, config["NUM_UPDATES"]
         )
         return {"runner_state": runner_state}
@@ -478,7 +478,7 @@ def main(config):
     )
     rng = jax.random.PRNGKey(config["SEED"])
     train_jit = jax.jit(make_train(config), device=jax.devices()[0])
-    out = train_jit(rng)
+    train_jit(rng)
 
 
 if __name__ == "__main__":

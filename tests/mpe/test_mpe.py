@@ -149,7 +149,7 @@ def test_mpe_vs_pettingzoo(zoo_env_name, action_type):
 
     key, key_reset = jax.random.split(key)
     env_jax.reset(key_reset)
-    for ep in tqdm.tqdm(
+    for _ep in tqdm.tqdm(
         range(num_episodes), desc=f"Testing {zoo_env_name}, episode:", leave=True
     ):
         obs = env_zoo.reset()

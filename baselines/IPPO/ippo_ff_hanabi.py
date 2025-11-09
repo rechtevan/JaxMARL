@@ -27,7 +27,7 @@ class ActorCritic(nn.Module):
 
     @nn.compact
     def __call__(self, x):
-        obs, dones, avail_actions = x
+        obs, _dones, avail_actions = x
         embedding = nn.Dense(
             512, kernel_init=orthogonal(np.sqrt(2)), bias_init=constant(0.0)
         )(obs)
@@ -304,7 +304,7 @@ def make_train(config):
                 return update_state, total_loss
 
             update_state = (train_state, traj_batch, advantages, targets, rng)
-            update_state, loss_info = jax.lax.scan(
+            update_state, _loss_info = jax.lax.scan(
                 _update_epoch, update_state, None, config["UPDATE_EPOCHS"]
             )
             train_state = update_state[0]
@@ -357,7 +357,7 @@ def main(config):
 
     rng = jax.random.PRNGKey(50)
     train_jit = jax.jit(make_train(config), device=jax.devices()[0])
-    out = train_jit(rng)
+    train_jit(rng)
 
 
 if __name__ == "__main__":

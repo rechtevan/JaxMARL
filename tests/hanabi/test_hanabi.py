@@ -63,12 +63,12 @@ def get_injected_score(deck, actions):
         actions = jnp.array([20, 20]).at[curr_player].set(action)
         actions = dict(zip(env.agents, actions))
 
-        new_obs, new_env_state, reward, done, info = env.step(
+        _new_obs, new_env_state, reward, done, _info = env.step(
             jax.random.PRNGKey(0), env_state, actions
         )
         return new_env_state, (reward, done)
 
-    obs, env_state = env.reset_from_deck(deck)
+    _obs, env_state = env.reset_from_deck(deck)
     _, (rewards, dones) = jax.lax.scan(_env_step, env_state, actions)
 
     def first_episode_returns(rewards, dones):

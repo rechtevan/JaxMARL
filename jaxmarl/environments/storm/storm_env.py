@@ -291,7 +291,7 @@ class InTheGrid(MultiAgentEnv):
 
             # Add a new axis to agent_indices and agent_positions
             agent_indices_expanded = agent_indices[:, jnp.newaxis]
-            agent_positions_expanded = state.agent_positions[:, jnp.newaxis]
+            state.agent_positions[:, jnp.newaxis]
 
             # Create a matrix of other agent indices for each agent
             other_agent_indices = agent_indices_expanded + jnp.arange(1, num_agents)
@@ -358,7 +358,7 @@ class InTheGrid(MultiAgentEnv):
 
             # Get agent positions and orientations
             agent_positions = state.agent_positions[:, :2]
-            agent_orientations = state.agent_positions[:, 2]
+            state.agent_positions[:, 2]
 
             zaps = actions == Actions.interact
 
@@ -421,7 +421,7 @@ class InTheGrid(MultiAgentEnv):
 
             vmap_get_target = jax.vmap(get_target, (0, None), (0, 0, 0, 0, 0, 0))
             (
-                agent_positions,
+                _agent_positions,
                 target,
                 target_ahead,
                 target_right,
@@ -492,7 +492,7 @@ class InTheGrid(MultiAgentEnv):
             # print(agent_pairs.shape, 'agent pairs')
 
             # Sort the agent pairs randomly using the provided rng_key
-            random_key, subkey = jax.random.split(rng_key)
+            _random_key, subkey = jax.random.split(rng_key)
             shuffled_indices = jax.random.permutation(
                 subkey, jnp.arange(agent_pairs.shape[0])
             )
@@ -877,7 +877,7 @@ class InTheGrid(MultiAgentEnv):
             state = state.replace(agent_positions=updated_position)
 
             key, subkey = jax.random.split(key)
-            red_reward, blue_reward = 0, 0
+            _red_reward, _blue_reward = 0, 0
             (rewards, state, interacted_agents) = _interact(state, actions, key)
             # print(interacted_agents, 'interacted agents')
 

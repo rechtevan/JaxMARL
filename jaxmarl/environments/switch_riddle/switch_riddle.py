@@ -165,7 +165,7 @@ def example():
     env.render(state)
 
     for _ in range(20):
-        key, key_reset, key_act, key_step = jax.random.split(key, 4)
+        key, _key_reset, key_act, key_step = jax.random.split(key, 4)
 
         env.render(state)
         print("obs:", obs)
@@ -183,7 +183,7 @@ def example():
         )
 
         # Perform the step transition.
-        obs, state, reward, done, infos = env.step(key_step, state, actions)
+        obs, state, reward, _done, _infos = env.step(key_step, state, actions)
 
         print("reward:", reward["agent_0"])
 

@@ -13,7 +13,7 @@ def get_no_jax_time(parallel_envs, num_agents, max_steps):
     actions = env.sample_actions()
 
     t0 = time.time()
-    for i in range(max_steps):
+    for _i in range(max_steps):
         _ = env.step(actions)
 
     return time.time() - t0
@@ -39,7 +39,7 @@ def get_jax_time(parallel_envs, num_agents, max_steps):
     _, state = wrapped_env.batch_reset(key_r)
 
     t0 = time.time()
-    for i in range(max_steps):
+    for _i in range(max_steps):
         key, key_s = jax.random.split(key)
         (
             _,

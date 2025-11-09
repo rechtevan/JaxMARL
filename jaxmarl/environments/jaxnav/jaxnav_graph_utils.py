@@ -231,7 +231,7 @@ def shortest_path_len(grid, pos_a, pos_b):
 
 @jax.jit
 def _shortest_path_len(grid, pos_a, pos_b, D):
-    h, w = grid.shape
+    _h, w = grid.shape
 
     a_idx = pos_a[1] * w + pos_a[0]
     b_idx = pos_b[1] * w + pos_b[0]

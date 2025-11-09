@@ -341,7 +341,7 @@ class SHAQMixer(nn.Module):
     @nn.compact
     def __call__(self, q_vals, states, max_filter, target, manual_alpha_estimates=None):
         # shape of q_vals, max_filter: (n_agents, time_steps, batch_size)
-        n_agents, time_steps, batch_size = q_vals.shape
+        _n_agents, _time_steps, _batch_size = q_vals.shape
         if target:
             return jnp.sum(q_vals, axis=0)
         else:

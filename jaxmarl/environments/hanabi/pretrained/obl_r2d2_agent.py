@@ -130,7 +130,7 @@ def example():
     agent_carry, actions = agent.greedy_act(params, agent_carry, agent_input)
     actions = unbatchify(actions)
 
-    obs, env_state, rewards, done, info = env.step(rng, env_state, actions)
+    obs, env_state, _rewards, _done, _info = env.step(rng, env_state, actions)
 
     print(
         "actions:", {agent: env.action_encoding[int(a)] for agent, a in actions.items()}

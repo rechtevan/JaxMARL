@@ -84,10 +84,10 @@ class QNetwork(nn.Module):
         if self.norm_input:
             x = nn.BatchNorm(use_running_average=not train)(x)
         else:
-            x_dummy = nn.BatchNorm(use_running_average=not train)(x)
+            nn.BatchNorm(use_running_average=not train)(x)
 
         x = CNN(norm_type=self.norm_type)(x, train=train)
-        for l in range(self.num_layers):
+        for _l in range(self.num_layers):
             x = nn.Dense(self.hidden_size)(x)
             x = normalize(x)
             x = nn.relu(x)
@@ -517,7 +517,7 @@ def make_train(config, env):
                 init_obs,
                 _rng,
             )
-            step_state, (rewards, dones, infos) = jax.lax.scan(
+            step_state, (_rewards, _dones, infos) = jax.lax.scan(
                 _greedy_env_step, step_state, None, config["TEST_NUM_STEPS"]
             )
             metrics = {
@@ -649,7 +649,7 @@ def tune(default_config):
         rng = jax.random.PRNGKey(config["SEED"])
         rngs = jax.random.split(rng, config["NUM_SEEDS"])
         train_vjit = jax.jit(jax.vmap(make_train(config, env)))
-        outs = jax.block_until_ready(train_vjit(rngs))
+        jax.block_until_ready(train_vjit(rngs))
 
     sweep_config = {
         "name": f"{alg_name}_{env_name}",
@@ -680,7 +680,7 @@ def tune(default_config):
     }
 
     wandb.login()
-    sweep_id = wandb.sweep(
+    wandb.sweep(
         sweep_config, entity=default_config["ENTITY"], project=default_config["PROJECT"]
     )
     wandb.agent("11ecmms5", wrapped_make_train, count=300)

@@ -416,7 +416,7 @@ def make_train(config, env):
 
             def _greedy_env_step(step_state, unused):
                 last_obs, env_state, rng = step_state
-                rng, rng_a, rng_s = jax.random.split(rng, 3)
+                rng, _rng_a, rng_s = jax.random.split(rng, 3)
                 q_vals = jax.vmap(network.apply, in_axes=(None, 0))(
                     train_state.params,
                     batchify(last_obs),  # (num_agents, num_envs, num_actions)
@@ -432,7 +432,7 @@ def make_train(config, env):
             rng, _rng = jax.random.split(rng)
             init_obs, env_state = test_env.batch_reset(_rng)
             rng, _rng = jax.random.split(rng)
-            step_state, (rewards, dones, infos) = jax.lax.scan(
+            _step_state, (rewards, dones, infos) = jax.lax.scan(
                 _greedy_env_step,
                 (init_obs, env_state, _rng),
                 None,
@@ -567,7 +567,7 @@ def tune(default_config):
         rng = jax.random.PRNGKey(config["SEED"])
         rngs = jax.random.split(rng, config["NUM_SEEDS"])
         train_vjit = jax.jit(jax.vmap(make_train(config, env)))
-        outs = jax.block_until_ready(train_vjit(rngs))
+        jax.block_until_ready(train_vjit(rngs))
 
     sweep_config = {
         "name": f"{alg_name}_{env_name}",

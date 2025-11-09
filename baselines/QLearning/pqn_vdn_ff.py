@@ -38,7 +38,7 @@ class QNetwork(nn.Module):
             x = nn.BatchNorm(use_running_average=not train)(x)
         else:
             # dummy normalize input for global compatibility
-            x_dummy = nn.BatchNorm(use_running_average=not train)(x)
+            nn.BatchNorm(use_running_average=not train)(x)
 
         if self.norm_type == "layer_norm":
             normalize = lambda x: nn.LayerNorm()(x)
@@ -47,7 +47,7 @@ class QNetwork(nn.Module):
         else:
             normalize = lambda x: x
 
-        for l in range(self.num_layers):
+        for _l in range(self.num_layers):
             x = nn.Dense(self.hidden_size)(x)
             x = normalize(x)
             x = nn.relu(x)
@@ -471,7 +471,7 @@ def make_train(config, env):
                 init_obs,
                 _rng,
             )
-            step_state, (rewards, dones, infos) = jax.lax.scan(
+            step_state, (_rewards, _dones, infos) = jax.lax.scan(
                 _greedy_env_step, step_state, None, config["TEST_NUM_STEPS"]
             )
             metrics = jax.tree.map(
@@ -608,7 +608,7 @@ def tune(default_config):
         rng = jax.random.PRNGKey(config["SEED"])
         rngs = jax.random.split(rng, config["NUM_SEEDS"])
         train_vjit = jax.jit(jax.vmap(make_train(config, env)))
-        outs = jax.block_until_ready(train_vjit(rngs))
+        jax.block_until_ready(train_vjit(rngs))
 
     sweep_config = {
         "name": f"{alg_name}_{env_name}",

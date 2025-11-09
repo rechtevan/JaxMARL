@@ -289,7 +289,7 @@ def make_train(config):
                 return update_state, total_loss
 
             update_state = (train_state, traj_batch, advantages, targets, rng)
-            update_state, loss_info = jax.lax.scan(
+            update_state, _loss_info = jax.lax.scan(
                 _update_epoch, update_state, None, config["UPDATE_EPOCHS"]
             )
             train_state = update_state[0]

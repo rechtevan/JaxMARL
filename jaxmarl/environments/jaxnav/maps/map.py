@@ -250,7 +250,7 @@ class Map:
         print("key")
         low_lim = 1 + self.rad
         high_lim = self.map_size[1] - 1 - self.rad
-        goal_square = jnp.floor(goal).astype(jnp.int32).squeeze()
+        jnp.floor(goal).astype(jnp.int32).squeeze()
         # print('goal square', goal_square)
 
         tree = jnp.empty((self.rrt_samples, 3))  # [sample, [x, y, parent]]
@@ -319,7 +319,7 @@ class Map:
 
         low_lim = 1 + self.rad
         high_lim = self.map_size[1] - 1 - self.rad
-        goal_square = jnp.floor(goal).astype(jnp.int32).squeeze()
+        jnp.floor(goal).astype(jnp.int32).squeeze()
 
         check_point_connections = jax.vmap(
             self.check_agent_translation, in_axes=(None, 0, None)
@@ -330,12 +330,12 @@ class Map:
         tree = tree.at[0].set(jnp.append(start, jnp.array([-1, 0.0, 0.0])))
         rrt_idx = 1
         goal_reached = False
-        goal_idx = jnp.full((30,), -1, dtype=jnp.int32)
+        jnp.full((30,), -1, dtype=jnp.int32)
 
         rrt_star_neighbours = 20
 
         def _cond_fun(val):
-            i, goal_reached = val[0], val[1]
+            i, _goal_reached = val[0], val[1]
             return i < self.rrt_samples  # & ~goal_reached
 
         def _body_fun(val):

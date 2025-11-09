@@ -31,7 +31,7 @@ class QNetwork(nn.Module):
 
     @nn.compact
     def __call__(self, x: jnp.ndarray):
-        for l in range(1, self.num_layers - 1):
+        for _l in range(1, self.num_layers - 1):
             x = nn.Dense(self.hidden_size)(x)
             x = nn.relu(x)
         x = nn.Dense(self.action_dim)(x)
@@ -524,7 +524,7 @@ def tune(default_config):
         rng = jax.random.PRNGKey(config["SEED"])
         rngs = jax.random.split(rng, config["NUM_SEEDS"])
         train_vjit = jax.jit(jax.vmap(make_train(config, env)))
-        outs = jax.block_until_ready(train_vjit(rngs))
+        jax.block_until_ready(train_vjit(rngs))
 
     sweep_config = {
         "name": f"{alg_name}_{env_name}",

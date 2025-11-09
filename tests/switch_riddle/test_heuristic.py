@@ -26,12 +26,12 @@ class TestHeuristic:
 
         for _ in range(100):
             key, key_reset, key_step = jax.random.split(key, 3)
-            obs, state = env.reset(key_reset)
+            _obs, state = env.reset(key_reset)
 
             prev_bulb_state = state.bulb_state
             actions = action_for_agent_in_room(env, state, "SWITCH_LIGHT")
 
-            _, state, _, done, _ = env.step(key_step, state, actions)
+            _, state, _, _done, _ = env.step(key_step, state, actions)
 
             # Check if the bulb state has changed (only if the env didn't just restarted)
             if not state.step == 0 and state.bulb_state != ~prev_bulb_state:
@@ -47,7 +47,7 @@ class TestHeuristic:
 
         for _ in range(100):
             key, key_reset, key_step = jax.random.split(key, 3)
-            obs, state = env.reset(key_reset)
+            _obs, state = env.reset(key_reset)
 
             # make all the agents visit the room
             for i in range(num_agents):
@@ -75,7 +75,7 @@ class TestHeuristic:
 
         for _ in range(100):
             key, key_reset, key_step = jax.random.split(key, 3)
-            obs, state = env.reset(key_reset)
+            _obs, state = env.reset(key_reset)
 
             # make all the agents visit the room
             for i in range(num_agents):
@@ -104,7 +104,7 @@ class TestHeuristic:
 
         for _ in range(100):
             key, key_reset, key_step = jax.random.split(key, 3)
-            obs, state = env.reset(key_reset)
+            _obs, state = env.reset(key_reset)
 
             actions = action_for_agent_in_room(env, state, "TELL")
             _, state, rewards, _, _ = env.step(key_step, state, actions)
@@ -125,7 +125,7 @@ class TestHeuristic:
 
         for _ in range(100):
             key, key_reset, key_step = jax.random.split(key, 3)
-            obs, state = env.reset(key_reset)
+            _obs, state = env.reset(key_reset)
 
             actions = get_nothing_actions(env)
             _, state, rewards, _, _ = env.step(key_step, state, actions)
@@ -157,10 +157,10 @@ class TestHeuristic:
             key, key_reset, key_step = jax.random.split(key, 3)
             obs, state = env.reset(key_reset)
 
-            for i in range(env.max_steps):
+            for _i in range(env.max_steps):
                 key, key_step = jax.random.split(key)
                 actions = get_nothing_actions(env)
-                obs, state, reward, done, infos = env.step_env(key_step, state, actions)
+                _obs, state, _reward, done, _infos = env.step_env(key_step, state, actions)
 
             assert done["__all__"], (
                 "The environment did not terminate correctly when the maximum time steps is reached."
@@ -196,7 +196,7 @@ class TestHeuristic:
 
         # Play out the sequence of actions in both environments
         for i in range(100):
-            key, key_reset, key_act, key_step = jax.random.split(key, 4)
+            key, _key_reset, key_act, key_step = jax.random.split(key, 4)
 
             key_act = jax.random.split(key_act, num_agents)
             actions1 = {
@@ -213,7 +213,7 @@ class TestHeuristic:
             )
 
             obs1, state1, reward1, done1, _ = env1.step(key_step, state1, actions1)
-            obs2, state2, reward2, done2, _ = env2.step(key_step, state2, actions2)
+            obs2, state2, reward2, _done2, _ = env2.step(key_step, state2, actions2)
 
             # Ensure that the state and observations are the same at each step
             assert check_equal(state1.__dict__, state2.__dict__), (

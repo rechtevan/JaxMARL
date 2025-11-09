@@ -230,7 +230,7 @@ def make_train(config):
                 runner_state = (train_state, env_state, obsv, done_batch, hstate, rng)
                 return runner_state, transition
 
-            initial_hstate = runner_state[-2]
+            runner_state[-2]
             runner_state, traj_batch = jax.lax.scan(
                 _env_step, runner_state, None, config["NUM_STEPS"]
             )
@@ -460,7 +460,7 @@ def main(config):
 
     rng = jax.random.PRNGKey(config["SEED"])
     train_jit = jax.jit(make_train(config))
-    out = train_jit(rng)
+    train_jit(rng)
 
     # checkpoint model for greedy eval
     """train_state = out['runner_state'][0]

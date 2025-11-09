@@ -85,7 +85,7 @@ class JaxNavSingleton(JaxNav):
 
     def viz_testcase(self, save=True, show=False, plot_lidar=True):
         obs, state = self.reset()
-        fig, ax = plt.subplots(figsize=(5, 5))
+        _fig, ax = plt.subplots(figsize=(5, 5))
 
         ax.set_aspect("equal", "box")
         self._map_obj.plot_map(ax, state.map_data)

@@ -144,7 +144,7 @@ class SwitchRiddleNoJax:
         Generates random actions for each agent in a batch.
         """
         actions = []
-        for b in range(self.bs):
+        for _b in range(self.bs):
             batch_actions = {}
             for agent_id in self.agents_ids:
                 if action_name is None:

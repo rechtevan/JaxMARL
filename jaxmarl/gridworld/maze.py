@@ -203,7 +203,7 @@ class Maze(Environment):
         """Return limited grid view ahead of agent."""
         obs = jnp.zeros(self.obs_shape, dtype=jnp.uint8)
 
-        agent_x, agent_y = state.agent_pos
+        _agent_x, _agent_y = state.agent_pos
 
         obs_fwd_bound1 = state.agent_pos
         obs_fwd_bound2 = state.agent_pos + state.agent_dir * (self.obs_shape[0] - 1)

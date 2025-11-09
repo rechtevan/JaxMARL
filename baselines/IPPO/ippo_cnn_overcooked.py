@@ -113,27 +113,27 @@ def get_rollout(params, config):
 
     network = ActorCritic(env.action_space().n, activation=config["ACTIVATION"])
     key = jax.random.PRNGKey(0)
-    key, key_r, key_a = jax.random.split(key, 3)
+    key, key_r, _key_a = jax.random.split(key, 3)
 
     done = False
 
     obs, state = env.reset(key_r)
     state_seq = [state]
     while not done:
-        key, key_a0, key_a1, key_s = jax.random.split(key, 4)
+        key, key_a0, _key_a1, key_s = jax.random.split(key, 4)
 
         obs_batch = jnp.stack([obs[a] for a in env.agents]).reshape(
             -1, *env.observation_space("agent_0").shape
         )
 
-        pi, value = network.apply(params, obs_batch)
+        pi, _value = network.apply(params, obs_batch)
         action = pi.sample(seed=key_a0)
         env_act = unbatchify(action, env.agents, 1, env.num_agents)
 
         env_act = {k: v.squeeze() for k, v in env_act.items()}
 
         # STEP ENV
-        obs, state, reward, done, info = env.step(key_s, state, env_act)
+        obs, state, _reward, done, _info = env.step(key_s, state, env_act)
         done = done["__all__"]
 
         state_seq.append(state)
@@ -373,7 +373,7 @@ def make_train(config):
                 return update_state, total_loss
 
             update_state = (train_state, traj_batch, advantages, targets, rng)
-            update_state, loss_info = jax.lax.scan(
+            update_state, _loss_info = jax.lax.scan(
                 _update_epoch, update_state, None, config["UPDATE_EPOCHS"]
             )
             train_state = update_state[0]
@@ -451,7 +451,7 @@ def tune(default_config):
         rng = jax.random.PRNGKey(config["SEED"])
         rngs = jax.random.split(rng, config["NUM_SEEDS"])
         train_vjit = jax.jit(jax.vmap(make_train(config)))
-        outs = jax.block_until_ready(train_vjit(rngs))
+        jax.block_until_ready(train_vjit(rngs))
 
     sweep_config = {
         "name": "ppo_overcooked",

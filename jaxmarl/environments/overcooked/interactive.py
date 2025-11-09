@@ -38,7 +38,7 @@ def step(env, action, extras):
 
     actions = {"agent_0": jnp.array(action), "agent_1": jnp.array(action)}
     print("Actions : ", actions)
-    obs, state, reward, done, info = jax.jit(env.step_env)(
+    obs, state, reward, done, _info = jax.jit(env.step_env)(
         subkey, extras["state"], actions
     )
     extras["obs"] = obs

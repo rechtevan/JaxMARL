@@ -128,7 +128,7 @@ class SimplePushMPE(SimpleMPE):
 
             return landmark_pos, other_pos, other_vel
 
-        landmark_pos, other_pos, other_vel = _common_stats(self.agent_range)
+        landmark_pos, other_pos, _other_vel = _common_stats(self.agent_range)
 
         def _good(aidx: int):
             goal_rel_pos = state.p_pos[state.goal + self.num_agents] - state.p_pos[aidx]

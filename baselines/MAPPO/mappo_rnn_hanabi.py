@@ -585,7 +585,7 @@ def make_train(config):
             (ac_init_hstate, cr_init_hstate),
             _rng,
         )
-        runner_state, metric = jax.lax.scan(
+        runner_state, _metric = jax.lax.scan(
             _update_step, (runner_state, 0), None, config["NUM_UPDATES"]
         )
         return {"runner_state": runner_state}

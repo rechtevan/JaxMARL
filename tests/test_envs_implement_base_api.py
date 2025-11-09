@@ -123,7 +123,7 @@ def test_step_returns_correct_format(env):
         "Step did not return a 5-tuple"
     )
 
-    next_obs, next_state, reward, done, info = result
+    next_obs, _next_state, reward, done, info = result
     for agent in env.observation_spaces:
         assert env.observation_spaces[agent].contains(next_obs[agent])
 

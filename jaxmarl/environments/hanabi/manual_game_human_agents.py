@@ -88,7 +88,7 @@ def main(argv):
 
         rng, _rng = jax.random.split(rng)
         actions = unbatchify(actions, env.agents)
-        obs, env_state, rewards, dones, infos = env_step_jit(_rng, env_state, actions)
+        _obs, env_state, rewards, dones, _infos = env_step_jit(_rng, env_state, actions)
         print(f"Action played: {env.action_encoding[user_action]}")
 
         score += rewards["__all__"]

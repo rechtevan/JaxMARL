@@ -538,7 +538,7 @@ def make_train(config):
                 targets,
                 rng,
             )
-            update_state, loss_info = jax.lax.scan(
+            update_state, _loss_info = jax.lax.scan(
                 _update_epoch, update_state, None, config["UPDATE_EPOCHS"]
             )
             train_state = update_state[0]
@@ -605,7 +605,7 @@ def main(config):
         rng = jax.random.PRNGKey(config["SEED"])
         rngs = jax.random.split(rng, num_seeds)
         train_jit = jax.jit(make_train(config))
-        out = jax.vmap(train_jit)(rngs)
+        jax.vmap(train_jit)(rngs)
 
 
 if __name__ == "__main__":

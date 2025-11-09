@@ -163,7 +163,7 @@ class InTheMatrix(MultiAgentEnv):
         self.OBS_SIZE = obs_size
         self.PADDING = self.OBS_SIZE - 1
         self.NUM_COINS = num_coins  # per type
-        NUM_OBJECTS = (
+        (
             2 + NUM_COIN_TYPES * self.NUM_COINS + 1
         )  # red, blue, 2 red coin, 2 blue coin
 
@@ -411,7 +411,7 @@ class InTheMatrix(MultiAgentEnv):
                 jnp.sum(two_step_conflicts_matrix, axis=-1), 0, 1
             )
 
-            k1, k2 = jax.random.split(k3, 2)
+            _k1, k2 = jax.random.split(k3, 2)
             two_step_interacts = rand_interaction(
                 k2, two_step_conflicts, two_step_conflicts_matrix, same_dist_targets
             )
