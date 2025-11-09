@@ -2,9 +2,13 @@ import math
 
 import numpy as np
 
-from jaxmarl.viz.window import Window
 import jaxmarl.viz.grid_rendering as rendering
-from jaxmarl.environments.overcooked.common import OBJECT_TO_INDEX, COLOR_TO_INDEX, COLORS
+from jaxmarl.environments.overcooked.common import (
+	COLOR_TO_INDEX,
+	COLORS,
+	OBJECT_TO_INDEX,
+)
+from jaxmarl.viz.window import Window
 
 
 INDEX_TO_COLOR = [k for k,v in COLOR_TO_INDEX.items()]
@@ -331,7 +335,7 @@ class OvercookedVisualizer:
 
 		# Render the grid
 		for y in range(grid.shape[0]):
-			for x in range(grid.shape[1]):		
+			for x in range(grid.shape[1]):
 				obj = grid[y,x,:]
 				if obj[0] in [OBJECT_TO_INDEX['empty'], OBJECT_TO_INDEX['unseen']] \
 					and obj[2] == 0:

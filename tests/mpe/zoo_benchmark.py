@@ -2,12 +2,16 @@
 Simple benchmarking of the speed of JaxMARL vs PettingZoo's MPE environments.
 """
 
+import time
+
 import jax
 import jax.numpy as jnp
-from jaxmarl.environments.mpe.simple_world_comm import SimpleWorldCommMPE
+
 #from ._test_utils.rollout_manager import RolloutManager
-from mpe2 import simple_v3, simple_tag_v3, simple_world_comm_v3
-import time
+from mpe2 import simple_tag_v3, simple_v3, simple_world_comm_v3
+
+from jaxmarl.environments.mpe.simple_world_comm import SimpleWorldCommMPE
+
 
 # Simple world comm for 1000 steps, with randomly sampled actions
 max_steps = 1000
@@ -19,12 +23,12 @@ env = simple_world_comm_v3.parallel_env(max_cycles=max_steps)
 obs = env.reset()
 
 start_time = time.time()
-actions = {agent: env.action_space(agent).sample() for agent in env.agents} 
+actions = {agent: env.action_space(agent).sample() for agent in env.agents}
 
 print('obs spaces', env.observation_spaces, env.action_spaces)
 #while env.agents:
     #step += 1
-for _ in range(max_steps):    
+for _ in range(max_steps):
     #actions = {agent: env.action_space(agent).sample() for agent in env.agents}  # this is where you would insert your policy
     print('actions', actions)
     observations, rewards, terminations, truncations, infos = env.step(actions)

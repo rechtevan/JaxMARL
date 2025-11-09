@@ -1,9 +1,6 @@
 """ Built off gymnax vizualizer.py"""
-import jax.numpy as jnp
-import jax
-import matplotlib.pyplot as plt
 import matplotlib.animation as animation
-from typing import Optional
+import matplotlib.pyplot as plt
 
 from jaxmarl.environments.multi_agent_env import MultiAgentEnv
 from jaxmarl.environments.smax.heuristic_enemy_smax_env import (
@@ -11,7 +8,7 @@ from jaxmarl.environments.smax.heuristic_enemy_smax_env import (
 )
 
 
-class Visualizer(object):
+class Visualizer:
     def __init__(
         self,
         env: MultiAgentEnv,
@@ -27,7 +24,7 @@ class Visualizer(object):
 
     def animate(
         self,
-        save_fname: Optional[str] = None,
+        save_fname: str | None = None,
         view: bool = True,
     ):
         """Anim for 2D fct - x (#steps, #pop, 2) & fitness (#steps, #pop)"""
@@ -78,7 +75,7 @@ class SMAXVisualizer(Visualizer):
         self.state_seq = self.env.expand_state_seq(self.state_seq)
         self.have_expanded = True
 
-    def animate(self, save_fname: Optional[str] = None, view: bool = True):
+    def animate(self, save_fname: str | None = None, view: bool = True):
         if not self.have_expanded:
             self.expand_state_seq()
         return super().animate(save_fname, view)

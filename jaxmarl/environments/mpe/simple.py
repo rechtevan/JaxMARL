@@ -1,22 +1,20 @@
-""" 
+"""
 Base class for MPE PettingZoo envs.
 
 TODO: viz for communication env, e.g. crypto
 """
 
-import jax
-import jax.numpy as jnp
-import numpy as onp
-from jaxmarl.environments.multi_agent_env import MultiAgentEnv
-from jaxmarl.environments.mpe.default_params import *
-import chex
-from jaxmarl.environments.spaces import Box, Discrete
-from flax import struct
-from typing import Tuple, Optional, Dict
 from functools import partial
 
-import matplotlib.pyplot as plt
-import matplotlib
+import chex
+import jax
+import jax.numpy as jnp
+from flax import struct
+
+from jaxmarl.environments.mpe.default_params import *
+from jaxmarl.environments.multi_agent_env import MultiAgentEnv
+from jaxmarl.environments.spaces import Box, Discrete
+
 
 @struct.dataclass
 class State:
@@ -262,7 +260,7 @@ class SimpleMPE(MultiAgentEnv):
         return obs, state, reward, dones, info
 
     @partial(jax.jit, static_argnums=[0])
-    def reset(self, key: chex.PRNGKey) -> Tuple[chex.Array, State]:
+    def reset(self, key: chex.PRNGKey) -> tuple[chex.Array, State]:
         """Initialise with random positions"""
 
         key_a, key_l = jax.random.split(key)
@@ -289,7 +287,7 @@ class SimpleMPE(MultiAgentEnv):
         return self.get_obs(state), state
 
     @partial(jax.jit, static_argnums=[0])
-    def get_obs(self, state: State) -> Dict[str, chex.Array]:
+    def get_obs(self, state: State) -> dict[str, chex.Array]:
         """Return dictionary of agent observations"""
 
         @partial(jax.vmap, in_axes=[0, None])
@@ -304,7 +302,7 @@ class SimpleMPE(MultiAgentEnv):
         obs = _observation(self.agent_range, state)
         return {a: obs[i] for i, a in enumerate(self.agents)}
 
-    def rewards(self, state: State) -> Dict[str, float]:
+    def rewards(self, state: State) -> dict[str, float]:
         """Assign rewards for all agents"""
 
         @partial(jax.vmap, in_axes=[0, None])
@@ -316,7 +314,7 @@ class SimpleMPE(MultiAgentEnv):
         r = _reward(self.agent_range, state)
         return {agent: r[i] for i, agent in enumerate(self.agents)}
 
-    def set_actions(self, actions: Dict):
+    def set_actions(self, actions: dict):
         """Extract u and c actions for all agents from actions Dict."""
 
         actions = jnp.array([actions[i] for i in self.agents]).reshape(
@@ -328,7 +326,7 @@ class SimpleMPE(MultiAgentEnv):
     @partial(jax.vmap, in_axes=[None, 0, 0])
     def _decode_continuous_action(
         self, a_idx: int, action: chex.Array
-    ) -> Tuple[chex.Array, chex.Array]:
+    ) -> tuple[chex.Array, chex.Array]:
         u = jnp.array([action[2] - action[1], action[4] - action[3]])
         u = u * self.accel[a_idx] * self.moveable[a_idx]
         c = action[5:]
@@ -337,7 +335,7 @@ class SimpleMPE(MultiAgentEnv):
     @partial(jax.vmap, in_axes=[None, 0, 0])
     def _decode_discrete_action(
         self, a_idx: int, action: chex.Array
-    ) -> Tuple[chex.Array, chex.Array]:
+    ) -> tuple[chex.Array, chex.Array]:
         u = jnp.zeros((self.dim_p,))
         idx = jax.lax.select(action <= 2, 0, 1)
         u_val = jax.lax.select(action % 2 == 0, 1.0, -1.0) * (action != 0)
@@ -472,7 +470,7 @@ class SimpleMPE(MultiAgentEnv):
                 "agents": self.agents,
             }
 
-    def agent_classes(self) -> Dict[str, list]:
+    def agent_classes(self) -> dict[str, list]:
         return self.classes
 
     ### === UTILITIES === ###
@@ -490,7 +488,7 @@ class SimpleMPE(MultiAgentEnv):
         m = x < 1.0
         mr = (x - 0.9) * 10
         br = jnp.min(jnp.array([jnp.exp(2 * x - 2), 10]))
-        return jax.lax.select(m, mr, br) * ~w   
+        return jax.lax.select(m, mr, br) * ~w
 
 
 if __name__ == "__main__":

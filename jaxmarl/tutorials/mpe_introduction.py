@@ -2,9 +2,11 @@
 Introduction running and visualising the MPE environments using random actions.
 """
 
-import jax 
+import jax
+
 from jaxmarl import make
 from jaxmarl.environments.mpe import MPEVisualizer
+
 
 # Parameters + random keys
 max_steps = 25

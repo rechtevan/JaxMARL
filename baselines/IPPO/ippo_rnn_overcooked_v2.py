@@ -1,23 +1,21 @@
+import functools
+from collections.abc import Callable, Sequence
+from typing import Any, NamedTuple
+
+import distrax
+import flax.linen as nn
+import hydra
 import jax
 import jax.numpy as jnp
-import flax.linen as nn
 import numpy as np
 import optax
-from flax.linen.initializers import constant, orthogonal
-from typing import Callable, Sequence, NamedTuple, Any, Dict
-from flax.training.train_state import TrainState
-import distrax
-from gymnax.wrappers.purerl import LogWrapper, FlattenObservationWrapper
-import jaxmarl
-from jaxmarl.wrappers.baselines import LogWrapper, OvercookedV2LogWrapper
-from jaxmarl.environments import overcooked_v2_layouts
-from jaxmarl.viz.overcooked_v2_visualizer import OvercookedV2Visualizer
-import hydra
-from omegaconf import OmegaConf
-from datetime import datetime
-import os
 import wandb
-import functools
+from flax.linen.initializers import constant, orthogonal
+from flax.training.train_state import TrainState
+from omegaconf import OmegaConf
+
+import jaxmarl
+from jaxmarl.wrappers.baselines import OvercookedV2LogWrapper
 
 
 class ScannedRNN(nn.Module):
@@ -117,7 +115,7 @@ class CNN(nn.Module):
 
 class ActorCriticRNN(nn.Module):
     action_dim: Sequence[int]
-    config: Dict
+    config: dict
 
     @nn.compact
     def __call__(self, hidden, x):
@@ -368,7 +366,7 @@ def make_train(config):
                 info["combined_reward"] = combined_reward
 
                 info = jax.tree_util.tree_map(
-                    lambda x: x.reshape((config["NUM_ACTORS"])), info
+                    lambda x: x.reshape(config["NUM_ACTORS"]), info
                 )
                 done_batch = batchify(done, env.agents, config["NUM_ACTORS"]).squeeze()
                 transition = Transition(

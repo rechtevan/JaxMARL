@@ -1,10 +1,10 @@
-from PIL import Image
-import os
+
 import jax
 import jax.numpy as jnp
+from PIL import Image
 
 from jaxmarl import make
-from jaxmarl.environments.storm.storm_2p import Items
+
 
 action = 1
 render_agent_view = True
@@ -13,9 +13,9 @@ num_inner_steps = 152
 
 rng = jax.random.PRNGKey(0)
 
-env = make('storm_2p', 
-        num_inner_steps=num_inner_steps, 
-        num_outer_steps=num_outer_steps, 
+env = make('storm_2p',
+        num_inner_steps=num_inner_steps,
+        num_outer_steps=num_outer_steps,
         fixed_coin_location=True,
         num_agents=2,
         payoff_matrix=jnp.array([[[3, 0], [5, 1]], [[3, 5], [0, 1]]]),
@@ -62,7 +62,6 @@ for t in range(num_outer_steps * num_inner_steps):
     print('inner t', state.inner_t)
     print('done', done)
     if (state.red_pos[:2] == state.blue_pos[:2]).all():
-        import pdb
 
         # pdb.set_trace()
         print("collision")

@@ -1,10 +1,12 @@
+
+import chex
 import jax
 import jax.numpy as jnp
-import chex
-from typing import Tuple, Dict
-from jaxmarl.environments.mpe.simple import SimpleMPE, State
+
 from jaxmarl.environments.mpe.default_params import *
+from jaxmarl.environments.mpe.simple import SimpleMPE, State
 from jaxmarl.environments.spaces import Box, Discrete
+
 
 SPEAKER = "speaker_0"
 LISTENER = "listener_0"
@@ -30,7 +32,7 @@ class SimpleSpeakerListenerMPE(SimpleMPE):
 
         agents = AGENT_NAMES
 
-        landmarks = ["landmark {}".format(i) for i in range(num_landmarks)]
+        landmarks = [f"landmark {i}" for i in range(num_landmarks)]
 
         # Action and observation spaces
 
@@ -85,7 +87,7 @@ class SimpleSpeakerListenerMPE(SimpleMPE):
             **kwargs,
         )
 
-    def reset(self, key: chex.PRNGKey) -> Tuple[chex.Array, State]:
+    def reset(self, key: chex.PRNGKey) -> tuple[chex.Array, State]:
         key_a, key_l, key_g = jax.random.split(key, 3)
 
         p_pos = jnp.concatenate(
@@ -110,7 +112,7 @@ class SimpleSpeakerListenerMPE(SimpleMPE):
 
         return self.get_obs(state), state
 
-    def set_actions(self, actions: Dict):
+    def set_actions(self, actions: dict):
         """Extract u and c actions for all agents from actions Dict."""
 
         """actions = jnp.array([actions[i] for i in self.agents]).reshape((self.num_agents, -1))"""
@@ -121,7 +123,7 @@ class SimpleSpeakerListenerMPE(SimpleMPE):
         self,
         a_idx: int,
         action: chex.Array,
-    ) -> Tuple[chex.Array, chex.Array]:
+    ) -> tuple[chex.Array, chex.Array]:
         u = jnp.zeros((self.num_agents, self.dim_p))
         c = jnp.zeros((self.num_agents, self.dim_c))
         c = c.at[0].set(action[SPEAKER])
@@ -137,7 +139,7 @@ class SimpleSpeakerListenerMPE(SimpleMPE):
         self,
         a_idx: int,
         action: chex.Array,
-    ) -> Tuple[chex.Array, chex.Array]:
+    ) -> tuple[chex.Array, chex.Array]:
         u = jnp.zeros((self.num_agents, self.dim_p))
         c = jnp.zeros((self.num_agents, self.dim_c))
 
@@ -154,13 +156,13 @@ class SimpleSpeakerListenerMPE(SimpleMPE):
     def rewards(
         self,
         state: State,
-    ) -> Dict[str, float]:
+    ) -> dict[str, float]:
         r = -1 * jnp.sum(
             jnp.square(state.p_pos[1] - state.p_pos[state.goal + self.num_agents])
         )
         return {a: r for a in self.agents}
 
-    def get_obs(self, state: State) -> Dict[str, chex.Array]:
+    def get_obs(self, state: State) -> dict[str, chex.Array]:
         goal_colour = jnp.full((3,), 0.15)
         goal_colour = goal_colour.at[state.goal].set(0.65)
 

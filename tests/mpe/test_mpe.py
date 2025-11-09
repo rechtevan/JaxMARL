@@ -4,13 +4,24 @@ Test correspondence between pettingzoo and JaxMARL MPE environments
 import jax
 import jax.numpy as jnp
 import numpy as np
-from pettingzoo.test import parallel_api_test
-from mpe2 import simple_v3, simple_world_comm_v3, simple_tag_v3, simple_spread_v3, simple_crypto_v3, simple_speaker_listener_v4, simple_push_v3, simple_adversary_v3, simple_reference_v3
-import tqdm
-from jaxmarl import make
 import pytest
+import tqdm
+from mpe2 import (
+    simple_adversary_v3,
+    simple_crypto_v3,
+    simple_push_v3,
+    simple_reference_v3,
+    simple_speaker_listener_v4,
+    simple_spread_v3,
+    simple_tag_v3,
+    simple_v3,
+    simple_world_comm_v3,
+)
+from pettingzoo.test import parallel_api_test
 
-from jaxmarl.environments.mpe.default_params import DISCRETE_ACT, CONTINUOUS_ACT
+from jaxmarl import make
+from jaxmarl.environments.mpe.default_params import CONTINUOUS_ACT, DISCRETE_ACT
+
 
 num_episodes, num_steps, tolerance = 500, 25, 1e-4
 
@@ -31,7 +42,7 @@ def np_state_to_jax(env_zoo, env_jax):
     for landmark in env_zoo.aec_env.env.world.landmarks:
         l_idx = env_jax.l_to_i[landmark.name]
         p_pos[l_idx] = landmark.state.p_pos
-        
+
     state = {
         "p_pos": p_pos,
         "p_vel": p_vel,
@@ -39,7 +50,7 @@ def np_state_to_jax(env_zoo, env_jax):
         "step": env_zoo.aec_env.env.steps,
         "done": np.full((env_jax.num_agents), False),
     }
-    
+
     if env_zoo.metadata["name"] == 'simple_crypto_v3':
         from jaxmarl.environments.mpe.simple_crypto import CryptoState
         state["goal_colour"] = env_zoo.aec_env.env.world.agents[1].color
@@ -69,10 +80,10 @@ def assert_same_trans(step, obs_zoo, rew_zoo, done_zoo, obs_jax, rew_jax, done_j
 def assert_same_state(env_zoo, env_jax, state_jax, atol=1e-4):
 
     state_zoo = np_state_to_jax(env_zoo, env_jax)
-    
+
     for k in state_zoo.keys():
         jax_value = getattr(state_jax, k)
-        if k not in ["step"]:        
+        if k not in ["step"]:
             assert np.allclose(jax_value, state_zoo[k], atol=atol), f"State values do not match for key {k}, zoo value: {state_zoo[k]}, jax value: {jax_value}"
 
 @pytest.mark.parametrize(("zoo_env_name", "action_type"),
@@ -97,19 +108,19 @@ def assert_same_state(env_zoo, env_jax, state_jax, atol=1e-4):
 def test_mpe_vs_pettingzoo(zoo_env_name, action_type):
     print(f'-- Testing {zoo_env_name} --')
     key = jax.random.PRNGKey(0)
-    
+
     if action_type == CONTINUOUS_ACT:
         continuous_actions=True
     else:
         continuous_actions=False
-    
+
     env_zoo = zoo_mpe_env_mapper[zoo_env_name]
 
     env_zoo = env_zoo.parallel_env(max_cycles=25, continuous_actions=continuous_actions)
     zoo_obs = env_zoo.reset()
 
     env_jax = make(zoo_env_name, action_type=action_type)
-    
+
     key, key_reset = jax.random.split(key)
     env_jax.reset(key_reset)
     for ep in tqdm.tqdm(range(num_episodes), desc=f"Testing {zoo_env_name}, episode:", leave=True):
@@ -117,13 +128,13 @@ def test_mpe_vs_pettingzoo(zoo_env_name, action_type):
         for s in range(num_steps):
             actions = {agent: env_zoo.action_space(agent).sample() for agent in env_zoo.agents}
             state = np_state_to_jax(env_zoo, env_jax)
-            
+
             obs_zoo, rew_zoo, done_zoo, _, _ = env_zoo.step(actions)
             key, key_step = jax.random.split(key)
             obs_jax, state_jax, rew_jax, done_jax, _ = env_jax.step(key_step, state, actions)
-            
+
             assert_same_trans(s, obs_zoo, rew_zoo, done_zoo, obs_jax, rew_jax, done_jax)
-            
+
             if not np.all(done_zoo.values()):
                 assert_same_state(env_zoo, env_jax, state_jax)
 
@@ -152,13 +163,12 @@ if __name__=="__main__":
     test_mpe_vs_pettingzoo("MPE_simple_adversary_v3", act_type)
     test_mpe_vs_pettingzoo("MPE_simple_tag_v3", act_type)
     test_mpe_vs_pettingzoo("MPE_simple_push_v3", act_type)
-    test_mpe_vs_pettingzoo("MPE_simple_spread_v3", act_type)    
+    test_mpe_vs_pettingzoo("MPE_simple_spread_v3", act_type)
 
 
     print(' *** All tests passed ***')
-    
-    
-    
-    
-    
-    
+
+
+
+
+

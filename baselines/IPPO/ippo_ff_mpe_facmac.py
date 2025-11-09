@@ -1,21 +1,24 @@
-""" 
+"""
 Based on PureJaxRL Implementation of PPO
 """
 
+from collections.abc import Sequence
+from typing import NamedTuple
+
+import distrax
+import flax.linen as nn
+import hydra
 import jax
 import jax.numpy as jnp
-import flax.linen as nn
 import numpy as np
 import optax
 from flax.linen.initializers import constant, orthogonal
-from typing import Sequence, NamedTuple, Any
 from flax.training.train_state import TrainState
-import distrax
+from omegaconf import OmegaConf
+
 import jaxmarl
 from jaxmarl.wrappers.baselines import LogWrapper
-import matplotlib.pyplot as plt
-import hydra
-from omegaconf import OmegaConf
+
 
 class ActorCritic(nn.Module):
     action_dim: Sequence[int]
@@ -146,7 +149,7 @@ def make_train(config):
                     rng_step, env_state, env_act,
                 )
 
-                info = jax.tree.map(lambda x: x.reshape((config["NUM_ACTORS"])), info)
+                info = jax.tree.map(lambda x: x.reshape(config["NUM_ACTORS"]), info)
                 transition = Transition(
                     batchify(done, env.agents, config["NUM_ACTORS"]).squeeze(),
                     action,
@@ -297,7 +300,7 @@ def main(config):
     rng = jax.random.PRNGKey(30)
     train_jit = jax.jit(make_train(config))
     out = train_jit(rng)
-    import pdb;
+    import pdb
 
     pdb.set_trace()
 

@@ -1,21 +1,21 @@
 from collections import OrderedDict
 from enum import IntEnum
 
-import numpy as np
+import chex
 import jax
 import jax.numpy as jnp
-from jax import lax
-from jaxmarl.gridworld.env import Environment
-from jaxmarl.environments import spaces
-from typing import Tuple
-import chex
+import numpy as np
 from flax import struct
+from jax import lax
 
+from jaxmarl.environments import spaces
 from jaxmarl.environments.overcooked.common import (
-	OBJECT_TO_INDEX,
     COLOR_TO_INDEX,
-	DIR_TO_VEC,
-	make_maze_map)
+    DIR_TO_VEC,
+    OBJECT_TO_INDEX,
+    make_maze_map,
+)
+from jaxmarl.gridworld.env import Environment
 
 
 class Actions(IntEnum):
@@ -50,7 +50,7 @@ class EnvState:
 class EnvParams:
 	height: int = 15
 	width: int = 15
-	n_walls: int = 25 
+	n_walls: int = 25
 	agent_view_size: int = 5
 	replace_wall_pos: bool = False
 	see_through_walls: bool = True
@@ -109,7 +109,7 @@ class Maze(Environment):
 		key: chex.PRNGKey,
 		state: EnvState,
 		action: int,
-	) -> Tuple[chex.Array, EnvState, float, bool, dict]:
+	) -> tuple[chex.Array, EnvState, float, bool, dict]:
 		"""Perform single timestep state transition."""
 		a = self.action_set[action]
 		state, reward = self.step_agent(key, state, a)
@@ -127,9 +127,9 @@ class Maze(Environment):
 		)
 
 	def reset_env(
-		self, 
-		key: chex.PRNGKey, 
-	) -> Tuple[chex.Array, EnvState]:
+		self,
+		key: chex.PRNGKey,
+	) -> tuple[chex.Array, EnvState]:
 		"""Reset environment state by resampling contents of maze_map
 		- initial agent position
 		- goal position
@@ -143,8 +143,8 @@ class Maze(Environment):
 		# Reset wall map, with shape H x W, and value of 1 at (i,j) iff there is a wall at (i,j)
 		key, subkey = jax.random.split(key)
 		wall_idx = jax.random.choice(
-			subkey, all_pos, 
-			shape=(params.n_walls,), 
+			subkey, all_pos,
+			shape=(params.n_walls,),
 			replace=params.replace_wall_pos)
 
 		occupied_mask = jnp.zeros_like(all_pos)
@@ -168,10 +168,10 @@ class Maze(Environment):
 
 		maze_map = make_maze_map(
 			params,
-			wall_map, 
-			goal_pos, 
-			agent_pos, 
-			agent_dir_idx, 
+			wall_map,
+			goal_pos,
+			agent_pos,
+			agent_dir_idx,
 			pad_obs=True)
 
 		state = EnvState(
@@ -190,7 +190,7 @@ class Maze(Environment):
 	def get_obs(self, state: EnvState) -> chex.Array:
 		"""Return limited grid view ahead of agent."""
 		obs = jnp.zeros(self.obs_shape, dtype=jnp.uint8)
-		
+
 		agent_x, agent_y = state.agent_pos
 
 		obs_fwd_bound1 = state.agent_pos
@@ -236,12 +236,12 @@ class Maze(Environment):
 
 		return OrderedDict(obs_dict)
 
-	def step_agent(self, key: chex.PRNGKey, state: EnvState, action: int) -> Tuple[EnvState, float]:
+	def step_agent(self, key: chex.PRNGKey, state: EnvState, action: int) -> tuple[EnvState, float]:
 		params = self.params
 
 		# Update agent position (forward action)
 		fwd_pos = jnp.minimum(
-			jnp.maximum(state.agent_pos + (action == Actions.forward)*state.agent_dir, 0), 
+			jnp.maximum(state.agent_pos + (action == Actions.forward)*state.agent_dir, 0),
 			jnp.array((params.width-1, params.height-1), dtype=jnp.uint32))
 
 		# Can't go past wall or goal
@@ -277,7 +277,7 @@ class Maze(Environment):
 				agent_pos=agent_pos,
 				agent_dir_idx=agent_dir_idx,
 				agent_dir=agent_dir,
-				maze_map=maze_map,	
+				maze_map=maze_map,
 				terminal=fwd_pos_has_goal),
 			reward
 		)

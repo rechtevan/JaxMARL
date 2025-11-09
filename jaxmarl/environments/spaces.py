@@ -1,11 +1,14 @@
 """ Built off Gymnax spaces.py, this module contains jittable classes for action and observation spaces. """
-from typing import Tuple, Union, Sequence
 from collections import OrderedDict
+from collections.abc import Sequence
+from typing import Tuple
+
 import chex
 import jax
 import jax.numpy as jnp
 
-class Space(object):
+
+class Space:
     """
     Minimal jittable class for abstract jaxmarl space.
     """
@@ -56,9 +59,9 @@ class MultiDiscrete(Space):
     def sample(self, rng: chex.PRNGKey) -> chex.Array:
         """Sample random action uniformly from set of categorical choices."""
         return jax.random.randint(
-            rng, 
-            shape=self.shape, 
-            minval=0, 
+            rng,
+            shape=self.shape,
+            minval=0,
             maxval=self.num_categories,
             dtype=self.dtype
         )
@@ -78,7 +81,7 @@ class Box(Space):
 		self,
 		low: float,
 		high: float,
-		shape: Tuple[int],
+		shape: tuple[int],
 		dtype: jnp.dtype = jnp.float32,
 	):
 		self.low = low
@@ -131,11 +134,11 @@ class Dict(Space):
 
 class Tuple(Space):
 	"""Minimal jittable class for tuple (product) of jittable spaces."""
-	def __init__(self, spaces: Union[tuple, list]):
+	def __init__(self, spaces: tuple | list):
 		self.spaces = spaces
 		self.num_spaces = len(spaces)
 
-	def sample(self, rng: chex.PRNGKey) -> Tuple[chex.Array]:
+	def sample(self, rng: chex.PRNGKey) -> tuple[chex.Array]:
 		"""Sample random action from all subspaces."""
 		key_split = jax.random.split(rng, self.num_spaces)
 		return tuple(

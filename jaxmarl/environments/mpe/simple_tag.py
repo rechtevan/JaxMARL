@@ -1,11 +1,12 @@
+from functools import partial
+
+import chex
 import jax
 import jax.numpy as jnp
-import chex
-from typing import Tuple, Dict
-from functools import partial
+
+from jaxmarl.environments.mpe.default_params import *
 from jaxmarl.environments.mpe.simple import SimpleMPE, State
 from jaxmarl.environments.spaces import Box
-from jaxmarl.environments.mpe.default_params import *
 
 
 class SimpleTagMPE(SimpleMPE):
@@ -25,11 +26,11 @@ class SimpleTagMPE(SimpleMPE):
 
         self.num_good_agents, self.num_adversaries = num_good_agents, num_adversaries
 
-        self.adversaries = ["adversary_{}".format(i) for i in range(num_adversaries)]
-        self.good_agents = ["agent_{}".format(i) for i in range(num_good_agents)]
+        self.adversaries = [f"adversary_{i}" for i in range(num_adversaries)]
+        self.good_agents = [f"agent_{i}" for i in range(num_good_agents)]
         agents = self.adversaries + self.good_agents
 
-        landmarks = ["landmark {}".format(i) for i in range(num_obs)]
+        landmarks = [f"landmark {i}" for i in range(num_obs)]
 
         # Action and observation spaces
         observation_spaces = {
@@ -84,7 +85,7 @@ class SimpleTagMPE(SimpleMPE):
             **kwargs,
         )
 
-    def get_obs(self, state: State) -> Dict[str, chex.Array]:
+    def get_obs(self, state: State) -> dict[str, chex.Array]:
         @partial(jax.vmap, in_axes=(0))
         def _common_stats(aidx):
             """Values needed in all observations"""
@@ -139,7 +140,7 @@ class SimpleTagMPE(SimpleMPE):
         )
         return obs
 
-    def rewards(self, state: State) -> Dict[str, float]:
+    def rewards(self, state: State) -> dict[str, float]:
         @partial(jax.vmap, in_axes=(0, None))
         def _collisions(agent_idx: int, other_idx: int):
             return jax.vmap(self.is_collision, in_axes=(None, 0, None))(

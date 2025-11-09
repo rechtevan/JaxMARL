@@ -1,8 +1,10 @@
-from jaxmarl.environments.overcooked_v2.common import StaticObject
-import numpy as np
-from typing import List, Tuple, Optional
-from dataclasses import dataclass
 import itertools
+from dataclasses import dataclass
+
+import numpy as np
+
+from jaxmarl.environments.overcooked_v2.common import StaticObject
+
 
 # Layouts from Overcooked-AI
 cramped_room = """
@@ -197,7 +199,7 @@ W1WWWWWWW1W
 @dataclass
 class Layout:
     # agent positions list of positions, tuples (x, y)
-    agent_positions: List[Tuple[int, int]]
+    agent_positions: list[tuple[int, int]]
 
     # width x height grid with static items
     static_objects: np.ndarray
@@ -206,7 +208,7 @@ class Layout:
 
     # If recipe is none, recipes will be sampled from the possible_recipes
     # If possible_recipes is none, all possible recipes with the available ingredients will be considered
-    possible_recipes: Optional[List[List[int]]]
+    possible_recipes: list[list[int]] | None
 
     def __post_init__(self):
         if len(self.agent_positions) == 0:
@@ -225,7 +227,7 @@ class Layout:
         return self.static_objects.shape[1]
 
     @staticmethod
-    def _get_all_possible_recipes(num_ingredients: int) -> List[List[int]]:
+    def _get_all_possible_recipes(num_ingredients: int) -> list[list[int]]:
         """
         Get all possible recipes given the number of ingredients.
         """

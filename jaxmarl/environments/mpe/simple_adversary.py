@@ -1,10 +1,11 @@
+from functools import partial
+
+import chex
 import jax
 import jax.numpy as jnp
-import chex
-from typing import Tuple, Dict
-from functools import partial
-from jaxmarl.environments.mpe.simple import State, SimpleMPE
+
 from jaxmarl.environments.mpe.default_params import *
+from jaxmarl.environments.mpe.simple import SimpleMPE, State
 from jaxmarl.environments.spaces import Box
 
 
@@ -25,11 +26,11 @@ class SimpleAdversaryMPE(SimpleMPE):
 
         self.num_good_agents, self.num_adversaries = num_good_agents, num_adversaries
 
-        self.adversaries = ["adversary_{}".format(i) for i in range(num_adversaries)]
-        self.good_agents = ["agent_{}".format(i) for i in range(num_good_agents)]
+        self.adversaries = [f"adversary_{i}" for i in range(num_adversaries)]
+        self.good_agents = [f"agent_{i}" for i in range(num_good_agents)]
         agents = self.adversaries + self.good_agents
 
-        landmarks = ["landmark {}".format(i) for i in range(num_obs)]
+        landmarks = [f"landmark {i}" for i in range(num_obs)]
 
         # Action and observation spaces
         observation_spaces = {i: Box(-jnp.inf, jnp.inf, (8,)) for i in self.adversaries}
@@ -63,7 +64,7 @@ class SimpleAdversaryMPE(SimpleMPE):
             **kwargs,
         )
 
-    def reset(self, key: chex.PRNGKey) -> Tuple[chex.Array, State]:
+    def reset(self, key: chex.PRNGKey) -> tuple[chex.Array, State]:
         key_a, key_l, key_g = jax.random.split(key, 3)
 
         p_pos = jnp.concatenate(
@@ -88,7 +89,7 @@ class SimpleAdversaryMPE(SimpleMPE):
 
         return self.get_obs(state), state
 
-    def get_obs(self, state: State) -> Dict[str, chex.Array]:
+    def get_obs(self, state: State) -> dict[str, chex.Array]:
         @partial(jax.vmap, in_axes=(0, None))
         def _common_stats(aidx, state: State):
             """Values needed in all observations"""
@@ -139,7 +140,7 @@ class SimpleAdversaryMPE(SimpleMPE):
     def rewards(
         self,
         state: State,
-    ) -> Dict[str, float]:
+    ) -> dict[str, float]:
         adv_rew = jnp.sum(
             jnp.linalg.norm(
                 state.p_pos[: self.num_adversaries]

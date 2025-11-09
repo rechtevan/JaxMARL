@@ -1,13 +1,16 @@
-import jax
-from jax import numpy as jnp
-from jaxmarl import make
-import random
-import pprint
-import sys
-import numpy as np
 import argparse
-from jaxmarl.wrappers.baselines import load_params
+import pprint
+import random
+import sys
+
+import jax
+import numpy as np
+from jax import numpy as jnp
+
+from jaxmarl import make
 from jaxmarl.environments.hanabi.pretrained.obl_r2d2_agent import OBLAgentR2D2
+from jaxmarl.wrappers.baselines import load_params
+
 
 env = make("hanabi")
 batchify = lambda x: jnp.stack([x[agent] for agent in env.agents])

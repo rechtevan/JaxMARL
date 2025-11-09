@@ -24,10 +24,10 @@ USER ${MYUSER}
 #disabling preallocation
 RUN export XLA_PYTHON_CLIENT_PREALLOCATE=false
 #safety measures
-RUN export XLA_PYTHON_CLIENT_MEM_FRACTION=0.25 
+RUN export XLA_PYTHON_CLIENT_MEM_FRACTION=0.25
 RUN export TF_FORCE_GPU_ALLOW_GROWTH=true
 
-# Uncomment below if you want jupyter 
+# Uncomment below if you want jupyter
 # RUN pip install jupyterlab
 
 #for secrets and debug

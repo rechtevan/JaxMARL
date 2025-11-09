@@ -1,17 +1,16 @@
-""" 
+"""
 Abstract base class for multi agent gym environments with JAX
 Based on the Gymnax and PettingZoo APIs
 """
 
-import jax
-import jax.numpy as jnp
-from typing import Dict
-import chex
 from functools import partial
+
+import chex
+import jax
 from flax import struct
-from typing import Tuple, Optional
 
 from jaxmarl.environments.spaces import Space
+
 
 @struct.dataclass
 class State:
@@ -19,7 +18,7 @@ class State:
     step: int
 
 
-class MultiAgentEnv(object):
+class MultiAgentEnv:
     """Jittable abstract base class for all JaxMARL Environments."""
 
     def __init__(
@@ -35,7 +34,7 @@ class MultiAgentEnv(object):
         self.action_spaces = dict()
 
     @partial(jax.jit, static_argnums=(0,))
-    def reset(self, key: chex.PRNGKey) -> Tuple[Dict[str, chex.Array], State]:
+    def reset(self, key: chex.PRNGKey) -> tuple[dict[str, chex.Array], State]:
         """Performs resetting of the environment.
 
         Args:
@@ -52,9 +51,9 @@ class MultiAgentEnv(object):
         self,
         key: chex.PRNGKey,
         state: State,
-        actions: Dict[str, chex.Array],
-        reset_state: Optional[State] = None,
-    ) -> Tuple[Dict[str, chex.Array], State, Dict[str, float], Dict[str, bool], Dict]:
+        actions: dict[str, chex.Array],
+        reset_state: State | None = None,
+    ) -> tuple[dict[str, chex.Array], State, dict[str, float], dict[str, bool], dict]:
         """Performs step transitions in the environment. Resets the environment if done.
         To control the reset state, pass `reset_state`. Otherwise, the environment will reset using `self.reset`.
 
@@ -91,10 +90,10 @@ class MultiAgentEnv(object):
         return obs, states, rewards, dones, infos
 
     def step_env(
-        self, key: chex.PRNGKey, state: State, actions: Dict[str, chex.Array]
-    ) -> Tuple[Dict[str, chex.Array], State, Dict[str, float], Dict[str, bool], Dict]:
+        self, key: chex.PRNGKey, state: State, actions: dict[str, chex.Array]
+    ) -> tuple[dict[str, chex.Array], State, dict[str, float], dict[str, bool], dict]:
         """Environment-specific step transition.
-        
+
         Args:
             key (chex.PRNGKey): random key
             state (State): environment state
@@ -107,22 +106,22 @@ class MultiAgentEnv(object):
             Dones (Dict[str, bool]): dones, keyed by agent name:
             Info (Dict): info dictionary
         """
-        
+
         raise NotImplementedError
 
-    def get_obs(self, state: State) -> Dict[str, chex.Array]:
+    def get_obs(self, state: State) -> dict[str, chex.Array]:
         """Applies observation function to state.
-        
+
         Args:
             State (state): Environment state
-            
+
         Returns:
             Observations (Dict[str, chex.Array]): observations keyed by agent names"""
         raise NotImplementedError
 
     def observation_space(self, agent: str) -> Space:
         """Observation space for a given agent.
-        
+
         Args:
             agent (str): agent name
 
@@ -133,7 +132,7 @@ class MultiAgentEnv(object):
 
     def action_space(self, agent: str) -> Space:
         """Action space for a given agent.
-        
+
         Args:
             agent (str): agent name
 
@@ -143,9 +142,9 @@ class MultiAgentEnv(object):
         return self.action_spaces[agent]
 
     @partial(jax.jit, static_argnums=(0,))
-    def get_avail_actions(self, state: State) -> Dict[str, chex.Array]:
+    def get_avail_actions(self, state: State) -> dict[str, chex.Array]:
         """Returns the available actions for each agent.
-        
+
         Args:
             state (State): environment state
 

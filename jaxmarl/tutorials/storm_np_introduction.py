@@ -1,9 +1,12 @@
+import math
+from pathlib import Path
+
 import jax
 import jax.numpy as jnp
 from PIL import Image
+
 from jaxmarl import make
-from pathlib import Path
-import math
+
 
 agent_pop_sizes = [10]
 for n_a in agent_pop_sizes:

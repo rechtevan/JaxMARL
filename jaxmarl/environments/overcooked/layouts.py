@@ -1,6 +1,7 @@
 import jax.numpy as jnp
 from flax.core.frozen_dict import FrozenDict
 
+
 cramped_room = {
     "height" : 4,
     "width" : 5,
@@ -100,7 +101,7 @@ def layout_grid_to_dict(grid):
     for i, row in enumerate(rows):
         for j, obj in enumerate(row):
             idx = width * i + j
-            if obj in symbol_to_key.keys():
+            if obj in symbol_to_key:
                 # Add object
                 layout_dict[symbol_to_key[obj]].append(idx)
             if obj in ["X", "B", "O", "P"]:

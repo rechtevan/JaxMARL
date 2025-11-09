@@ -1,7 +1,7 @@
-import jax
-import chex
-from typing import Tuple, Union, Optional
 from functools import partial
+
+import chex
+import jax
 from flax import struct
 
 
@@ -15,7 +15,7 @@ class EnvParams:
 	max_episode_steps: int
 
 
-class Environment(object):
+class Environment:
 	@property
 	def default_params(self) -> EnvParams:
 		return EnvParams()
@@ -25,8 +25,8 @@ class Environment(object):
 		self,
 		key: chex.PRNGKey,
 		state: EnvState,
-		action: Union[int, float]
-	) -> Tuple[chex.ArrayTree, EnvState, float, bool]:
+		action: int | float
+	) -> tuple[chex.ArrayTree, EnvState, float, bool]:
 		"""Performs step transitions in the environment."""
 		# Use default env parameters if no others specified
 		if hasattr(self, 'params'):
@@ -57,9 +57,9 @@ class Environment(object):
 
 	@partial(jax.jit, static_argnums=(0,))
 	def reset(
-		self, 
-		key: chex.PRNGKey, 
-	) -> Tuple[chex.ArrayTree, EnvState]:
+		self,
+		key: chex.PRNGKey,
+	) -> tuple[chex.ArrayTree, EnvState]:
 		"""Performs resetting of environment."""
 		# Use default env parameters if no others specified
 		if hasattr(self, 'params'):
@@ -77,14 +77,14 @@ class Environment(object):
 		self,
 		key: chex.PRNGKey,
 		state: EnvState,
-		action: Union[int, float],
-	) -> Tuple[chex.ArrayTree, EnvState, float, bool, dict]:
+		action: int | float,
+	) -> tuple[chex.ArrayTree, EnvState, float, bool, dict]:
 		"""Environment-specific step transition."""
 		raise NotImplementedError
 
 	def reset_env(
 		self, key: chex.PRNGKey
-	) -> Tuple[chex.ArrayTree, EnvState]:
+	) -> tuple[chex.ArrayTree, EnvState]:
 		"""Environment-specific reset."""
 		raise NotImplementedError
 

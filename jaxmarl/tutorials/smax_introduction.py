@@ -2,11 +2,11 @@
 Short introduction to the package.
 
 ## Abstract base class
-Uses the PettingZoo Parallel API. All agents act synchronously, with actions, 
-observations, returns and dones passed as dictionaries keyed by agent names. 
+Uses the PettingZoo Parallel API. All agents act synchronously, with actions,
+observations, returns and dones passed as dictionaries keyed by agent names.
 The code can be found in `multiagentgymnax/multi_agent_env.py`
 
-The class follows an identical structure to that of `gymnax` with one execption. 
+The class follows an identical structure to that of `gymnax` with one execption.
 The class is instatiated with `num_agents`, defining the number of agents within the environment.
 
 ## Environment loop
@@ -14,19 +14,22 @@ Below is an example of a simple environment loop, using random actions.
 
 """
 
+import os
+from collections.abc import Sequence
+
+import distrax
+import flax.linen as nn
 import jax
 import jax.numpy as jnp
-import flax.linen as nn
-import distrax
+
 from jaxmarl import make
 from jaxmarl.environments.smax import map_name_to_scenario
 from jaxmarl.environments.smax.heuristic_enemy import (
     create_heuristic_policy,
     get_heuristic_policy_initial_state,
 )
-from jaxmarl.viz.visualizer import Visualizer, SMAXVisualizer
-import os
-from typing import Sequence
+from jaxmarl.viz.visualizer import SMAXVisualizer
+
 
 os.environ["TF_CUDNN_DETERMINISTIC"] = "1"
 # Parameters + random keys

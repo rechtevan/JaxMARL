@@ -1,12 +1,14 @@
+from functools import partial
+
+import chex
 import jax
 import jax.numpy as jnp
-import chex
-from typing import Tuple, Dict
 from flax import struct
-from functools import partial
-from jaxmarl.environments.mpe.simple import SimpleMPE, State
+
 from jaxmarl.environments.mpe.default_params import *
+from jaxmarl.environments.mpe.simple import SimpleMPE, State
 from jaxmarl.environments.spaces import Box, Discrete
+
 
 SPEAKER = "alice_0"
 LISTENER = "bob_0"
@@ -52,7 +54,7 @@ class SimpleCryptoMPE(SimpleMPE):
         agents = self.adversaries + self.good_agents
         assert agents[SPEAKER_IDX] == "alice_0"
 
-        landmarks = ["landmark {}".format(i) for i in range(num_landmarks)]
+        landmarks = [f"landmark {i}" for i in range(num_landmarks)]
 
         # Action and observation spaces
         if action_type == DISCRETE_ACT:
@@ -102,7 +104,7 @@ class SimpleCryptoMPE(SimpleMPE):
             **kwargs,
         )
 
-    def reset(self, key: chex.PRNGKey) -> Tuple[chex.Array, CryptoState]:
+    def reset(self, key: chex.PRNGKey) -> tuple[chex.Array, CryptoState]:
         key_a, key_l, key_g, key_k = jax.random.split(key, 4)
 
         p_pos = jnp.concatenate(
@@ -134,7 +136,7 @@ class SimpleCryptoMPE(SimpleMPE):
     @partial(jax.vmap, in_axes=[None, 0, 0])
     def _decode_continuous_action(
         self, a_idx: int, action: chex.Array
-    ) -> Tuple[chex.Array, chex.Array]:
+    ) -> tuple[chex.Array, chex.Array]:
         """Communication action"""
         u = jnp.zeros((self.dim_p,))
         c = action
@@ -143,14 +145,14 @@ class SimpleCryptoMPE(SimpleMPE):
     @partial(jax.vmap, in_axes=[None, 0, 0])
     def _decode_discrete_action(
         self, a_idx: int, action: chex.Array
-    ) -> Tuple[chex.Array, chex.Array]:
+    ) -> tuple[chex.Array, chex.Array]:
         """Communication action"""
         u = jnp.zeros((self.dim_p,))
         c = jnp.zeros((self.dim_c,))
         c = c.at[action].set(1.0)
         return u, c
 
-    def get_obs(self, state: CryptoState) -> Dict[str, chex.Array]:
+    def get_obs(self, state: CryptoState) -> dict[str, chex.Array]:
         goal_colour = state.goal_colour
         comm = state.c[SPEAKER_IDX]
 
@@ -176,7 +178,7 @@ class SimpleCryptoMPE(SimpleMPE):
         obs = {SPEAKER: _speaker(), LISTENER: _listener(), ADVERSARY: _adversary()}
         return obs
 
-    def rewards(self, state: CryptoState) -> Dict[str, float]:
+    def rewards(self, state: CryptoState) -> dict[str, float]:
         comm_diff = jnp.sum(
             jnp.square(state.c - state.goal_colour), axis=1
         )  # check axis

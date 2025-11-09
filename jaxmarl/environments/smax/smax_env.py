@@ -1,20 +1,19 @@
 import dataclasses
-import jax.numpy as jnp
+import io
+import math
+from functools import partial
+
+import chex
 import jax
-from jax.experimental import sparse
+import jax.numpy as jnp
+from flax.struct import dataclass
+
 from jaxmarl.environments.multi_agent_env import MultiAgentEnv
-from jaxmarl.environments.spaces import Box, Discrete
 from jaxmarl.environments.smax.distributions import (
     SurroundAndReflectPositionDistribution,
     UniformUnitTypeDistribution,
 )
-import chex
-from typing import Tuple, Dict, Optional
-from flax.struct import dataclass
-from enum import IntEnum
-from functools import partial
-import io
-import math
+from jaxmarl.environments.spaces import Box, Discrete
 
 
 @dataclass
@@ -259,7 +258,7 @@ class SMAX(MultiAgentEnv):
             raise ValueError("Provided observation type is not valid")
 
     @partial(jax.jit, static_argnums=(0,))
-    def reset(self, key: chex.PRNGKey) -> Tuple[Dict[str, chex.Array], State]:
+    def reset(self, key: chex.PRNGKey) -> tuple[dict[str, chex.Array], State]:
         """Environment-specific reset."""
         key, team_0_key, team_1_key = jax.random.split(key, num=3)
         team_0_start = jnp.stack([jnp.array([self.map_width / 4, self.map_height / 2])] * self.num_allies)
@@ -316,9 +315,9 @@ class SMAX(MultiAgentEnv):
         self,
         key: chex.PRNGKey,
         state: State,
-        actions: Dict[str, chex.Array],
+        actions: dict[str, chex.Array],
         get_state_sequence: bool = False,
-    ) -> Tuple[Dict[str, chex.Array], State, Dict[str, float], Dict[str, bool], Dict]:
+    ) -> tuple[dict[str, chex.Array], State, dict[str, float], dict[str, bool], dict]:
         actions = jnp.array([actions[i] for i in self.agents])
         key, action_key = jax.random.split(key)
         actions = self._decode_actions(action_key, state, actions)
@@ -329,9 +328,9 @@ class SMAX(MultiAgentEnv):
         self,
         key: chex.PRNGKey,
         state: State,
-        actions: Dict[str, chex.Array],
+        actions: dict[str, chex.Array],
         get_state_sequence: bool = False,
-    ) -> Tuple[Dict[str, chex.Array], State, Dict[str, float], Dict[str, bool], Dict]:
+    ) -> tuple[dict[str, chex.Array], State, dict[str, float], dict[str, bool], dict]:
         """Environment-specific step transition."""
 
         health_before = jnp.copy(state.unit_health)
@@ -499,7 +498,7 @@ class SMAX(MultiAgentEnv):
     @partial(jax.jit, static_argnums=(0,))
     def _decode_actions(
         self, key, state: State, actions: chex.Array
-    ) -> Tuple[chex.Array, chex.Array]:
+    ) -> tuple[chex.Array, chex.Array]:
         if self.action_type == "discrete":
             return self._decode_discrete_actions(actions)
         elif self.action_type == "continuous":
@@ -510,7 +509,7 @@ class SMAX(MultiAgentEnv):
 
     def _decode_discrete_actions(
         self, actions: chex.Array
-    ) -> Tuple[chex.Array, chex.Array]:
+    ) -> tuple[chex.Array, chex.Array]:
         def _decode_movement_action(action):
             vec = jax.lax.cond(
                 # action is an attack action OR stop (action 4)
@@ -541,7 +540,7 @@ class SMAX(MultiAgentEnv):
     @partial(jax.jit, static_argnums=(0,))
     def _decode_continuous_actions(
         self, key, state: State, actions: chex.Array
-    ) -> Tuple[chex.Array, chex.Array]:
+    ) -> tuple[chex.Array, chex.Array]:
         shoot_last_idx = self.continuous_action_dims.index("shoot_last_enemy")
         action_idx = self.continuous_action_dims.index("do_shoot")
         theta_idx = self.continuous_action_dims.index("coordinate_2")
@@ -624,8 +623,8 @@ class SMAX(MultiAgentEnv):
         self,
         key: chex.PRNGKey,
         state: State,
-        actions: Tuple[chex.Array, chex.Array],
-    ) -> Tuple[Dict[str, chex.Array], State, Dict[str, float], Dict[str, bool], Dict]:
+        actions: tuple[chex.Array, chex.Array],
+    ) -> tuple[dict[str, chex.Array], State, dict[str, float], dict[str, bool], dict]:
         def update_position(idx, vec):
             # Compute the movements slightly strangely.
             # The velocities below are for diagonal directions
@@ -761,13 +760,13 @@ class SMAX(MultiAgentEnv):
         return jnp.concatenate([unit_obs, unit_teams, unit_types], axis=-1)
 
     @partial(jax.jit, static_argnums=(0,))
-    def get_obs(self, state: State) -> Dict[str, chex.Array]:
+    def get_obs(self, state: State) -> dict[str, chex.Array]:
         if self.observation_type == "unit_list":
             return self.get_obs_unit_list(state)
         elif self.observation_type == "conic":
             return self.get_obs_conic(state)
 
-    def get_obs_conic(self, state: State) -> Dict[str, chex.Array]:
+    def get_obs_conic(self, state: State) -> dict[str, chex.Array]:
         def get_features(i: int):
             relative_pos = (
                 state.unit_positions - state.unit_positions[i]
@@ -862,7 +861,7 @@ class SMAX(MultiAgentEnv):
             state.unit_alive[i], lambda: features, lambda: empty_features
         )
 
-    def get_obs_unit_list(self, state: State) -> Dict[str, chex.Array]:
+    def get_obs_unit_list(self, state: State) -> dict[str, chex.Array]:
         """Applies observation function to state."""
 
         def get_features(i, j):
@@ -906,7 +905,7 @@ class SMAX(MultiAgentEnv):
         return {agent: obs[self.agent_ids[agent]] for agent in self.agents}
 
     @partial(jax.jit, static_argnums=(0,))
-    def get_avail_actions(self, state: State) -> Dict[str, chex.Array]:
+    def get_avail_actions(self, state: State) -> dict[str, chex.Array]:
         @partial(jax.jit, static_argnums=(1,))
         def get_individual_avail_actions(i, team):
             num_actions = {0: self.num_ally_actions, 1: self.num_enemy_actions}[team]
@@ -968,13 +967,12 @@ class SMAX(MultiAgentEnv):
     def init_render(
         self,
         ax,
-        state: Tuple[State, Dict],
+        state: tuple[State, dict],
         step: int,
         env_step: int,
     ):
-        from matplotlib.patches import Circle, Rectangle
-        import matplotlib.pyplot as plt
         import numpy as np
+        from matplotlib.patches import Circle, Rectangle
 
         _, state, actions = state
 

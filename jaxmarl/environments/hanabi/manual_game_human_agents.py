@@ -1,10 +1,10 @@
-import chex
-from absl import flags, app
 import jax
 import jax.numpy as jnp
+from absl import app, flags
 
 from jaxmarl import make
 from jaxmarl.environments.hanabi.hanabi import HanabiEnv
+
 
 FLAGS = flags.FLAGS
 

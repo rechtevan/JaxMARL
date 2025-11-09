@@ -1,30 +1,30 @@
-import os
 import copy
-import jax
-import jax.numpy as jnp
-import numpy as np
+import os
 from functools import partial
 from typing import Any
 
 import chex
-import optax
+import flashbax as fbx
 import flax.linen as nn
+import hydra
+import jax
+import jax.numpy as jnp
+import numpy as np
+import optax
+import wandb
 from flax.linen.initializers import constant, orthogonal
 from flax.training.train_state import TrainState
 from gymnax.wrappers.purerl import LogWrapper
-import hydra
 from omegaconf import OmegaConf
-import flashbax as fbx
-import wandb
 
 from jaxmarl import make
-from jaxmarl.environments.smax import map_name_to_scenario
 from jaxmarl.environments.overcooked import overcooked_layouts
+from jaxmarl.environments.smax import map_name_to_scenario
 from jaxmarl.wrappers.baselines import (
-    SMAXLogWrapper,
-    MPELogWrapper,
-    LogWrapper,
     CTRolloutManager,
+    LogWrapper,
+    MPELogWrapper,
+    SMAXLogWrapper,
 )
 
 
@@ -579,8 +579,8 @@ def make_train(config, env):
             """Help function to test greedy policy during training"""
             if not config.get("TEST_DURING_TRAINING", True):
                 return None
-            
-            params = train_state.params['agent']  
+
+            params = train_state.params['agent']
             def _greedy_env_step(step_state, unused):
                 params, env_state, last_obs, last_dones, hstate, rng = step_state
                 rng, key_s = jax.random.split(rng)

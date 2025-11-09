@@ -6,13 +6,14 @@ This implementation had the goal to perform inference with pretrained params, fo
 is kept as minimal as possible.
 """
 
-import jax
-from jax import numpy as jnp
-import flax.linen as nn
 from functools import partial
-from typing import Tuple
+
+import flax.linen as nn
+import jax
 from chex import Array, PRNGKey
 from flax.linen.module import compact, nowrap
+from jax import numpy as jnp
+
 
 class MultiLayerLSTM(nn.RNNCellBase):
 
@@ -37,8 +38,8 @@ class MultiLayerLSTM(nn.RNNCellBase):
 
     @nowrap
     def initialize_carry(
-        self, rng: PRNGKey, batch_dims: Tuple[int, ...]
-    ) -> Tuple[Array, Array]:
+        self, rng: PRNGKey, batch_dims: tuple[int, ...]
+    ) -> tuple[Array, Array]:
         mem_shape = (self.num_layers,) + batch_dims + (self.features,)
         c = jnp.zeros(mem_shape)
         h = jnp.zeros(mem_shape)
@@ -103,8 +104,8 @@ class OBLAgentR2D2(nn.Module):
 
     @nowrap
     def initialize_carry(
-        self, rng: PRNGKey, batch_dims: Tuple[int, ...]
-    ) -> Tuple[Array, Array]:
+        self, rng: PRNGKey, batch_dims: tuple[int, ...]
+    ) -> tuple[Array, Array]:
         return MultiLayerLSTM(
             num_layers=self.num_lstm_layer, features=self.hid_dim
         ).initialize_carry(rng, batch_dims)
@@ -121,7 +122,7 @@ def example():
 
     agent = OBLAgentR2D2()
     agent_carry = agent.initialize_carry(jax.random.PRNGKey(0), batch_dims=(2,))
-    
+
     rng = jax.random.PRNGKey(0)
     env = make('hanabi')
     obs, env_state = env.reset(rng)

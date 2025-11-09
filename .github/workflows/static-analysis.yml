@@ -1,0 +1,115 @@
+name: Static Analysis
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  ruff-lint:
+    name: Ruff Linting
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    - name: Install Ruff
+      run: pip install ruff
+
+    - name: Run Ruff linter
+      run: ruff check .
+
+  ruff-format:
+    name: Ruff Formatting
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    - name: Install Ruff
+      run: pip install ruff
+
+    - name: Check code formatting
+      run: ruff format --check .
+
+  mypy:
+    name: MyPy Type Checking
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    - name: Install dependencies
+      run: |
+        pip install mypy
+        pip install -e .[algs]
+
+    - name: Run MyPy
+      run: mypy jaxmarl baselines
+
+  markdown-format:
+    name: Markdown Formatting
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    - name: Install mdformat
+      run: pip install mdformat mdformat-gfm mdformat-black
+
+    - name: Check markdown formatting
+      run: mdformat --check .
+
+  markdown-lint:
+    name: Markdown Linting
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    - name: Install pymarkdownlnt
+      run: pip install pymarkdownlnt
+
+    - name: Run markdown linter
+      run: pymarkdown scan .

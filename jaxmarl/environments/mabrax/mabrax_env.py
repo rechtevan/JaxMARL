@@ -1,13 +1,16 @@
-from typing import Dict, Literal, Optional, Tuple
+from functools import partial
+from typing import Literal
+
 import chex
-from jaxmarl.environments.multi_agent_env import MultiAgentEnv
-from jaxmarl.environments import spaces
-from brax import envs
 import jax
 import jax.numpy as jnp
-from functools import partial
+from brax import envs
+
+from jaxmarl.environments import spaces
+from jaxmarl.environments.multi_agent_env import MultiAgentEnv
 
 from .mappings import _agent_action_mapping, _agent_observation_mapping
+
 
 # TODO: move homogenisation to a separate wrapper
 
@@ -19,7 +22,7 @@ class MABraxEnv(MultiAgentEnv):
         episode_length: int = 1000,
         action_repeat: int = 1,
         auto_reset: bool = True,
-        homogenisation_method: Optional[Literal["max", "concat"]] = None,
+        homogenisation_method: Literal["max", "concat"] | None = None,
         backend: str = "positional",
         **kwargs
     ):
@@ -92,7 +95,7 @@ class MABraxEnv(MultiAgentEnv):
         }
 
     @partial(jax.jit, static_argnums=(0,))
-    def reset(self, key: chex.PRNGKey) -> Tuple[Dict[str, chex.Array], envs.State]:
+    def reset(self, key: chex.PRNGKey) -> tuple[dict[str, chex.Array], envs.State]:
         state = self.env.reset(key)
         return self.get_obs(state), state
 
@@ -101,9 +104,9 @@ class MABraxEnv(MultiAgentEnv):
         self,
         key: chex.PRNGKey,
         state: envs.State,
-        actions: Dict[str, chex.Array],
-    ) -> Tuple[
-        Dict[str, chex.Array], envs.State, Dict[str, float], Dict[str, bool], Dict
+        actions: dict[str, chex.Array],
+    ) -> tuple[
+        dict[str, chex.Array], envs.State, dict[str, float], dict[str, bool], dict
     ]:
         global_action = self.map_agents_to_global_action(actions)
         next_state = self.env.step(state, global_action)  # type: ignore
@@ -120,7 +123,7 @@ class MABraxEnv(MultiAgentEnv):
             next_state.info,
         )
 
-    def get_obs(self, state: envs.State) -> Dict[str, chex.Array]:
+    def get_obs(self, state: envs.State) -> dict[str, chex.Array]:
         """Extracts agent observations from the global state.
 
         Args:
@@ -132,7 +135,7 @@ class MABraxEnv(MultiAgentEnv):
         return self.map_global_obs_to_agents(state.obs)
 
     def map_agents_to_global_action(
-        self, agent_actions: Dict[str, jnp.ndarray]
+        self, agent_actions: dict[str, jnp.ndarray]
     ) -> jnp.ndarray:
         global_action = jnp.zeros(self.env.action_size)
         for agent_name, action_indices in self.agent_action_mapping.items():
@@ -152,7 +155,7 @@ class MABraxEnv(MultiAgentEnv):
 
     def map_global_obs_to_agents(
         self, global_obs: jnp.ndarray
-    ) -> Dict[str, jnp.ndarray]:
+    ) -> dict[str, jnp.ndarray]:
         """Maps the global observation vector to the individual agent observations.
 
         Args:

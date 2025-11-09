@@ -1,11 +1,11 @@
+
+import chex
 import jax
 import jax.numpy as jnp
-from typing import NamedTuple
-from typing import Tuple
-from jaxmarl.environments.multi_agent_env import MultiAgentEnv
-import chex
+
 from jaxmarl.environments import spaces
-from typing import Optional, Tuple
+from jaxmarl.environments.multi_agent_env import MultiAgentEnv
+
 
 @chex.dataclass
 class EnvState:
@@ -69,7 +69,7 @@ class CoinGame(MultiAgentEnv):
         self.agents = [str(i) for i in list(range(2))]
         self.payoff_matrix = payoff_matrix
         self.cnn = cnn
-        
+
         # helper functions
         def _update_stats(
             state: EnvState,
@@ -199,19 +199,19 @@ class CoinGame(MultiAgentEnv):
             if not cnn:
                 return {agent: obs[agent].flatten() for agent in obs}
             return obs
-        
+
         _shape = (3, 3, 4) if self.cnn else (36,)
         self.observation_spaces = {
             a: spaces.Box(low=0, high=1, shape=_shape, dtype=jnp.uint8) for a in self.agents
         }
         self.action_spaces = {
             a: spaces.Discrete(5) for a in self.agents
-        }    
+        }
 
         def _step(
             key: chex.PRNGKey,
             state: EnvState,
-            actions: Tuple[int, int],
+            actions: tuple[int, int],
         ):
             action_0, action_1 = list(actions.values())
             new_red_pos = (state.red_pos + MOVES[action_0]) % 3
@@ -367,7 +367,7 @@ class CoinGame(MultiAgentEnv):
 
             dones = {agent: reset_inner for agent in self.agents}
             dones['__all__'] = reset_inner
-            
+
             infos = {}
             return (
                 obs,
@@ -379,7 +379,7 @@ class CoinGame(MultiAgentEnv):
 
         def _reset(
             key: jnp.ndarray
-        ) -> Tuple[jnp.ndarray, EnvState]:
+        ) -> tuple[jnp.ndarray, EnvState]:
             key, subkey = jax.random.split(key)
             all_pos = jax.random.randint(
                 subkey, shape=(4, 2), minval=0, maxval=3
@@ -410,7 +410,7 @@ class CoinGame(MultiAgentEnv):
         # overwrite Gymnax as it makes single-agent assumptions
         self.step = jax.jit(_step)
         self.reset = jax.jit(_reset)
-        
+
 
         self.step = _step
         self.reset = _reset

@@ -1,6 +1,6 @@
-from enum import IntEnum
 import math
-from typing import Any, Optional, Tuple, Union, Dict
+from enum import IntEnum
+from typing import Any
 
 import chex
 import jax
@@ -8,9 +8,8 @@ import jax.numpy as jnp
 import numpy as onp
 from flax.struct import dataclass
 
-from jaxmarl.environments.multi_agent_env import MultiAgentEnv
 from jaxmarl.environments import spaces
-
+from jaxmarl.environments.multi_agent_env import MultiAgentEnv
 
 from .rendering import (
     downsample,
@@ -188,7 +187,7 @@ class InTheGrid_2p(MultiAgentEnv):
     """
 
     # used for caching
-    tile_cache: Dict[Tuple[Any, ...], Any] = {}
+    tile_cache: dict[tuple[Any, ...], Any] = {}
 
     def __init__(
         self,
@@ -343,8 +342,8 @@ class InTheGrid_2p(MultiAgentEnv):
             return r1, r2
 
         def _interact(
-            state: State, actions: Tuple[int, int]
-        ) -> Tuple[bool, float, float, State]:
+            state: State, actions: tuple[int, int]
+        ) -> tuple[bool, float, float, State]:
             # if interact
             a0, a1 = actions
 
@@ -573,7 +572,7 @@ class InTheGrid_2p(MultiAgentEnv):
         def _step(
             key: chex.PRNGKey,
             state: State,
-            actions: Tuple[int, int]
+            actions: tuple[int, int]
         ):
 
             """Step the environment."""
@@ -828,7 +827,7 @@ class InTheGrid_2p(MultiAgentEnv):
 
         def _reset_state(
             key: jnp.ndarray
-        ) -> Tuple[jnp.ndarray, State]:
+        ) -> tuple[jnp.ndarray, State]:
             key, subkey = jax.random.split(key)
 
             # coin_pos = jax.random.choice(
@@ -889,7 +888,7 @@ class InTheGrid_2p(MultiAgentEnv):
 
         def reset(
             key: jnp.ndarray
-        ) -> Tuple[jnp.ndarray, State]:
+        ) -> tuple[jnp.ndarray, State]:
             state = _reset_state(key)
             obs = _get_obs(state)
             return obs, state
@@ -962,7 +961,7 @@ class InTheGrid_2p(MultiAgentEnv):
     def render_tile(
         cls,
         obj: int,
-        agent_dir: Union[int, None] = None,
+        agent_dir: int | None = None,
         agent_hat: bool = False,
         highlight: bool = False,
         tile_size: int = 32,
@@ -1067,7 +1066,7 @@ class InTheGrid_2p(MultiAgentEnv):
 
     def render_agent_view(
         self, state: State, agent: int
-    ) -> Tuple[onp.ndarray]:
+    ) -> tuple[onp.ndarray]:
         """
         Render the observation for each agent"""
 

@@ -1,10 +1,11 @@
+from functools import partial
+
+import chex
 import jax
 import jax.numpy as jnp
-import chex
-from typing import Tuple, Dict
-from functools import partial
-from jaxmarl.environments.mpe.simple import SimpleMPE, State
+
 from jaxmarl.environments.mpe.default_params import *
+from jaxmarl.environments.mpe.simple import SimpleMPE, State
 from jaxmarl.environments.spaces import Box
 
 
@@ -20,11 +21,11 @@ class SimpleSpreadMPE(SimpleMPE):
         dim_c = 2  # NOTE follows code rather than docs
 
         # Action and observation spaces
-        agents = ["agent_{}".format(i) for i in range(num_agents)]
-        landmarks = ["landmark {}".format(i) for i in range(num_landmarks)]
+        agents = [f"agent_{i}" for i in range(num_agents)]
+        landmarks = [f"landmark {i}" for i in range(num_landmarks)]
 
         observation_spaces = {
-            i:Box(-jnp.inf, jnp.inf, (4+(num_agents-1)*4+(num_landmarks*2),)) 
+            i:Box(-jnp.inf, jnp.inf, (4+(num_agents-1)*4+(num_landmarks*2),))
             for i in agents
         }
 
@@ -58,7 +59,7 @@ class SimpleSpreadMPE(SimpleMPE):
             **kwargs,
         )
 
-    def get_obs(self, state: State) -> Dict[str, chex.Array]:
+    def get_obs(self, state: State) -> dict[str, chex.Array]:
         @partial(jax.vmap, in_axes=(0))
         def _common_stats(aidx: int):
             """Values needed in all observations"""
@@ -99,7 +100,7 @@ class SimpleSpreadMPE(SimpleMPE):
         obs = {a: _obs(i) for i, a in enumerate(self.agents)}
         return obs
 
-    def rewards(self, state: State) -> Dict[str, float]:
+    def rewards(self, state: State) -> dict[str, float]:
         @partial(jax.vmap, in_axes=(0, None))
         def _collisions(agent_idx: int, other_idx: int):
             return jax.vmap(self.is_collision, in_axes=(None, 0, None))(

@@ -1,17 +1,19 @@
+from functools import partial
+
+import chex
 import jax
 import jax.numpy as jnp
-import chex
-from typing import Tuple, Dict
-from functools import partial
+
+from jaxmarl.environments.mpe.default_params import *
 from jaxmarl.environments.mpe.simple import (
+    ADVERSARY_COLOUR,
+    AGENT_COLOUR,
+    OBS_COLOUR,
     SimpleMPE,
     State,
-    AGENT_COLOUR,
-    ADVERSARY_COLOUR,
-    OBS_COLOUR,
 )
-from jaxmarl.environments.mpe.default_params import *
 from jaxmarl.environments.spaces import Box, Discrete
+
 
 # NOTE food and forests are part of world.landmarks
 
@@ -47,18 +49,18 @@ class SimpleWorldCommMPE(SimpleMPE):
         # Entity names
         self.leader = "leadadversary_0"
         self.adversaries = [
-            "adversary_{}".format(i) for i in range(num_adversaries - 1)
+            f"adversary_{i}" for i in range(num_adversaries - 1)
         ]
-        self.good_agents = ["agent_{}".format(i) for i in range(num_good_agents)]
+        self.good_agents = [f"agent_{i}" for i in range(num_good_agents)]
         agents = [self.leader] + self.adversaries + self.good_agents
 
         landmarks = (
-            ["landmark {}".format(i) for i in range(num_obs)]
-            + ["food {}".format(i) for i in range(num_food)]
-            + ["forest {}".format(i) for i in range(num_forests)]
+            [f"landmark {i}" for i in range(num_obs)]
+            + [f"food {i}" for i in range(num_food)]
+            + [f"forest {i}" for i in range(num_forests)]
         )
 
-        self.leader_map = jnp.insert(jnp.zeros((num_agents - 1)), 0, 1)
+        self.leader_map = jnp.insert(jnp.zeros(num_agents - 1), 0, 1)
         self.leader_idx = 0
 
         # Action and observation spaces
@@ -97,7 +99,7 @@ class SimpleWorldCommMPE(SimpleMPE):
                 jnp.full((self.num_forests), 0.3),
             ]
         )
-        silent = jnp.insert(jnp.ones((num_agents - 1)), 0, 0).astype(jnp.int32)
+        silent = jnp.insert(jnp.ones(num_agents - 1), 0, 0).astype(jnp.int32)
         collide = jnp.concatenate(
             [
                 jnp.full((num_agents + self.num_obs), True),
@@ -142,10 +144,10 @@ class SimpleWorldCommMPE(SimpleMPE):
 
     def _decode_discrete_action(
         self, a_idx: int, actions: chex.Array
-    ) -> Tuple[chex.Array, chex.Array]:
+    ) -> tuple[chex.Array, chex.Array]:
         @partial(jax.vmap, in_axes=[0, 0])
         def u_decoder(a_idx, a):
-            u = jnp.zeros((self.dim_p))
+            u = jnp.zeros(self.dim_p)
             idx = jax.lax.select(a <= 2, 0, 1)
             u_val = jax.lax.select(a % 2 == 0, 1.0, -1.0) * (a != 0)
             u = u.at[idx].set(u_val)
@@ -171,7 +173,7 @@ class SimpleWorldCommMPE(SimpleMPE):
 
     def _decode_continuous_action(
         self, a_idx: int, actions: chex.Array
-    ) -> Tuple[chex.Array, chex.Array]:
+    ) -> tuple[chex.Array, chex.Array]:
         @partial(jax.vmap, in_axes=[0, 0])
         def _set_u(a_idx, action):
             u = jnp.array([action[2] - action[1], action[4] - action[3]])
@@ -188,7 +190,7 @@ class SimpleWorldCommMPE(SimpleMPE):
         c = c.at[self.leader_idx].set(lact[5:])
         return u, c
 
-    def get_obs(self, state: State) -> Dict[str, chex.Array]:
+    def get_obs(self, state: State) -> dict[str, chex.Array]:
         """Returns observations of all agents"""
 
         @partial(jax.vmap, in_axes=(0, None))
@@ -294,7 +296,7 @@ class SimpleWorldCommMPE(SimpleMPE):
         )
         return obs
 
-    def rewards(self, state: State) -> Dict[str, float]:
+    def rewards(self, state: State) -> dict[str, float]:
         """Computes rewards for all agents"""
 
         @partial(jax.vmap, in_axes=[0, None])

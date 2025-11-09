@@ -1,21 +1,21 @@
 from collections import OrderedDict
 from enum import IntEnum
 
-import numpy as np
+import chex
 import jax
 import jax.numpy as jnp
-from jax import lax
-from jaxmarl.gridworld.env import Environment
-from jaxmarl.environments import spaces
-from typing import Tuple
-import chex
+import numpy as np
 from flax import struct
+from jax import lax
 
+from jaxmarl.environments import spaces
 from jaxmarl.environments.overcooked.common import (
-    OBJECT_TO_INDEX,
     COLOR_TO_INDEX,
     DIR_TO_VEC,
-    make_maze_map)
+    OBJECT_TO_INDEX,
+    make_maze_map,
+)
+from jaxmarl.gridworld.env import Environment
 
 
 class Actions(IntEnum):
@@ -114,7 +114,7 @@ class MAMaze(Environment):
             key: chex.PRNGKey,
             state: EnvState,
             actions: chex.Array,
-    ) -> Tuple[chex.Array, EnvState, float, bool, dict]:
+    ) -> tuple[chex.Array, EnvState, float, bool, dict]:
         """Perform single timestep state transition."""
 
         acts = self.action_set.take(indices=jnp.array(actions))
@@ -138,7 +138,7 @@ class MAMaze(Environment):
     def reset_env(
             self,
             key: chex.PRNGKey,
-    ) -> Tuple[chex.Array, EnvState]:
+    ) -> tuple[chex.Array, EnvState]:
         """Reset environment state by resampling contents of maze_map
         - initial agent position
         - goal position
@@ -252,7 +252,7 @@ class MAMaze(Environment):
 
         return OrderedDict(obs_dict)
 
-    def step_agents(self, key: chex.PRNGKey, state: EnvState, action: chex.Array) -> Tuple[EnvState, float]:
+    def step_agents(self, key: chex.PRNGKey, state: EnvState, action: chex.Array) -> tuple[EnvState, float]:
         params = self.params
 
         # Update agent position (forward action)

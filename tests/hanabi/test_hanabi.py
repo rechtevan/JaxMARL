@@ -1,9 +1,12 @@
-import os
 import json
-import numpy as np
+import os
+
 import jax
+import numpy as np
 from jax import numpy as jnp
+
 from jaxmarl import make
+
 
 env = make("hanabi")
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -17,7 +20,7 @@ def pad_array(arr, target_length):
 
 
 def get_action_sequences():
-    with open(os.path.join(dir_path, "actions.json"), "r") as f:
+    with open(os.path.join(dir_path, "actions.json")) as f:
         actions_traj = json.load(f)
 
     max_len = max(len(a) for a in actions_traj)
@@ -34,7 +37,7 @@ def get_decks():
         card[color, rank] = 1
         return card
 
-    with open(os.path.join(dir_path, "decks.json"), "r") as f:
+    with open(os.path.join(dir_path, "decks.json")) as f:
         decks = json.load(f)
 
     # encode into card-matrices
@@ -49,7 +52,7 @@ def get_decks():
 
 
 def get_scores():
-    with open(os.path.join(dir_path, "scores.txt"), "r") as f:
+    with open(os.path.join(dir_path, "scores.txt")) as f:
         scores = [int(line.split(",")[1].split("\n")[0]) for line in f.readlines()]
     return jnp.array(scores)
 

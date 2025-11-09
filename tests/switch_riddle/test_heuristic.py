@@ -1,7 +1,9 @@
 import jax
 import jax.numpy as jnp
-from jaxmarl import make
 import pytest
+
+from jaxmarl import make
+
 
 def get_nothing_actions(env):
     actions = {agent: jnp.array(env.game_actions["NOTHING"]) for agent in env.agents}
@@ -36,9 +38,7 @@ class TestHeuristic:
                     "Light state should have changed after switching, but it didn't."
                 )
         print(
-            'Test "light switch" passed with {} agents and seed {}.'.format(
-                num_agents, seed
-            )
+            f'Test "light switch" passed with {num_agents} agents and seed {seed}.'
         )
 
 
@@ -68,7 +68,7 @@ class TestHeuristic:
                 raise ValueError(
                     "ALl agents visited the room but the has_been parameter doesn't say so."
                 )
-        print('Test "has been" passed with {} agents and seed {}.'.format(num_agents, seed))
+        print(f'Test "has been" passed with {num_agents} agents and seed {seed}.')
 
 
     def test_positive_reward(self, seed, num_agents):
@@ -97,9 +97,7 @@ class TestHeuristic:
                 )
 
         print(
-            'Test "positive reward" passed with {} agents and seed {}.'.format(
-                num_agents, seed
-            )
+            f'Test "positive reward" passed with {num_agents} agents and seed {seed}.'
         )
 
 
@@ -121,9 +119,7 @@ class TestHeuristic:
                 )
 
         print(
-            'Test "negative reward" passed with {} agents and seed {}.'.format(
-                num_agents, seed
-            )
+            f'Test "negative reward" passed with {num_agents} agents and seed {seed}.'
         )
 
 
@@ -140,12 +136,10 @@ class TestHeuristic:
             _, state, rewards, _, _ = env.step(key_step, state, actions)
 
             if not all(rewards[a] == 0 for a in env.agents):
-                raise ValueError(f"Agents did nothing but the reward is not 0")
+                raise ValueError("Agents did nothing but the reward is not 0")
 
         print(
-            'Test "neutral reward" passed with {} agents and seed {}.'.format(
-                num_agents, seed
-            )
+            f'Test "neutral reward" passed with {num_agents} agents and seed {seed}.'
         )
 
 
@@ -181,9 +175,7 @@ class TestHeuristic:
             ], "The environment did not terminate correctly when the maximum time steps is reached."
 
         print(
-            'Test "environment termination" passed with {} agents and seed {}.'.format(
-                num_agents, seed
-            )
+            f'Test "environment termination" passed with {num_agents} agents and seed {seed}.'
         )
 
 
@@ -245,7 +237,7 @@ class TestHeuristic:
             ), f"The dones of the two environments do not match at step {i}."
 
         print(
-            'Test "consistency" passed with {} agents and seed {}.'.format(num_agents, seed)
+            f'Test "consistency" passed with {num_agents} agents and seed {seed}.'
         )
 
 

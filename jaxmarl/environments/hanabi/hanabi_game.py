@@ -2,14 +2,15 @@
 This class models the game dynamics of Hanabi (reset and step of the game).
 """
 
-import numpy as np
+from functools import partial
+
+import chex
 import jax
 import jax.numpy as jnp
-from jax import lax
-import chex
+import numpy as np
 from flax import struct
-from typing import Tuple, Dict
-from functools import partial
+from jax import lax
+
 from jaxmarl.environments.multi_agent_env import MultiAgentEnv
 
 
@@ -183,7 +184,7 @@ class HanabiGame(MultiAgentEnv):
         state: State,
         aidx: int,
         action: int,
-    ) -> Tuple[State, int]:
+    ) -> tuple[State, int]:
         """
         Execute the current player's action and its consequences
         """

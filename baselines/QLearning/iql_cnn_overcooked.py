@@ -1,33 +1,30 @@
 """
 Specific to this implementation: CNN network and Reward Shaping Annealing as per Overcooked paper.
 """
-import os
 import copy
-import jax
-import jax.numpy as jnp
-import numpy as np
-from functools import partial
+import os
 from typing import Any
 
-import flax
 import chex
-import optax
-import flax.linen as nn
-from flax.training.train_state import TrainState
-import hydra
-from omegaconf import OmegaConf
 import flashbax as fbx
+import flax.linen as nn
+import hydra
+import jax
+import jax.numpy as jnp
+import optax
 import wandb
+from flax.training.train_state import TrainState
+from omegaconf import OmegaConf
 
 from jaxmarl import make
+from jaxmarl.environments.overcooked import overcooked_layouts
 from jaxmarl.environments.smax import map_name_to_scenario
 from jaxmarl.wrappers.baselines import (
-    SMAXLogWrapper,
-    MPELogWrapper,
-    LogWrapper,
     CTRolloutManager,
+    LogWrapper,
+    MPELogWrapper,
+    SMAXLogWrapper,
 )
-from jaxmarl.environments.overcooked import overcooked_layouts
 
 
 class CNN(nn.Module):
@@ -57,7 +54,7 @@ class CNN(nn.Module):
         x = x.reshape((x.shape[0], -1))  # Flatten
 
         x = nn.Dense(
-            features=64 
+            features=64
         )(x)
         x = activation(x)
 

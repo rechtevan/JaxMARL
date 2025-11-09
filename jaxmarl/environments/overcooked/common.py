@@ -1,10 +1,7 @@
-import copy
 
-import numpy as np
-import jax.numpy as jnp
-from flax import struct
-import chex
 import jax
+import jax.numpy as jnp
+import numpy as np
 
 
 OBJECT_TO_INDEX = {

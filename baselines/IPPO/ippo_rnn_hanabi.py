@@ -6,22 +6,25 @@ doing homogenous first with continuous actions. Also terminate synchronously
 NOTE: currently implemented using the gymnax to smax wrapper
 """
 
+import functools
+from collections.abc import Sequence
+from typing import NamedTuple
+
+import distrax
+import flax.linen as nn
+import hydra
 import jax
 import jax.numpy as jnp
-import flax.linen as nn
 import numpy as np
 import optax
+import wandb
 from flax.linen.initializers import constant, orthogonal
-from typing import Sequence, NamedTuple, Any, Dict
 from flax.training.train_state import TrainState
-import distrax
+from omegaconf import OmegaConf
+
 import jaxmarl
 from jaxmarl.wrappers.baselines import LogWrapper
-import wandb
-import functools
-import hydra
-from omegaconf import OmegaConf
-import os 
+
 
 class ScannedRNN(nn.Module):
     @functools.partial(
@@ -55,7 +58,7 @@ class ScannedRNN(nn.Module):
 
 class ActorCriticRNN(nn.Module):
     action_dim: Sequence[int]
-    config: Dict
+    config: dict
 
     @nn.compact
     def __call__(self, hidden, x):
@@ -190,7 +193,7 @@ def make_train(config):
                 obsv, env_state, reward, done, info = jax.vmap(env.step, in_axes=(0, 0, 0))(
                     rng_step, env_state, env_act
                 )
-                info = jax.tree.map(lambda x: x.reshape((config["NUM_ACTORS"])), info)
+                info = jax.tree.map(lambda x: x.reshape(config["NUM_ACTORS"]), info)
                 done_batch = batchify(done, env.agents, config["NUM_ACTORS"]).squeeze()
                 transition = Transition(
                     jnp.tile(done["__all__"], env.num_agents),
@@ -284,7 +287,7 @@ def make_train(config):
                         loss_actor = -jnp.minimum(loss_actor1, loss_actor2)
                         loss_actor = loss_actor.mean()
                         entropy = pi.entropy().mean()
-                        
+
                         # debug
                         approx_kl = ((ratio - 1) - logratio).mean()
                         clip_frac = jnp.mean(jnp.abs(ratio - 1) > config["CLIP_EPS"])
@@ -308,7 +311,7 @@ def make_train(config):
 
                 init_hstate = jnp.reshape(
                     init_hstate, (1, config["NUM_ACTORS"], -1)
-                )                
+                )
                 batch = (init_hstate, traj_batch, advantages.squeeze(), targets.squeeze())
                 permutation = jax.random.permutation(_rng, config["NUM_ACTORS"])
 
@@ -355,7 +358,7 @@ def make_train(config):
             }
             rng = update_state[-1]
 
-            def callback(metric):                
+            def callback(metric):
                 wandb.log(
                     {
                         "returns": metric["returned_episode_returns"][-1, :].mean(),
@@ -384,7 +387,7 @@ def make_train(config):
 
 @hydra.main(version_base=None, config_path="config", config_name="ippo_rnn_hanabi")
 def main(config):
-    config = OmegaConf.to_container(config) 
+    config = OmegaConf.to_container(config)
 
     wandb.init(
         entity=config["ENTITY"],

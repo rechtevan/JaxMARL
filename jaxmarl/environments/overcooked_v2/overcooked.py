@@ -1,28 +1,22 @@
-from collections import OrderedDict
 from enum import Enum
 from functools import partial
-from typing import List, Optional, Union
-import numpy as np
+
+import chex
 import jax
 import jax.numpy as jnp
 from jax import lax
-from jaxmarl.environments import MultiAgentEnv
-from jaxmarl.environments import spaces
-from typing import Tuple, Dict
-import chex
-from flax import struct
-from flax.core.frozen_dict import FrozenDict
+
+from jaxmarl.environments import MultiAgentEnv, spaces
 from jaxmarl.environments.overcooked_v2.common import (
     ACTION_TO_DIRECTION,
-    MAX_INGREDIENTS,
     Actions,
-    StaticObject,
-    DynamicObject,
-    Direction,
-    Position,
     Agent,
+    Direction,
+    DynamicObject,
+    Position,
+    StaticObject,
 )
-from jaxmarl.environments.overcooked_v2.layouts import overcooked_v2_layouts, Layout
+from jaxmarl.environments.overcooked_v2.layouts import Layout, overcooked_v2_layouts
 from jaxmarl.environments.overcooked_v2.settings import (
     DELIVERY_REWARD,
     INDICATOR_ACTIVATION_COST,
@@ -32,11 +26,9 @@ from jaxmarl.environments.overcooked_v2.settings import (
 )
 from jaxmarl.environments.overcooked_v2.utils import (
     OvercookedPathPlanner,
-    compute_view_box,
-    get_closest_true_pos_no_directions,
+    compute_enclosed_spaces,
     mark_adjacent_cells,
     tree_select,
-    compute_enclosed_spaces,
 )
 
 
@@ -62,7 +54,7 @@ class State:
 
     new_correct_delivery: bool = False
 
-    ingredient_permutations: Optional[chex.Array] = None
+    ingredient_permutations: chex.Array | None = None
 
 
 class OvercookedV2(MultiAgentEnv):
@@ -70,20 +62,18 @@ class OvercookedV2(MultiAgentEnv):
 
     def __init__(
         self,
-        layout: Union[str, Layout] = "cramped_room",
+        layout: str | Layout = "cramped_room",
         max_steps: int = 400,
-        observation_type: Union[
-            ObservationType, List[ObservationType]
-        ] = ObservationType.DEFAULT,
-        agent_view_size: Optional[int] = None,
+        observation_type: ObservationType | list[ObservationType] = ObservationType.DEFAULT,
+        agent_view_size: int | None = None,
         random_reset: bool = False,
         random_agent_positions: bool = False,
         start_cooking_interaction: bool = False,
         negative_rewards: bool = False,
         sample_recipe_on_delivery: bool = False,
         indicate_successful_delivery: bool = False,
-        op_ingredient_permutations: List[int] = None,
-        initial_state_buffer: Optional[State] = None,
+        op_ingredient_permutations: list[int] = None,
+        initial_state_buffer: State | None = None,
         force_path_planning: bool = False,
     ):
         """
@@ -176,8 +166,8 @@ class OvercookedV2(MultiAgentEnv):
         self,
         key: chex.PRNGKey,
         state: State,
-        actions: Dict[str, chex.Array],
-    ) -> Tuple[Dict[str, chex.Array], State, Dict[str, float], Dict[str, bool], Dict]:
+        actions: dict[str, chex.Array],
+    ) -> tuple[dict[str, chex.Array], State, dict[str, float], dict[str, bool], dict]:
         """Perform single timestep state transition."""
 
         acts = self.action_set.take(
@@ -229,7 +219,7 @@ class OvercookedV2(MultiAgentEnv):
     def reset(
         self,
         key: chex.PRNGKey,
-    ) -> Tuple[Dict[str, chex.Array], State]:
+    ) -> tuple[dict[str, chex.Array], State]:
         if self.initial_state_buffer is not None:
             num_states = jax.tree_util.tree_flatten(self.initial_state_buffer)[0][
                 0
@@ -295,7 +285,7 @@ class OvercookedV2(MultiAgentEnv):
         self,
         state: State,
         key: chex.PRNGKey,
-    ) -> Tuple[Dict[str, chex.Array], State]:
+    ) -> tuple[dict[str, chex.Array], State]:
         """
         Reset the environment from a given state. Grid and agents are copied from the state, other parameters are reset.
         """
@@ -497,7 +487,7 @@ class OvercookedV2(MultiAgentEnv):
             grid=new_grid,
         )
 
-    def _get_obs_shape(self) -> Tuple[int]:
+    def _get_obs_shape(self) -> tuple[int]:
         if self.agent_view_size:
             view_size = self.agent_view_size * 2 + 1
             view_width = min(self.width, view_size)
@@ -551,7 +541,7 @@ class OvercookedV2(MultiAgentEnv):
 
     def get_obs_for_type(
         self, state: State, obs_type: ObservationType
-    ) -> Dict[str, chex.Array]:
+    ) -> dict[str, chex.Array]:
         match obs_type:
             case ObservationType.DEFAULT:
                 all_obs = self.get_obs_default(state)
@@ -584,7 +574,7 @@ class OvercookedV2(MultiAgentEnv):
 
         return {f"agent_{i}": obs for i, obs in enumerate(all_obs)}
 
-    def get_obs_default(self, state: State) -> Dict[str, chex.Array]:
+    def get_obs_default(self, state: State) -> dict[str, chex.Array]:
 
         width = self.width
         height = self.height
@@ -1005,7 +995,7 @@ class OvercookedV2(MultiAgentEnv):
         key: chex.PRNGKey,
         state: State,
         actions: chex.Array,
-    ) -> Tuple[State, float]:
+    ) -> tuple[State, float]:
         grid = state.grid
 
         # print("actions: ", actions)

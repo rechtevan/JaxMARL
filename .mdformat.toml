@@ -1,0 +1,14 @@
+# Markdown formatting configuration for JaxMARL
+# Used by mdformat via pre-commit hooks
+
+# Wrap text at 80 characters for better readability
+wrap = 80
+
+# Add line numbers to code blocks
+number = true
+
+# Format code blocks using black style (via mdformat-black plugin)
+# This ensures Python code in markdown matches our Python formatting
+
+# Use GitHub Flavored Markdown (via mdformat-gfm plugin)
+# Supports tables, task lists, strikethrough, etc.

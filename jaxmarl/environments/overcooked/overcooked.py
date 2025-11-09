@@ -1,28 +1,26 @@
-from collections import OrderedDict
 from enum import IntEnum
 
-import numpy as np
+import chex
 import jax
 import jax.numpy as jnp
-from jax import lax
-from jaxmarl.environments import MultiAgentEnv
-from jaxmarl.environments import spaces
-from typing import Tuple, Dict
-import chex
+import numpy as np
 from flax import struct
 from flax.core.frozen_dict import FrozenDict
+from jax import lax
 
+from jaxmarl.environments import MultiAgentEnv, spaces
 from jaxmarl.environments.overcooked.common import (
-    OBJECT_TO_INDEX,
     COLOR_TO_INDEX,
-    OBJECT_INDEX_TO_VEC,
     DIR_TO_VEC,
-    make_overcooked_map)
+    OBJECT_INDEX_TO_VEC,
+    OBJECT_TO_INDEX,
+    make_overcooked_map,
+)
 from jaxmarl.environments.overcooked.layouts import overcooked_layouts as layouts
 
 
 BASE_REW_SHAPING_PARAMS = {
-    "PLACEMENT_IN_POT_REW": 3, # reward for putting ingredients 
+    "PLACEMENT_IN_POT_REW": 3, # reward for putting ingredients
     "PLATE_PICKUP_REWARD": 3, # reward for picking up a plate
     "SOUP_PICKUP_REWARD": 5, # reward for picking up a ready soup
     "DISH_DISP_DISTANCE_REW": 0,
@@ -109,8 +107,8 @@ class Overcooked(MultiAgentEnv):
             self,
             key: chex.PRNGKey,
             state: State,
-            actions: Dict[str, chex.Array],
-    ) -> Tuple[Dict[str, chex.Array], State, Dict[str, float], Dict[str, bool], Dict]:
+            actions: dict[str, chex.Array],
+    ) -> tuple[dict[str, chex.Array], State, dict[str, float], dict[str, bool], dict]:
         """Perform single timestep state transition."""
 
         acts = self.action_set.take(indices=jnp.array([actions["agent_0"], actions["agent_1"]]))
@@ -138,7 +136,7 @@ class Overcooked(MultiAgentEnv):
     def reset(
             self,
             key: chex.PRNGKey,
-    ) -> Tuple[Dict[str, chex.Array], State]:
+    ) -> tuple[dict[str, chex.Array], State]:
         """Reset environment state based on `self.random_reset`
 
         If True, everything is randomized, including agent inventories and positions, pot states and items on counters
@@ -200,7 +198,7 @@ class Overcooked(MultiAgentEnv):
         # Pot status is determined by a number between 0 (inclusive) and 24 (exclusive)
         # 23 corresponds to an empty pot (default)
         pot_status = jax.random.randint(subkey, (pot_idx.shape[0],), 0, 24)
-        pot_status = pot_status * random_reset + (1-random_reset) * jnp.ones((pot_idx.shape[0])) * 23
+        pot_status = pot_status * random_reset + (1-random_reset) * jnp.ones(pot_idx.shape[0]) * 23
 
         onion_pos = jnp.array([])
         plate_pos = jnp.array([])
@@ -248,7 +246,7 @@ class Overcooked(MultiAgentEnv):
 
         return lax.stop_gradient(obs), lax.stop_gradient(state)
 
-    def get_obs(self, state: State) -> Dict[str, chex.Array]:
+    def get_obs(self, state: State) -> dict[str, chex.Array]:
         """Return a full observation, of size (height x width x n_layers), where n_layers = 26.
         Layers are of shape (height x width) and  are binary (0/1) except where indicated otherwise.
         The obs is very sparse (most elements are 0), which prob. contributes to generalization problems in Overcooked.
@@ -366,7 +364,7 @@ class Overcooked(MultiAgentEnv):
 
     def step_agents(
             self, key: chex.PRNGKey, state: State, action: chex.Array,
-    ) -> Tuple[State, float]:
+    ) -> tuple[State, float]:
 
         # Update agent position (forward action)
         is_move_action = jnp.logical_and(action != Actions.stay, action != Actions.interact)
@@ -521,7 +519,7 @@ class Overcooked(MultiAgentEnv):
             inventory_all: chex.Array,
             player_idx: int):
         """Assume agent took interact actions. Result depends on what agent is facing and what it is holding."""
-        
+
         fwd_pos = fwd_pos_all[player_idx]
         inventory = inventory_all[player_idx]
 
@@ -606,21 +604,21 @@ class Overcooked(MultiAgentEnv):
 
         # Apply inventory update
         has_picked_up_plate = successful_pickup*(new_object_in_inv == OBJECT_TO_INDEX["plate"])
-        
+
         # number of plates in player hands < number ready/cooking/partially full pot
         num_plates_in_inv = jnp.sum(inventory == OBJECT_TO_INDEX["plate"])
         pot_loc_layer = jnp.array(maze_map[padding:-padding, padding:-padding, 0] == OBJECT_TO_INDEX["pot"], dtype=jnp.uint8)
-        padded_map = maze_map[padding:-padding, padding:-padding, 2] 
+        padded_map = maze_map[padding:-padding, padding:-padding, 2]
         num_notempty_pots = jnp.sum((padded_map!=POT_EMPTY_STATUS)* pot_loc_layer)
         is_dish_picku_useful = num_plates_in_inv < num_notempty_pots
 
         plate_loc_layer = jnp.array(maze_map == OBJECT_TO_INDEX["plate"], dtype=jnp.uint8)
         no_plates_on_counters = jnp.sum(plate_loc_layer) == 0
-        
+
         shaped_reward += no_plates_on_counters*has_picked_up_plate*is_dish_picku_useful*BASE_REW_SHAPING_PARAMS["PLATE_PICKUP_REWARD"]
 
         inventory = new_object_in_inv
-        
+
         # Apply changes to maze
         new_maze_object_on_table = \
             object_is_pot * OBJECT_INDEX_TO_VEC[new_object_on_table].at[-1].set(new_pot_status) \
@@ -657,7 +655,7 @@ class Overcooked(MultiAgentEnv):
     def action_space(self, agent: str) -> spaces.Discrete:
         """Action space of the environment. Agent_id not used since action_space is uniform for all agents"""
         return self.action_spaces[agent]
-    
+
     def observation_space(self, agent: str) -> spaces.Box:
         """Observation space of the environment."""
         return self.observation_spaces[agent]

@@ -1,10 +1,7 @@
-import copy
 
-import numpy as np
-import jax.numpy as jnp
-from flax import struct
-import chex
 import jax
+import jax.numpy as jnp
+import numpy as np
 
 
 OBJECT_TO_INDEX = {
@@ -72,9 +69,9 @@ DIR_TO_VEC = jnp.array([
 
 def make_maze_map(
 	params,
-	wall_map, 
-	goal_pos, 
-	agent_pos, 
+	wall_map,
+	goal_pos,
+	agent_pos,
 	agent_dir_idx,
 	pad_obs=False):
 	# Expand maze map to H x W x C

@@ -2,27 +2,28 @@
 Based on PureJaxRL Implementation of PPO
 """
 
+from collections.abc import Sequence
+from typing import NamedTuple
+
+import distrax
+import flax.linen as nn
+import hydra
 import jax
 import jax.numpy as jnp
-import flax.linen as nn
 import numpy as np
 import optax
-from flax.linen.initializers import constant, orthogonal
-from typing import Sequence, NamedTuple, Any, Dict
-from flax.training.train_state import TrainState
-import distrax
-from jaxmarl.wrappers.baselines import LogWrapper
-import jaxmarl
 import wandb
-import functools
-import matplotlib.pyplot as plt
-import hydra
+from flax.linen.initializers import constant, orthogonal
+from flax.training.train_state import TrainState
 from omegaconf import OmegaConf
+
+import jaxmarl
+from jaxmarl.wrappers.baselines import LogWrapper
 
 
 class ActorCritic(nn.Module):
     action_dim: Sequence[int]
-    config: Dict
+    config: dict
 
     @nn.compact
     def __call__(self, x):
@@ -146,7 +147,7 @@ def make_train(config):
                 obsv, env_state, reward, done, info = jax.vmap(env.step, in_axes=(0, 0, 0))(
                     rng_step, env_state, env_act
                 )
-                info = jax.tree.map(lambda x: x.reshape((config["NUM_ACTORS"])), info)
+                info = jax.tree.map(lambda x: x.reshape(config["NUM_ACTORS"]), info)
                 done_batch = batchify(done, env.agents, config["NUM_ACTORS"]).squeeze()
                 transition = Transition(
                     done_batch,
@@ -315,7 +316,7 @@ def make_train(config):
 
 @hydra.main(version_base=None, config_path="config", config_name="ippo_ff_hanabi")
 def main(config):
-    config = OmegaConf.to_container(config) 
+    config = OmegaConf.to_container(config)
 
     wandb.init(
         entity=config["ENTITY"],

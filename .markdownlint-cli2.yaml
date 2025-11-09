@@ -1,0 +1,37 @@
+# Markdown linting configuration for markdownlint-cli2
+# Documentation: https://github.com/DavidAnson/markdownlint
+
+# Default state for all rules
+default: true
+
+# Rule customization
+# MD007: Unordered list indentation - use 2 spaces
+MD007:
+  indent: 2
+
+# MD013: Line length - disabled (handled by mdformat)
+MD013: false
+
+# MD024: Multiple headings with same content - allow in different sections
+MD024:
+  allow_different_nesting: true
+
+# MD033: Allow inline HTML (sometimes needed for complex tables/formatting)
+MD033: false
+
+# MD034: Bare URLs - disabled (sometimes needed for clarity)
+MD034: false
+
+# MD041: First line in file should be top-level heading - disabled
+# (Some files start with comments or badges)
+MD041: false
+
+# MD046: Code block style - use fenced (```) not indented
+MD046:
+  style: "fenced"
+
+# Ignore specific files/patterns
+ignores:
+  - "**/node_modules/**"
+  - "**/CHANGELOG.md"  # May have auto-generated content
+  - ".local/**"  # AI-generated analysis files

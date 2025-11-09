@@ -1,30 +1,29 @@
-import os
 import copy
-import jax
-import jax.numpy as jnp
-import numpy as np
+import os
 from functools import partial
 from typing import Any
 
 import chex
-import optax
+import flashbax as fbx
 import flax.linen as nn
+import hydra
+import jax
+import jax.numpy as jnp
+import numpy as np
+import optax
+import wandb
 from flax.linen.initializers import constant, orthogonal
 from flax.training.train_state import TrainState
-import hydra
 from omegaconf import OmegaConf
-import gymnax
-import flashbax as fbx
-import wandb
 
 from jaxmarl import make
-from jaxmarl.environments.smax import map_name_to_scenario
 from jaxmarl.environments.overcooked import overcooked_layouts
+from jaxmarl.environments.smax import map_name_to_scenario
 from jaxmarl.wrappers.baselines import (
-    SMAXLogWrapper,
-    MPELogWrapper,
-    LogWrapper,
     CTRolloutManager,
+    LogWrapper,
+    MPELogWrapper,
+    SMAXLogWrapper,
 )
 
 
@@ -665,7 +664,7 @@ def tune(default_config):
 
     default_config = {**default_config, **default_config["alg"]}  # merge the alg config with the main config
     env_name = default_config["ENV_NAME"]
-    alg_name = default_config.get("ALG_NAME", "iql_rnn") 
+    alg_name = default_config.get("ALG_NAME", "iql_rnn")
     env, env_name = env_from_config(default_config)
 
     def wrapped_make_train():

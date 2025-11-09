@@ -1,7 +1,7 @@
 '''
     A generalised implementation of JaxMARL's STORM.
 
-    NOTE: 
+    NOTE:
         - Change in the observation space:
             - Items at each location are encoded as a mixed one-hot vector;
             - Each vector is the concatenation of the following form:
@@ -25,22 +25,20 @@
                 5. "frozen" is a length-1 1 hot vector for whether the "other"
                 agent is frozen
 '''
-from enum import IntEnum
+import colorsys
 import math
-from typing import Any, Optional, Tuple, Union, Dict
+from enum import IntEnum
 from functools import partial
+from typing import Any
 
 import chex
 import jax
 import jax.numpy as jnp
 import numpy as onp
 from flax.struct import dataclass
-import colorsys
 
-from jaxmarl.environments.multi_agent_env import MultiAgentEnv
 from jaxmarl.environments import spaces
-
-
+from jaxmarl.environments.multi_agent_env import MultiAgentEnv
 from jaxmarl.environments.storm.rendering import (
     downsample,
     fill_coords,
@@ -50,6 +48,7 @@ from jaxmarl.environments.storm.rendering import (
     point_in_triangle,
     rotate_fn,
 )
+
 
 NUM_TYPES = 5  # empty (0), red (1), blue, red coin, blue coin, wall, interact
 NUM_COIN_TYPES = 2
@@ -132,7 +131,7 @@ class InTheMatrix(MultiAgentEnv):
     """
 
     # used for caching
-    tile_cache: Dict[Tuple[Any, ...], Any] = {}
+    tile_cache: dict[tuple[Any, ...], Any] = {}
 
     def __init__(
         self,
@@ -182,7 +181,7 @@ class InTheMatrix(MultiAgentEnv):
             )(
                 jnp.array(range(self.GRID_SIZE)),
                 jnp.array(range(self.GRID_SIZE))
-            ), 
+            ),
             axis=0
             )
 
@@ -194,7 +193,7 @@ class InTheMatrix(MultiAgentEnv):
             ) -> jnp.ndarray:
             '''
             Function for randomly choosing between conflicting interactions.
-            
+
             Args:
                 - key: jax PRNGKey for randomisation.
                 - conflicts: jnp.ndarray of bools where True if agent is in a
@@ -205,7 +204,7 @@ class InTheMatrix(MultiAgentEnv):
                 agent, and the element at each index is the item found at that
                 agent's respective target location in the grid.
 
-                
+
             Returns:
                 - jnp.ndarray array of final interactions, where each index is
                 an agent, and each element is caught in its interaction beam.
@@ -245,7 +244,7 @@ class InTheMatrix(MultiAgentEnv):
             ) -> jnp.ndarray:
             '''
             Function for randomly choosing between conflicting interactions.
-            
+
             Args:
                 - key: jax PRNGKey for randomisation.
                 - conflicts: jnp.ndarray of bools where True if agent is in a
@@ -256,7 +255,7 @@ class InTheMatrix(MultiAgentEnv):
                 agent, and the element at each index is the item found at that
                 agent's respective target location in the grid.
 
-                
+
             Returns:
                 - jnp.ndarray array of final interactions, where each index is
                 an agent, and each element is caught in its interaction beam.
@@ -317,7 +316,7 @@ class InTheMatrix(MultiAgentEnv):
                 conflicts_matrix,
                 step_arr
             ), step_arr)
-        
+
         def fix_interactions(
             key: jnp.ndarray,
             all_interacts: jnp.ndarray,
@@ -330,7 +329,7 @@ class InTheMatrix(MultiAgentEnv):
         ) -> jnp.ndarray:
             '''
             Function defining multi-interaction logic.
-            
+
             Args:
                 - key: jax key for randomisation
                 - all_interacts: jnp.ndarray of bools, provisional interaction
@@ -342,7 +341,7 @@ class InTheMatrix(MultiAgentEnv):
                 the element at each index is the item found at that agent's
                 respective target location in the grid.
 
-                
+
             Returns:
                 - (jnp.ndarray, jnp.ndarray) - Tuple, where index 0 contains
                 the array of the final agent interactions and index 1 contains
@@ -500,7 +499,7 @@ class InTheMatrix(MultiAgentEnv):
                 one_step, # use the one-step item list after it was filtered
                 two_step_interacts # else use two-step item after filtering
             ) * (state.freeze.max(axis=-1) <= 0)
-            
+
             # note, both arrays were
             # qualified for:
             # 1. having actually zapped,
@@ -559,11 +558,11 @@ class InTheMatrix(MultiAgentEnv):
             ) -> jnp.ndarray:
             '''
             Function to check agent collisions.
-            
+
             Args:
-                - new_agent_locs: jnp.ndarray, the agent locations at the 
+                - new_agent_locs: jnp.ndarray, the agent locations at the
                 current time step.
-                
+
             Returns:
                 - jnp.ndarray matrix of bool of agents in collision.
             '''
@@ -578,7 +577,7 @@ class InTheMatrix(MultiAgentEnv):
             )(new_agent_locs, new_agent_locs)
 
             return collisions
-        
+
         # first attempt at func - needs improvement
         # inefficient due to double-checking collisions
         def check_interaction_conflict(
@@ -586,11 +585,11 @@ class InTheMatrix(MultiAgentEnv):
             ) -> jnp.ndarray:
             '''
             Function to check conflicting interaction targets.
-            
+
             Args:
                 - items: jnp.ndarray, the agent itemss at the interaction
                 targets.
-                
+
             Returns:
                 - jnp.ndarray matrix of bool of agents in collision.
             '''
@@ -668,7 +667,7 @@ class InTheMatrix(MultiAgentEnv):
             collision_matrix: jnp.ndarray,
             agent_locs: jnp.ndarray,
             new_agent_locs: jnp.ndarray
-        ) -> Tuple[Tuple, jnp.ndarray]:
+        ) -> tuple[tuple, jnp.ndarray]:
             def select_random_true_index(key, array):
                 # Calculate the cumulative sum of True values
                 cumsum_array = jnp.cumsum(array)
@@ -713,7 +712,7 @@ class InTheMatrix(MultiAgentEnv):
             # Prepare random agent selection
             k1, k2 = jax.random.split(key, 2)
             rand_idx = select_random_true_index(k1, collisions)
-            collisions_rand = collisions.at[rand_idx].set(False) # <<<< PROBLEM LINE        
+            collisions_rand = collisions.at[rand_idx].set(False) # <<<< PROBLEM LINE
             new_locs_rand = jax.vmap(
                 lambda p, l, n: jnp.where(p, l, n)
             )(
@@ -759,7 +758,7 @@ class InTheMatrix(MultiAgentEnv):
             ) -> dict:
             '''
             Function to produce observation/state dictionaries.
-            
+
             Args:
                 - agent: int, number identifying agent
                 - obs: jnp.ndarray, the combined grid observations for each
@@ -767,7 +766,7 @@ class InTheMatrix(MultiAgentEnv):
                 - agent_invs: jnp.ndarray of current agents' inventories
                 - agent_pickups: boolean indicators of interaction
                 - inv_to_show: jnp.ndarray inventory to show to other agents
-                
+
             Returns:
                 - dictionary of full state observation.
             '''
@@ -786,7 +785,7 @@ class InTheMatrix(MultiAgentEnv):
             }
 
             return state_dict
-        
+
         def combine_channels(
                 grid: jnp.ndarray,
                 agent: int,
@@ -796,9 +795,9 @@ class InTheMatrix(MultiAgentEnv):
             ):
             '''
             Function to enforce symmetry in observations & generate final
-            feature representation; current agent is permuted to first 
+            feature representation; current agent is permuted to first
             position in the feature dimension.
-            
+
             Args:
                 - grid: jax ndarray of current agent's obs grid
                 - agent: int, an index indicating current agent number
@@ -916,7 +915,7 @@ class InTheMatrix(MultiAgentEnv):
                 )
             )(grid, angles)
             return new_grid
-        
+
         def check_relative_orientation(
                 agent: int,
                 agent_locs: jnp.ndarray,
@@ -925,12 +924,12 @@ class InTheMatrix(MultiAgentEnv):
             '''
             Check's relative orientations of all other agents in view of
             current agent.
-            
+
             Args:
                 - agent: int, an index indicating current agent number
                 - agent_locs: jax ndarray of agent locations (x, y, direction)
                 - grid: jax ndarray of current agent's obs grid
-                
+
             Returns:
                 - grid with 1) int -1 in places where no agent exists, or
                 where the agent is the current agent, and 2) int in range
@@ -960,7 +959,7 @@ class InTheMatrix(MultiAgentEnv):
             )
 
             return angle
-        
+
         def rotate_grid(agent_loc: jnp.ndarray, grid: jnp.ndarray) -> jnp.ndarray:
             '''
             Rotates agent's observation grid k * 90 degrees, depending on agent's
@@ -997,12 +996,12 @@ class InTheMatrix(MultiAgentEnv):
             Obtain the position of top-left corner of obs map using
             agent's current location & orientation.
 
-            Args: 
+            Args:
                 - agent_loc: jnp.ndarray, agent x, y, direction.
             Returns:
                 - x, y: ints of top-left corner of agent's obs map.
             '''
-            
+
             x, y, direction = agent_loc
 
             x, y = x + self.PADDING, y + self.PADDING
@@ -1019,7 +1018,7 @@ class InTheMatrix(MultiAgentEnv):
             '''
             Obtain the agent's observation of the grid.
 
-            Args: 
+            Args:
                 - state: State object containing env state.
             Returns:
                 - jnp.ndarray of grid observation.
@@ -1095,7 +1094,7 @@ class InTheMatrix(MultiAgentEnv):
             '''
             Obtain the reward for a matrix game.
 
-            Args: 
+            Args:
                 - state: State object of env.
                 - agent1: int of position of first agent in interaction
                 - agent2: int of position of first agent in interaction
@@ -1124,7 +1123,7 @@ class InTheMatrix(MultiAgentEnv):
 
         def _interact(
             key: jnp.ndarray, state: State, actions: jnp.ndarray
-        ) -> Tuple[jnp.ndarray, jnp.ndarray, State, jnp.ndarray]:
+        ) -> tuple[jnp.ndarray, jnp.ndarray, State, jnp.ndarray]:
             '''
             Main interaction logic entry point.
 
@@ -1696,7 +1695,7 @@ class InTheMatrix(MultiAgentEnv):
                 new_a_pos, new_r_pos, new_b_pos, mask, agent_idx, red_idx, blue_idx = carry
                 pos = shuffled_positions[x]
                 is_occupied = mask[x]
-                
+
                 # agent update
                 agent_needs_respawn = jnp.logical_and(agent_idx < self.num_agents, agents_to_respawn[agent_idx])
                 agent_update = jnp.logical_and(agent_needs_respawn, ~is_occupied)
@@ -1846,7 +1845,7 @@ class InTheMatrix(MultiAgentEnv):
 
             all_positions = jax.random.permutation(subkey, self.SPAWNS)
             total_items = num_agents + NUM_COIN_TYPES * self.NUM_COINS
-            
+
             agent_pos = all_positions[:num_agents]
             coin_pos = all_positions[num_agents:total_items]
 
@@ -1895,7 +1894,7 @@ class InTheMatrix(MultiAgentEnv):
 
         def reset(
             key: jnp.ndarray
-        ) -> Tuple[jnp.ndarray, State]:
+        ) -> tuple[jnp.ndarray, State]:
             state = _reset_state(key)
             obs = _get_obs(state)
             return obs, state
@@ -1946,7 +1945,7 @@ class InTheMatrix(MultiAgentEnv):
     def observation_space(self, agent:str) -> spaces.Box:
         """Observation space of the environment."""
         return self.observation_spaces[agent]
-    
+
     def state_space(self) -> spaces.Dict:
         """State space of the environment."""
         _shape = (
@@ -1955,11 +1954,11 @@ class InTheMatrix(MultiAgentEnv):
             else (self.GRID_SIZE**2 * (NUM_TYPES + 4),)
         )
         return spaces.Box(low=0, high=1, shape=_shape, dtype=jnp.uint8)
-    
+
     def render_tile(
         self,
         obj: int,
-        agent_dir: Union[int, None] = None,
+        agent_dir: int | None = None,
         agent_hat: bool = False,
         highlight: bool = False,
         tile_size: int = 32,
@@ -2108,7 +2107,7 @@ class InTheMatrix(MultiAgentEnv):
                         if agent_here[a]
                         else agent_dir
                     )
-                
+
                 agent_hat = False
                 for a in range(self.num_agents):
                     agent_hat = (

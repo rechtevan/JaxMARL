@@ -1,9 +1,9 @@
 from functools import partial
+
 import jax
 import jax.numpy as jnp
-from typing import List, Tuple
-import itertools
-from .common import ALL_DIRECTIONS, Position, Direction
+
+from .common import ALL_DIRECTIONS, Direction, Position
 
 
 def tree_select(predicate, a, b):
@@ -108,7 +108,7 @@ class OvercookedPathPlanner:
     @partial(jax.jit, static_argnums=(0,))
     def get_closest_target_pos(
         self, targets: jnp.ndarray, pos: Position, dir: Direction
-    ) -> Tuple[Position, bool]:
+    ) -> tuple[Position, bool]:
         pos_lookup_idx = self.position_to_idx[pos.y, pos.x]
 
         def _compute_min_moves():
@@ -148,7 +148,7 @@ class OvercookedPathPlanner:
     @partial(jax.jit, static_argnums=(0,))
     def get_closest_target_pos_static(
         cls, move_area: jnp.ndarray, targets: jnp.ndarray, pos: Position, dir: Direction
-    ) -> Tuple[Position, bool]:
+    ) -> tuple[Position, bool]:
 
         def _compute_min_moves(pos, dir):
             min_moves = cls._compute_min_moves(pos, dir, move_area)
@@ -165,7 +165,7 @@ class OvercookedPathPlanner:
     @staticmethod
     def _get_pos_from_min_moves_grid(
         min_moves: jnp.ndarray, targets: jnp.ndarray
-    ) -> Tuple[Position, bool]:
+    ) -> tuple[Position, bool]:
         min_moves_targets = jnp.where(targets, min_moves, jnp.inf)
 
         min_idx = jnp.argmin(min_moves_targets)

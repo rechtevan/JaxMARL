@@ -1,13 +1,14 @@
-import jax
-import jax.numpy as jnp
-import chex
-from flax.struct import dataclass
-from typing import Tuple
-from jaxmarl import make
-from jaxmarl.gridworld.ma_maze import MAMaze
 import math
 from functools import partial
+
+import chex
+import jax
+import jax.numpy as jnp
+from flax.struct import dataclass
+
 from jaxmarl.gridworld.grid_viz import GridVisualizer
+from jaxmarl.gridworld.ma_maze import MAMaze
+
 
 @dataclass
 class ArrayFixedSizeSet:
@@ -19,12 +20,12 @@ class ArrayFixedSizeSet:
 
     data: chex.Array
     capacity: int
-    array_shape: Tuple[int]
+    array_shape: tuple[int]
     size: int
     placeholder: int = 0
 
     @classmethod
-    def create(cls, array_shape: Tuple[int], capacity: int, placeholder: int = 0):
+    def create(cls, array_shape: tuple[int], capacity: int, placeholder: int = 0):
         data = jnp.zeros((capacity, *array_shape)) + placeholder
         return cls(
             data=data,
@@ -84,7 +85,7 @@ def main():
         max_action = jnp.argmax(q_values[q_index]).squeeze()
         random_action = sample_random_action(key)
         return jax.lax.cond(jnp.all(q_values[q_index] == q_values[q_index][0]), lambda: random_action, lambda: max_action)
-    
+
     def sample_action(key, obs_storage, q_values, obs):
 
         key, key_rand_action, key_optimal_action = jax.random.split(key, num=3)

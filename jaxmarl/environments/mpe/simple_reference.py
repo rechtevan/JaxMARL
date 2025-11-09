@@ -1,11 +1,13 @@
+from functools import partial
+
+import chex
 import jax
 import jax.numpy as jnp
-import chex
-from typing import Tuple, Dict
-from functools import partial
-from jaxmarl.environments.mpe.simple import SimpleMPE, State
+
 from jaxmarl.environments.mpe.default_params import *
+from jaxmarl.environments.mpe.simple import SimpleMPE, State
 from jaxmarl.environments.spaces import Box, Discrete
+
 
 # Obstacle Colours
 OBS_COLOUR = [(191, 64, 64), (64, 191, 64), (64, 64, 191)]
@@ -28,9 +30,9 @@ class SimpleReferenceMPE(SimpleMPE):
 
         dim_c = 10
 
-        agents = ["agent_{}".format(i) for i in range(num_agents)]
+        agents = [f"agent_{i}" for i in range(num_agents)]
 
-        landmarks = ["landmark {}".format(i) for i in range(num_landmarks)]
+        landmarks = [f"landmark {i}" for i in range(num_landmarks)]
 
         # Action and observation spaces
         if action_type == DISCRETE_ACT:
@@ -61,7 +63,7 @@ class SimpleReferenceMPE(SimpleMPE):
             **kwargs,
         )
 
-    def reset(self, key: chex.PRNGKey) -> Tuple[chex.Array, State]:
+    def reset(self, key: chex.PRNGKey) -> tuple[chex.Array, State]:
         key_a, key_l, key_g = jax.random.split(key, 3)
 
         p_pos = jnp.concatenate(
@@ -89,7 +91,7 @@ class SimpleReferenceMPE(SimpleMPE):
     def get_obs(
         self,
         state: State,
-    ) -> Dict[str, chex.Array]:
+    ) -> dict[str, chex.Array]:
         @partial(jax.vmap, in_axes=(0, None))
         def _common_stats(aidx: int, state: State):
             """Values needed in all observations"""
@@ -121,7 +123,7 @@ class SimpleReferenceMPE(SimpleMPE):
     @partial(jax.vmap, in_axes=[None, 0, 0])
     def _decode_discrete_action(
         self, a_idx: int, action: chex.Array
-    ) -> Tuple[chex.Array, chex.Array]:
+    ) -> tuple[chex.Array, chex.Array]:
         u = jnp.zeros((self.dim_p,))
         c = jnp.zeros((self.dim_c,))
         u_act = action % 5
@@ -133,7 +135,7 @@ class SimpleReferenceMPE(SimpleMPE):
         c = c.at[c_act].set(1.0)
         return u, c
 
-    def rewards(self, state: State) -> Dict[str, float]:
+    def rewards(self, state: State) -> dict[str, float]:
         @partial(jax.vmap, in_axes=(0, None))
         def _agent(aidx, state):
             other_idx = (aidx + 1) % 2

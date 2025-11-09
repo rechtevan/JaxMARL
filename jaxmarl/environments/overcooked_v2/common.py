@@ -1,9 +1,10 @@
-import numpy as np
-import jax.numpy as jnp
+from enum import IntEnum
+
 import chex
 import jax
-from enum import IntEnum
+import jax.numpy as jnp
 from jax.typing import ArrayLike
+
 
 MAX_INGREDIENTS = 3
 

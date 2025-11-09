@@ -1,4 +1,3 @@
-# coding=utf-8
 # Copyright 2023 The Google Research Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,15 +21,14 @@ and low rank decomposition of the attention matrix.
 # pylint: disable=invalid-name, missing-function-docstring, line-too-long
 
 import abc
-from collections.abc import Iterable  # pylint: disable=g-importing-member
 import functools
-from absl import logging
-import jax
-from jax import lax
-from jax import random
-import jax.numpy as jnp
+from collections.abc import Iterable  # pylint: disable=g-importing-member
 
+import jax
+import jax.numpy as jnp
 import numpy as onp
+from absl import logging
+from jax import lax, random
 
 
 def nonnegative_softmax_kernel_feature_creator(data,
@@ -296,7 +294,7 @@ def make_fast_generalized_attention(qkv_dim,
   return attention_fn
 
 
-class RandomMatrix(object):
+class RandomMatrix:
   r"""Abstract class providing a method for constructing 2D random arrays.
 
   Class is responsible for constructing 2D random arrays.
@@ -357,14 +355,14 @@ class GaussianOrthogonalRandomMatrix(RandomMatrix):
       multiplier = jnp.linalg.norm(
           random.normal(self.key, (self.nb_rows, self.nb_columns)), axis=1)
     elif self.scaling == 1:
-      multiplier = jnp.sqrt(float(self.nb_columns)) * jnp.ones((self.nb_rows))
+      multiplier = jnp.sqrt(float(self.nb_columns)) * jnp.ones(self.nb_rows)
     else:
       raise ValueError('Scaling must be one of {0, 1}. Was %s' % self._scaling)
 
     return jnp.matmul(jnp.diag(multiplier), final_matrix)
 
 
-class FastAttention(object):
+class FastAttention:
   r"""Abstract class providing a method for fast attention.
 
   Class is responsible for providing a method <dot_product_attention> for fast

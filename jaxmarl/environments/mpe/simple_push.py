@@ -1,15 +1,17 @@
+from functools import partial
+
+import chex
 import jax
 import jax.numpy as jnp
-import chex
-from typing import Tuple, Dict
-from functools import partial
-from jaxmarl.environments.mpe.simple import SimpleMPE, State
+
 from jaxmarl.environments.mpe.default_params import *
+from jaxmarl.environments.mpe.simple import SimpleMPE, State
 from jaxmarl.environments.spaces import Box
+
 
 # Obstacle Colours
 COLOUR_1 = jnp.array([0.1, 0.9, 0.1])
-COLOUR_2 = jnp.array([0.1, 0.1, 0.9])  
+COLOUR_2 = jnp.array([0.1, 0.1, 0.9])
 OBS_COLOUR = jnp.concatenate([COLOUR_1, COLOUR_2])
 
 
@@ -33,11 +35,11 @@ class SimplePushMPE(SimpleMPE):
 
         self.num_good_agents, self.num_adversaries = num_good_agents, num_adversaries
 
-        self.adversaries = ["adversary_{}".format(i) for i in range(num_adversaries)]
-        self.good_agents = ["agent_{}".format(i) for i in range(num_good_agents)]
+        self.adversaries = [f"adversary_{i}" for i in range(num_adversaries)]
+        self.good_agents = [f"agent_{i}" for i in range(num_good_agents)]
         agents = self.adversaries + self.good_agents
 
-        landmarks = ["landmark {}".format(i) for i in range(num_landmarks)]
+        landmarks = [f"landmark {i}" for i in range(num_landmarks)]
 
         # Action and observation spaces
         # action_spaces = {i: Box(0.0, 1.0, (5,)) for i in agents}
@@ -75,7 +77,7 @@ class SimplePushMPE(SimpleMPE):
             **kwargs,
         )
 
-    def reset(self, key: chex.PRNGKey) -> Tuple[chex.Array, State]:
+    def reset(self, key: chex.PRNGKey) -> tuple[chex.Array, State]:
         key_a, key_l, key_g = jax.random.split(key, 3)
 
         p_pos = jnp.concatenate(
@@ -100,7 +102,7 @@ class SimplePushMPE(SimpleMPE):
 
         return self.get_obs(state), state
 
-    def get_obs(self, state: State) -> Dict[str, chex.Array]:
+    def get_obs(self, state: State) -> dict[str, chex.Array]:
         @partial(jax.vmap, in_axes=(0))
         def _common_stats(aidx: int):
             """Values needed in all observations"""
@@ -135,7 +137,7 @@ class SimplePushMPE(SimpleMPE):
             agent_colour = agent_colour.at[state.goal + 1].set(0.75)
 
             return jnp.concatenate(
-                [  
+                [
                     state.p_vel[aidx].flatten(),  # 2
                     goal_rel_pos.flatten(),  # 2
                     agent_colour,
@@ -163,7 +165,7 @@ class SimplePushMPE(SimpleMPE):
     def rewards(
         self,
         state: State,
-    ) -> Dict[str, float]:
+    ) -> dict[str, float]:
         def _good(aidx):
             return -jnp.linalg.norm(
                 state.p_pos[state.goal + self.num_agents] - state.p_pos[aidx]

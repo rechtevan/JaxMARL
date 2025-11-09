@@ -2,9 +2,13 @@ import math
 
 import numpy as np
 
-from jaxmarl.viz.window import Window
 import jaxmarl.viz.grid_rendering as rendering
-from jaxmarl.environments.overcooked.common import OBJECT_TO_INDEX, COLOR_TO_INDEX, COLORS
+from jaxmarl.environments.overcooked.common import (
+	COLOR_TO_INDEX,
+	COLORS,
+	OBJECT_TO_INDEX,
+)
+from jaxmarl.viz.window import Window
 
 
 INDEX_TO_COLOR = [k for k,v in COLOR_TO_INDEX.items()]
@@ -57,7 +61,7 @@ class GridVisualizer:
 		grid = np.asarray(state.maze_map[padding:-padding,padding:-padding,:])
 		grid_offset = np.array([1,1])
 		h,w = grid.shape[:2]
-		
+
 		# === Compute highlight mask
 		highlight_mask = np.zeros(shape=(h,w), dtype=np.bool)
 
@@ -104,9 +108,7 @@ class GridVisualizer:
 		obj_type = obj[0]
 		color = INDEX_TO_COLOR[obj[1]]
 
-		if obj_type == OBJECT_TO_INDEX['wall']:
-			rendering.fill_coords(img, rendering.point_in_rect(0, 1, 0, 1), COLORS[color])
-		elif obj_type == OBJECT_TO_INDEX['goal']:
+		if obj_type == OBJECT_TO_INDEX['wall'] or obj_type == OBJECT_TO_INDEX['goal']:
 			rendering.fill_coords(img, rendering.point_in_rect(0, 1, 0, 1), COLORS[color])
 		elif obj_type == OBJECT_TO_INDEX['agent']:
 			agent_dir_idx = obj[2]
@@ -196,7 +198,7 @@ class GridVisualizer:
 
 		# Render the grid
 		for y in range(grid.shape[0]):
-			for x in range(grid.shape[1]):		
+			for x in range(grid.shape[1]):
 				obj = grid[y,x,:]
 				if obj[0] in [OBJECT_TO_INDEX['empty'], OBJECT_TO_INDEX['unseen']] \
 					and obj[2] == 0:

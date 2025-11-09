@@ -1,6 +1,6 @@
 # Contributing to JaxMARL
 
-Please help build JaxMARL into the best possible tool for the MARL community. 
+Please help build JaxMARL into the best possible tool for the MARL community.
 
 ## Contributing code
 
@@ -157,5 +157,5 @@ Signed-off-by: Your Name <your.name@bah.com>
 ## Roadmap
 
 Some improvements we would like to see implemented:
-- [x] improved RNN implementations. In the current implementation, the hidden size is dependent on "NUM_STEPS", it should be made independent. 
+- [x] improved RNN implementations. In the current implementation, the hidden size is dependent on "NUM_STEPS", it should be made independent.
 - [ ] S5 RNN architecture.

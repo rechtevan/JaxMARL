@@ -1,5 +1,11 @@
-from .grid_map import GridMapCircleAgents, GridMapPolygonAgents, GridMapBarn, GridMapPolygonAgentsSingleMap, GridMapFromBuffer
-from .map import Map
+from .grid_map import (
+    GridMapBarn,
+    GridMapCircleAgents,
+    GridMapFromBuffer,
+    GridMapPolygonAgents,
+    GridMapPolygonAgentsSingleMap,
+)
+
 
 def make_map(map_id: str, num_agents: int, rad: float, **map_kwargs) -> GridMapCircleAgents:  # note this type hint technically should be Map
 

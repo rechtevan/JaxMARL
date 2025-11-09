@@ -1,27 +1,28 @@
-""" 
+"""
 Based on PureJaxRL Implementation of PPO
 """
 
+import copy
+from collections.abc import Sequence
+from typing import NamedTuple
+
+import distrax
+import flax.linen as nn
+import hydra
 import jax
 import jax.numpy as jnp
-import flax.linen as nn
 import numpy as np
 import optax
+import wandb
 from flax.linen.initializers import constant, orthogonal
-from typing import Sequence, NamedTuple, Any
 from flax.training.train_state import TrainState
-import distrax
-from gymnax.wrappers.purerl import LogWrapper, FlattenObservationWrapper
+from gymnax.wrappers.purerl import LogWrapper
+from omegaconf import OmegaConf
+
 import jaxmarl
-from jaxmarl.wrappers.baselines import LogWrapper
 from jaxmarl.environments.overcooked import overcooked_layouts
 from jaxmarl.viz.overcooked_visualizer import OvercookedVisualizer
-import hydra
-from omegaconf import OmegaConf
-import wandb
-import copy
-
-import matplotlib.pyplot as plt
+from jaxmarl.wrappers.baselines import LogWrapper
 
 
 class CNN(nn.Module):
@@ -73,7 +74,7 @@ class ActorCritic(nn.Module):
             activation = nn.relu
         else:
             activation = nn.tanh
-        
+
         embedding = CNN(self.activation)(x)
 
         actor_mean = nn.Dense(
@@ -239,7 +240,7 @@ def make_train(config):
                 current_timestep = update_step*config["NUM_STEPS"]*config["NUM_ENVS"]
                 reward = jax.tree.map(lambda x,y: x+y*rew_shaping_anneal(current_timestep), reward, shaped_reward)
 
-                info = jax.tree.map(lambda x: x.reshape((config["NUM_ACTORS"])), info)
+                info = jax.tree.map(lambda x: x.reshape(config["NUM_ACTORS"]), info)
                 transition = Transition(
                     batchify(done, env.agents, config["NUM_ACTORS"]).squeeze(),
                     action,

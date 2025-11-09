@@ -2,14 +2,16 @@
 JaxMarl Hanabi Environment
 """
 import itertools
-import numpy as np
+from functools import partial
+
+import chex
 import jax
 import jax.numpy as jnp
+import numpy as np
 from jax import lax
-import chex
-from typing import Tuple, Dict
-from functools import partial
-from jaxmarl.environments.spaces import Discrete, Box
+
+from jaxmarl.environments.spaces import Box, Discrete
+
 from .hanabi_game import HanabiGame, State
 
 
@@ -136,21 +138,21 @@ class HanabiEnv(HanabiGame):
             self.observation_spaces = {i: Box(low=0, high=1, shape=self.obs_size) for i in self.agents}
 
     @partial(jax.jit, static_argnums=[0])
-    def reset(self, key: chex.PRNGKey) -> Tuple[Dict, State]:
+    def reset(self, key: chex.PRNGKey) -> tuple[dict, State]:
         """Reset the environment and return the initial observation."""
         state = self.reset_game(key)
         obs = self.get_obs(state, state, action=self.num_moves - 1)
         return obs, state
 
     @partial(jax.jit, static_argnums=[0])
-    def reset_from_deck(self, deck: chex.Array) -> Tuple[Dict, State]:
+    def reset_from_deck(self, deck: chex.Array) -> tuple[dict, State]:
         """Inject a deck in the game. Useful for testing."""
         state = self.reset_game_from_deck(deck)
         obs = self.get_obs(state, state, action=self.num_moves - 1)
         return obs, state
 
     @partial(jax.jit, static_argnums=[0])
-    def reset_from_deck_of_pairs(self, deck: chex.Array) -> Tuple[Dict, State]:
+    def reset_from_deck_of_pairs(self, deck: chex.Array) -> tuple[dict, State]:
         """Inject a deck from (color, rank) pairs."""
         state = self.reset_game_from_deck_of_pairs(deck)
         obs = self.get_obs(state, state, action=self.num_moves - 1)
@@ -161,8 +163,8 @@ class HanabiEnv(HanabiGame):
         self,
         key: chex.PRNGKey,
         state: State,
-        actions: Dict,
-    ) -> Tuple[chex.Array, State, Dict, Dict, Dict]:
+        actions: dict,
+    ) -> tuple[chex.Array, State, dict, dict, dict]:
         """Execute the environment step."""
 
         # get actions as array
@@ -190,7 +192,7 @@ class HanabiEnv(HanabiGame):
     @partial(jax.jit, static_argnums=[0])
     def get_obs(
         self, new_state: State, old_state: State, action: chex.Array
-    ) -> Dict:
+    ) -> dict:
         """Get all agents' observations."""
 
         # no agent-specific obs

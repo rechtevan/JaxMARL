@@ -1,11 +1,12 @@
+from functools import partial
+
+import chex
 import jax
 import jax.numpy as jnp
+from flax import struct
+
 from jaxmarl.environments.multi_agent_env import MultiAgentEnv
 from jaxmarl.environments.spaces import Discrete, MultiDiscrete
-import chex
-from flax import struct
-from typing import Tuple, Dict
-from functools import partial
 
 
 @struct.dataclass
@@ -50,7 +51,7 @@ class SwitchRiddle(MultiAgentEnv):
         self.reward_all_live = reward_all_live
 
     @partial(jax.jit, static_argnums=[0])
-    def reset(self, key: chex.PRNGKey) -> Tuple[chex.Array, State]:
+    def reset(self, key: chex.PRNGKey) -> tuple[chex.Array, State]:
         state = State(
             bulb_state=jnp.array(self.initial_bulb_state),
             agent_in_room=jax.random.randint(

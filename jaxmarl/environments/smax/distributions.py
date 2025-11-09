@@ -1,7 +1,8 @@
+from functools import partial
+
 import chex
 import jax
 import jax.numpy as jnp
-from functools import partial
 
 
 class Distribution:
@@ -141,7 +142,7 @@ class UniformUnitTypeDistribution(Distribution):
             enemy_unit_types.at[self.n_allies:].set(
                     jax.random.categorical(
                         enemy_key,
-                        jnp.log(jnp.ones((self.n_unit_types)) / self.n_unit_types),
+                        jnp.log(jnp.ones(self.n_unit_types) / self.n_unit_types),
                         shape=(self.n_enemies - self.n_allies,),
                     ).astype(jnp.uint8)
                 )

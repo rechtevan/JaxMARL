@@ -1,15 +1,15 @@
-from typing import Sequence, NamedTuple, Any
-from flax.linen.initializers import constant, orthogonal
+import time
+from collections.abc import Sequence
+
+import distrax
+import flax.linen as nn
 import jax
 import jax.numpy as jnp
-import flax.linen as nn
-from flax.training.train_state import TrainState
 import numpy as np
-import optax
-import distrax
+from flax.linen.initializers import constant, orthogonal
+
 from jaxmarl import make
-from jaxmarl.environments.smax import map_name_to_scenario, Scenario
-import time
+from jaxmarl.environments.smax import Scenario, map_name_to_scenario
 
 
 def batchify(x: dict, agent_list, num_actors):
@@ -142,7 +142,7 @@ def make_benchmark(config):
             obsv, env_state, _, _, info = jax.vmap(env.step)(
                 rng_step, env_state, env_act
             )
-            info = jax.tree.map(lambda x: x.reshape((config["NUM_ACTORS"])), info)
+            info = jax.tree.map(lambda x: x.reshape(config["NUM_ACTORS"]), info)
             runner_state = (params, env_state, obsv, rng)
             return runner_state, None
 

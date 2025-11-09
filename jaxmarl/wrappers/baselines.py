@@ -1,32 +1,34 @@
 """ Wrappers for use with jaxmarl baselines. """
 import os
-import jax
-import jax.numpy as jnp
-import chex
-import numpy as np
-from flax import struct
 from functools import partial
 
-# from gymnax.environments import environment, spaces
-from gymnax.environments.spaces import Box as BoxGymnax, Discrete as DiscreteGymnax
-from typing import Dict, Optional, List, Tuple, Union
-from jaxmarl.environments.overcooked_v2.common import DynamicObject
-from jaxmarl.environments.spaces import Box, Discrete, MultiDiscrete
-from jaxmarl.environments.multi_agent_env import MultiAgentEnv, State
-
-from safetensors.flax import save_file, load_file
+import chex
+import jax
+import jax.numpy as jnp
+import numpy as np
+from flax import struct
 from flax.traverse_util import flatten_dict, unflatten_dict
 
-def save_params(params: Dict, filename: Union[str, os.PathLike]) -> None:
+# from gymnax.environments import environment, spaces
+from gymnax.environments.spaces import Box as BoxGymnax
+from gymnax.environments.spaces import Discrete as DiscreteGymnax
+from safetensors.flax import load_file, save_file
+
+from jaxmarl.environments.multi_agent_env import MultiAgentEnv, State
+from jaxmarl.environments.overcooked_v2.common import DynamicObject
+from jaxmarl.environments.spaces import Box, Discrete, MultiDiscrete
+
+
+def save_params(params: dict, filename: str | os.PathLike) -> None:
     flattened_dict = flatten_dict(params, sep=',')
     save_file(flattened_dict, filename)
 
-def load_params(filename:Union[str, os.PathLike]) -> Dict:
+def load_params(filename:str | os.PathLike) -> dict:
     flattened_dict = load_file(filename)
     return unflatten_dict(flattened_dict, sep=",")
 
 
-class JaxMARLWrapper(object):
+class JaxMARLWrapper:
     """Base class for all jaxmarl wrappers."""
 
     def __init__(self, env: MultiAgentEnv):
@@ -62,7 +64,7 @@ class LogWrapper(JaxMARLWrapper):
         self.replace_info = replace_info
 
     @partial(jax.jit, static_argnums=(0,))
-    def reset(self, key: chex.PRNGKey) -> Tuple[chex.Array, State]:
+    def reset(self, key: chex.PRNGKey) -> tuple[chex.Array, State]:
         obs, env_state = self._env.reset(key)
         state = LogEnvState(
             env_state,
@@ -78,8 +80,8 @@ class LogWrapper(JaxMARLWrapper):
         self,
         key: chex.PRNGKey,
         state: LogEnvState,
-        action: Union[int, float],
-    ) -> Tuple[chex.Array, LogEnvState, float, bool, dict]:
+        action: int | float,
+    ) -> tuple[chex.Array, LogEnvState, float, bool, dict]:
         obs, env_state, reward, done, info = self._env.step(
             key, state.env_state, action
         )
@@ -101,7 +103,7 @@ class LogWrapper(JaxMARLWrapper):
         info["returned_episode_lengths"] = state.returned_episode_lengths
         info["returned_episode"] = jnp.full((self._env.num_agents,), ep_done)
         return obs, state, reward, done, info
-    
+
 @struct.dataclass
 class OvercookedV2LogEnvState:
     env_state: State
@@ -109,7 +111,7 @@ class OvercookedV2LogEnvState:
     episode_lengths: int
     returned_episode_returns: float
     returned_episode_lengths: int
-    returned_episode_recipe_returns: Dict[str, float]
+    returned_episode_recipe_returns: dict[str, float]
 
 
 class OvercookedV2LogWrapper(JaxMARLWrapper):
@@ -125,7 +127,7 @@ class OvercookedV2LogWrapper(JaxMARLWrapper):
         }
 
     @partial(jax.jit, static_argnums=(0,))
-    def reset(self, key: chex.PRNGKey) -> Tuple[chex.Array, State]:
+    def reset(self, key: chex.PRNGKey) -> tuple[chex.Array, State]:
         obs, env_state = self._env.reset(key)
 
         recipe_returns = {
@@ -147,8 +149,8 @@ class OvercookedV2LogWrapper(JaxMARLWrapper):
         self,
         key: chex.PRNGKey,
         state: OvercookedV2LogEnvState,
-        action: Union[int, float],
-    ) -> Tuple[chex.Array, LogEnvState, float, bool, dict]:
+        action: int | float,
+    ) -> tuple[chex.Array, LogEnvState, float, bool, dict]:
         obs, env_state, reward, done, info = self._env.step(
             key, state.env_state, action
         )
@@ -189,14 +191,14 @@ class OvercookedV2LogWrapper(JaxMARLWrapper):
 class MPELogWrapper(LogWrapper):
     """ Times reward signal by number of agents within the environment,
     to match the on-policy codebase. """
-    
+
     @partial(jax.jit, static_argnums=(0,))
     def step(
         self,
         key: chex.PRNGKey,
         state: LogEnvState,
-        action: Union[int, float],
-    ) -> Tuple[chex.Array, LogEnvState, float, bool, dict]:
+        action: int | float,
+    ) -> tuple[chex.Array, LogEnvState, float, bool, dict]:
         obs, env_state, reward, done, info = self._env.step(
             key, state.env_state, action
         )
@@ -237,7 +239,7 @@ class SMAXLogWrapper(JaxMARLWrapper):
         self.replace_info = replace_info
 
     @partial(jax.jit, static_argnums=(0,))
-    def reset(self, key: chex.PRNGKey) -> Tuple[chex.Array, State]:
+    def reset(self, key: chex.PRNGKey) -> tuple[chex.Array, State]:
         obs, env_state = self._env.reset(key)
         state = SMAXLogEnvState(
             env_state,
@@ -255,8 +257,8 @@ class SMAXLogWrapper(JaxMARLWrapper):
         self,
         key: chex.PRNGKey,
         state: SMAXLogEnvState,
-        action: Union[int, float],
-    ) -> Tuple[chex.Array, LogEnvState, float, bool, dict]:
+        action: int | float,
+    ) -> tuple[chex.Array, LogEnvState, float, bool, dict]:
         obs, env_state, reward, done, info = self._env.step(
             key, state.env_state, action
         )
@@ -310,17 +312,17 @@ class CTRolloutManager(JaxMARLWrapper):
     - global_reward is the sum of all agents' rewards.
     """
 
-    def __init__(self, env: MultiAgentEnv, batch_size:int, training_agents:List=None, preprocess_obs:bool=True):
-        
+    def __init__(self, env: MultiAgentEnv, batch_size:int, training_agents:list=None, preprocess_obs:bool=True):
+
         super().__init__(env)
-        
+
         self.batch_size = batch_size
 
         # the agents to train could differ from the total trainable agents in the env (f.i. if using pretrained agents)
         # it's important to know it in order to compute properly the default global rewards and state
-        self.training_agents = self.agents if training_agents is None else training_agents  
-        self.preprocess_obs = preprocess_obs  
-        
+        self.training_agents = self.agents if training_agents is None else training_agents
+        self.preprocess_obs = preprocess_obs
+
         # batched action sampling
         self.batch_samplers = {agent: jax.jit(jax.vmap(self.action_space(agent).sample, in_axes=0)) for agent in self.agents}
 
@@ -349,7 +351,7 @@ class CTRolloutManager(JaxMARLWrapper):
             self.global_reward = lambda rewards: rewards[self.training_agents[0]]
             self.get_valid_actions = lambda state: jax.vmap(env.get_legal_moves)(state)
 
-    
+
     @partial(jax.jit, static_argnums=0)
     def batch_reset(self, key):
         keys = jax.random.split(key, self.batch_size)
@@ -385,17 +387,17 @@ class CTRolloutManager(JaxMARLWrapper):
     @partial(jax.jit, static_argnums=0)
     def global_state(self, obs, state):
         return jnp.concatenate([obs[agent] for agent in self.agents], axis=-1)
-    
+
     @partial(jax.jit, static_argnums=0)
     def global_reward(self, reward):
-        return jnp.stack([reward[agent] for agent in self.training_agents]).sum(axis=0) 
-    
+        return jnp.stack([reward[agent] for agent in self.training_agents]).sum(axis=0)
+
     def batch_sample(self, key, agent):
         return self.batch_samplers[agent](jax.random.split(key, self.batch_size)).astype(int)
-    
+
     @partial(jax.jit, static_argnums=0)
     def get_valid_actions(self, state):
-        # default is to return the same valid actions one hot encoded for each env 
+        # default is to return the same valid actions one hot encoded for each env
         return {agent:jnp.tile(actions, self.batch_size).reshape(self.batch_size, -1) for agent, actions in self.valid_actions_oh.items()}
 
     @partial(jax.jit, static_argnums=0)

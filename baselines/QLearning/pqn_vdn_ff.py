@@ -1,28 +1,27 @@
-import os
 import copy
-import jax
-import jax.numpy as jnp
-import numpy as np
-from functools import partial
+import os
 from typing import Any
 
 import chex
-import optax
 import flax.linen as nn
-from flax.training.train_state import TrainState
 import hydra
-from omegaconf import OmegaConf
+import jax
+import jax.numpy as jnp
+import numpy as np
+import optax
 import wandb
+from flax.training.train_state import TrainState
+from omegaconf import OmegaConf
 
 from jaxmarl import make
+from jaxmarl.environments.overcooked import overcooked_layouts
 from jaxmarl.environments.smax import map_name_to_scenario
 from jaxmarl.wrappers.baselines import (
-    SMAXLogWrapper,
-    MPELogWrapper,
-    LogWrapper,
     CTRolloutManager,
+    LogWrapper,
+    MPELogWrapper,
+    SMAXLogWrapper,
 )
-from jaxmarl.environments.overcooked import overcooked_layouts
 
 
 class QNetwork(nn.Module):

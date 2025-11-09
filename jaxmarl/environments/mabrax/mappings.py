@@ -1,5 +1,6 @@
-from typing import Dict, List, Tuple, Union
+
 import jax.numpy as jnp
+
 
 # TODO: programatically generate these mappings from the kinematic trees
 #       and add an observation distance parameter to the environment
@@ -36,7 +37,7 @@ _agent_action_mapping = {
 }
 
 
-def listerize(ranges: List[Union[int, Tuple[int, int]]]) -> List[int]:
+def listerize(ranges: list[int | tuple[int, int]]) -> list[int]:
     return [
         i
         for r in ranges
@@ -44,7 +45,7 @@ def listerize(ranges: List[Union[int, Tuple[int, int]]]) -> List[int]:
     ]
 
 
-ranges: Dict[str, Dict[str, List[Union[int, Tuple[int, int]]]]] = {
+ranges: dict[str, dict[str, list[int | tuple[int, int]]]] = {
     "ant_4x2": {
         "agent_0": [(0, 5), 6, 7, 9, 11, (13, 18), 19, 20],
         "agent_1": [(0, 5), 7, 8, 9, 11, (13, 18), 21, 22],

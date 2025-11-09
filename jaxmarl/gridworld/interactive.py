@@ -5,10 +5,10 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 
-from jaxmarl.gridworld.maze import Maze #, Actions
-from jaxmarl.gridworld.ma_maze import MAMaze
-from jaxmarl.environments.overcooked.overcooked import Overcooked
 from jaxmarl.environments.overcooked.layouts import layouts
+from jaxmarl.environments.overcooked.overcooked import Overcooked
+from jaxmarl.gridworld.ma_maze import MAMaze
+from jaxmarl.gridworld.maze import Maze  #, Actions
 
 
 def redraw(state, obs, extras):
@@ -42,7 +42,7 @@ def step(env, action, extras):
     extras['obs'] = obs
     extras['state'] = state
     print(f"reward={reward}, agent_dir={obs['agent_dir']}, agent_inv={state.agent_inv}")
-    
+
     if extras["debug"]:
         layers = [f"player_{i}_loc" for i in range(2)]
         layers.extend([f"player_{i // 4}_orientation_{i % 4}" for i in range(8)])
@@ -252,8 +252,8 @@ if __name__ == '__main__':
                 see_agent=True,
                 n_agents=2
             )
-        from jaxmarl.viz.overcooked_visualizer import OvercookedVisualizer as Visualizer
         from jaxmarl.environments.overcooked.overcooked import Actions
+        from jaxmarl.viz.overcooked_visualizer import OvercookedVisualizer as Visualizer
 
     params = env.params
 

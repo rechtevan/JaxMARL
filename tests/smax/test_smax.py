@@ -1,8 +1,9 @@
-import jax.numpy as jnp
 import jax
+import jax.numpy as jnp
+import pytest
+
 from jaxmarl import make
 from jaxmarl.environments.smax.smax_env import State
-import pytest
 
 
 def create_env(key, continuous_action=False, conic_observation=False):

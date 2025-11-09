@@ -1,17 +1,18 @@
 import dataclasses
-from jaxmarl.environments.smax.smax_env import SMAX
-from jaxmarl.environments.smax.smax_env import State as SMAXState
+from functools import partial
+
+import chex
+import jax
+import jax.numpy as jnp
+from flax.struct import dataclass
+
+from jaxmarl.environments.multi_agent_env import MultiAgentEnv
 from jaxmarl.environments.smax.heuristic_enemy import (
     create_heuristic_policy,
     get_heuristic_policy_initial_state,
 )
-from jaxmarl.environments.multi_agent_env import MultiAgentEnv
-import chex
-from typing import Dict, Optional, Tuple
-import jax.numpy as jnp
-import jax
-from flax.struct import dataclass
-from functools import partial
+from jaxmarl.environments.smax.smax_env import SMAX
+from jaxmarl.environments.smax.smax_env import State as SMAXState
 
 
 @dataclass
@@ -47,7 +48,7 @@ class EnemySMAX(MultiAgentEnv):
         return getattr(self._env, name)
 
     @partial(jax.jit, static_argnums=(0,))
-    def reset(self, key: chex.PRNGKey) -> Tuple[Dict[str, chex.Array], State]:
+    def reset(self, key: chex.PRNGKey) -> tuple[dict[str, chex.Array], State]:
         key, reset_key = jax.random.split(key)
         obs, state = self._env.reset(reset_key)
         enemy_policy_state = self.get_enemy_policy_initial_state(key)
@@ -66,7 +67,7 @@ class EnemySMAX(MultiAgentEnv):
         self,
         key: chex.PRNGKey,
         state: State,
-        actions: Dict[str, chex.Array],
+        actions: dict[str, chex.Array],
         get_state_sequence=False,
     ):
         jaxmarl_state = state.state
@@ -138,7 +139,7 @@ class EnemySMAX(MultiAgentEnv):
     def get_all_unit_obs(self, state: State):
         return self._env.get_obs(state.state)
 
-    def get_obs(self, state: State) -> Dict[str, chex.Array]:
+    def get_obs(self, state: State) -> dict[str, chex.Array]:
         obs = self.get_all_unit_obs(state)
         return {agent: obs[agent] for agent in self.agents}
 
