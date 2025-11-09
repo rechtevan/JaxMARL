@@ -74,6 +74,7 @@ class Maze(Environment):
         max_episode_steps=250,
         normalize_obs=False,
         singleton_seed=-1,
+        sample_n_walls=False,
     ):
         super().__init__()
 

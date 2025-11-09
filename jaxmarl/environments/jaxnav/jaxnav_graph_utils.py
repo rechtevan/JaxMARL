@@ -115,14 +115,14 @@ def grid_to_graph(grid):
         t_ignore = jnp.logical_or(t_border, nodes[idx])
         b_ignore = jnp.logical_or(b_border, nodes[idx])
 
-        left = l * (1 - l_ignore) + idx * (l_ignore)
-        right = r * (1 - r_ignore) + idx * (r_ignore)
-        top = t * (1 - t_ignore) + idx * (t_ignore)
-        bottom = b * (1 - b_ignore) + idx * (b_ignore)
+        left_idx = left * (1 - l_ignore) + idx * (l_ignore)
+        right_idx = r * (1 - r_ignore) + idx * (r_ignore)
+        top_idx = t * (1 - t_ignore) + idx * (t_ignore)
+        bottom_idx = b * (1 - b_ignore) + idx * (b_ignore)
 
         neighbor_mask = jnp.zeros(n, dtype=jnp.bool_)
-        # jax.debug.print('idx {x}, neigh {n}', x=idx, n=jnp.array([left, right, top, bottom]))
-        neighbor_mask = neighbor_mask.at[jnp.array([left, right, top, bottom])].set(
+        # jax.debug.print('idx {x}, neigh {n}', x=idx, n=jnp.array([left_idx, right_idx, top_idx, bottom_idx]))
+        neighbor_mask = neighbor_mask.at[jnp.array([left_idx, right_idx, top_idx, bottom_idx])].set(
             True
         )
 

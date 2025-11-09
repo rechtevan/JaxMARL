@@ -90,7 +90,7 @@ DIR_TO_VEC = jnp.array(
 )
 
 
-def make_maze_map(params, wall_map, goal_pos, agent_pos, agent_dir_idx, pad_obs=False):
+def make_maze_map(params, wall_map, goal_pos, agent_pos, agent_dir_idx, pad_obs=False, goal_color_sequence=None):
     # Expand maze map to H x W x C
     empty = jnp.array([OBJECT_TO_INDEX["empty"], 0, 0], dtype=jnp.uint8)
     wall = jnp.array(
@@ -123,7 +123,10 @@ def make_maze_map(params, wall_map, goal_pos, agent_pos, agent_dir_idx, pad_obs=
         goal_x, goal_y = goal_pos
         maze_map = maze_map.at[goal_y, goal_x, :].set(goal)
     else:
-        color_seq = jnp.array(list(GOAL_COLOR_TO_INDEX.values()))[goal_color_sequence]
+        # Use COLOR_TO_INDEX for goal colors, default to green for all goals
+        if goal_color_sequence is None:
+            goal_color_sequence = jnp.zeros(goal_pos.shape[0], dtype=jnp.int32)  # All green
+        color_seq = jnp.array(list(COLOR_TO_INDEX.values()))[goal_color_sequence]
         goals = (
             jnp.stack(
                 [jnp.array([OBJECT_TO_INDEX["goal"], color, 0]) for color in color_seq],
@@ -215,7 +218,10 @@ def make_overcooked_map(
         goal_x, goal_y = goal_pos
         maze_map = maze_map.at[goal_y, goal_x, :].set(goal)
     else:
-        color_seq = jnp.array(list(GOAL_COLOR_TO_INDEX.values()))[goal_color_sequence]
+        # Use COLOR_TO_INDEX for goal colors, default to green for all goals
+        if goal_color_sequence is None:
+            goal_color_sequence = jnp.zeros(goal_pos.shape[0], dtype=jnp.int32)  # All green
+        color_seq = jnp.array(list(COLOR_TO_INDEX.values()))[goal_color_sequence]
         goals = (
             jnp.stack(
                 [jnp.array([OBJECT_TO_INDEX["goal"], color, 0]) for color in color_seq],

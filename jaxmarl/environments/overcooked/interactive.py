@@ -91,7 +91,7 @@ def key_handler(env, extras, event):
     print("pressed", event.key)
 
     if event.key == "escape":
-        window.close()
+        extras["viz"].window.close()
         return
 
     if event.key == "backspace":
@@ -128,7 +128,7 @@ def key_handler_overcooked(env, extras, event):
     print("pressed", event.key)
 
     if event.key == "escape":
-        window.close()
+        extras["viz"].window.close()
         return
     if event.key == "backspace":
         extras["jit_reset"]((env, extras))

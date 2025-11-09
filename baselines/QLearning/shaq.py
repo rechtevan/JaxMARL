@@ -1010,10 +1010,10 @@ def make_train(config, env):
                 )
                 return jnp.where(first_episode_mask, rewards, 0.0).sum()
 
-            all_dones = dones["__all__"]
+            all_dones = _dones["__all__"]
             first_returns = jax.tree.map(
                 lambda r: jax.vmap(first_episode_returns, in_axes=1)(r, all_dones),
-                rewards,
+                _rewards,
             )
             first_infos = jax.tree.map(
                 lambda i: jax.vmap(first_episode_returns, in_axes=1)(

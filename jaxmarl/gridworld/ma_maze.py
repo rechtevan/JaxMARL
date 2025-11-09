@@ -78,6 +78,7 @@ class MAMaze(Environment):
         normalize_obs=False,
         singleton_seed=-1,
         n_agents=2,
+        sample_n_walls=False,
     ):
         super().__init__()
 

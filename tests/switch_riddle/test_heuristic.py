@@ -143,7 +143,7 @@ class TestHeuristic:
         # Case where an agent speaks
         for _ in range(100):
             key, key_reset, key_step = jax.random.split(key, 3)
-            obs, state = env.reset(key_reset)
+            _obs, state = env.reset(key_reset)
 
             actions = action_for_agent_in_room(env, state, "TELL")
             _obs, state, _reward, done, _infos = env.step_env(key_step, state, actions)
