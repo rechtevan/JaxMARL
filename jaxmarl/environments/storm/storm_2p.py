@@ -1,6 +1,6 @@
 import math
 from enum import IntEnum
-from typing import Any
+from typing import Any, ClassVar
 
 import chex
 import jax
@@ -182,7 +182,7 @@ class InTheGrid_2p(MultiAgentEnv):
     """
 
     # used for caching
-    tile_cache: dict[tuple[Any, ...], Any] = {}
+    tile_cache: ClassVar[dict[tuple[Any, ...], Any]] = {}
 
     def __init__(
         self,

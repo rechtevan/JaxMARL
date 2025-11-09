@@ -1,5 +1,6 @@
 import math
 from functools import partial
+from typing import ClassVar
 
 import imageio
 import jax
@@ -67,7 +68,7 @@ class OvercookedV2Visualizer:
     Manages a window and renders contents of EnvState instances to it.
     """
 
-    tile_cache = {}
+    tile_cache: ClassVar[dict] = {}
 
     def __init__(self, tile_size=TILE_PIXELS, subdivs=3):
         self.window = None

@@ -1,4 +1,5 @@
 from functools import partial
+from typing import ClassVar
 
 import gymnax
 import jax
@@ -9,7 +10,7 @@ class GymnaxToJaxMARL:
 
     num_agents = 1
     agent = "agent"
-    agents = [agent]
+    agents: ClassVar[list[str]] = [agent]
 
     def __init__(self, env_name: str, env_kwargs: dict | None = None):
         if env_kwargs is None:

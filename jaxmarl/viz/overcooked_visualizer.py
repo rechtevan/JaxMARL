@@ -1,4 +1,5 @@
 import math
+from typing import ClassVar
 
 import numpy as np
 
@@ -22,7 +23,7 @@ class OvercookedVisualizer:
     Manages a window and renders contents of EnvState instances to it.
     """
 
-    tile_cache = {}
+    tile_cache: ClassVar[dict] = {}
 
     def __init__(self):
         self.window = None
