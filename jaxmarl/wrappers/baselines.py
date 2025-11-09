@@ -324,7 +324,7 @@ class CTRolloutManager(JaxMARLWrapper):
         self,
         env: MultiAgentEnv,
         batch_size: int,
-        training_agents: list = None,
+        training_agents: list | None = None,
         preprocess_obs: bool = True,
     ):
         super().__init__(env)

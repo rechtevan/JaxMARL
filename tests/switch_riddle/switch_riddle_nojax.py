@@ -139,7 +139,7 @@ class SwitchRiddleNoJax:
             print(f"Reward: {self.reward[b]}")
             print()
 
-    def sample_actions(self, action_name: str = None):
+    def sample_actions(self, action_name: str | None = None):
         """
         Generates random actions for each agent in a batch.
         """

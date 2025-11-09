@@ -73,7 +73,7 @@ class OvercookedV2(MultiAgentEnv):
         negative_rewards: bool = False,
         sample_recipe_on_delivery: bool = False,
         indicate_successful_delivery: bool = False,
-        op_ingredient_permutations: list[int] = None,
+        op_ingredient_permutations: list[int] | None = None,
         initial_state_buffer: State | None = None,
         force_path_planning: bool = False,
     ):

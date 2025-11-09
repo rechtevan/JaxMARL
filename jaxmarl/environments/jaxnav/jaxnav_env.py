@@ -859,7 +859,7 @@ class JaxNav(MultiAgentEnv):
         self,
         ax: axes.Axes,
         state: State,
-        obs: dict = None,
+        obs: dict | None = None,
         lidar=True,  # plot lidar?
         agent=True,  # plot agents?
         goal=True,  # plot goals?
