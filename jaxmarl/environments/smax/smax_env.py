@@ -117,15 +117,8 @@ class SMAX(MultiAgentEnv):
         world_steps_per_env_step=8,
         time_per_step=1.0 / 16,
         scenario=None,
-        unit_type_names=[
-            "marine",
-            "marauder",
-            "stalker",
-            "zealot",
-            "zergling",
-            "hydralisk",
-        ],
-        unit_type_shorthands=["m", "M", "s", "Z", "z", "h"],
+        unit_type_names=None,
+        unit_type_shorthands=None,
         unit_type_velocities=jnp.array([3.15, 2.25, 4.13, 3.15, 4.13, 3.15]),
         unit_type_attacks=jnp.array([9.0, 10.0, 13.0, 8.0, 5.0, 12.0]),
         unit_type_attack_ranges=jnp.array([5.0, 6.0, 6.0, 2.0, 2.0, 5.0]),
@@ -143,6 +136,17 @@ class SMAX(MultiAgentEnv):
         observation_type="unit_list",
         action_type="discrete",
     ) -> None:
+        if unit_type_names is None:
+            unit_type_names = [
+                "marine",
+                "marauder",
+                "stalker",
+                "zealot",
+                "zergling",
+                "hydralisk",
+            ]
+        if unit_type_shorthands is None:
+            unit_type_shorthands = ["m", "M", "s", "Z", "z", "h"]
         self.num_allies = num_allies if scenario is None else scenario.num_allies
         self.num_enemies = num_enemies if scenario is None else scenario.num_enemies
         self.num_agents = self.num_allies + self.num_enemies

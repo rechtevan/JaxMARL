@@ -132,7 +132,7 @@ class JaxNav(MultiAgentEnv):
         dt=0.1,
         fixed_lambda=True,
         rew_lambda=0.5,  # linear interpolation between individual and team rewards
-        lambda_range=[0.0, 1.0],
+        lambda_range=None,
         goal_radius=0.5,
         goal_rew=4.0,
         weight_g=0.25,
@@ -147,6 +147,8 @@ class JaxNav(MultiAgentEnv):
         info_by_agent=True,
     ):
         super().__init__(num_agents)
+        if lambda_range is None:
+            lambda_range = [0.0, 1.0]
 
         assert rad < 1, "current code assumes radius of less than 1"
         self.rad = rad

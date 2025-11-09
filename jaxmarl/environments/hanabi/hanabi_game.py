@@ -47,9 +47,11 @@ class HanabiGame(MultiAgentEnv):
         max_info_tokens=8,
         max_life_tokens=3,
         num_cards_of_rank=np.array([3, 2, 2, 2, 1]),
-        color_map=["R", "Y", "G", "W", "B"],
+        color_map=None,
     ):
         super().__init__(num_agents)
+        if color_map is None:
+            color_map = ["R", "Y", "G", "W", "B"]
 
         self.num_agents = num_agents
         self.agent_range = jnp.arange(num_agents)

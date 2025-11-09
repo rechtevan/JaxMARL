@@ -61,9 +61,11 @@ class CoinGame(MultiAgentEnv):
         cnn: bool = False,
         egocentric: bool = False,
         shared_rewards: bool = False,
-        payoff_matrix=[[1, 1, -2], [1, 1, -2]],
+        payoff_matrix=None,
     ):
         super().__init__(num_agents=2)
+        if payoff_matrix is None:
+            payoff_matrix = [[1, 1, -2], [1, 1, -2]]
         self.agents = [str(i) for i in list(range(2))]
         self.payoff_matrix = payoff_matrix
         self.cnn = cnn
