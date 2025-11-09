@@ -1,4 +1,6 @@
+<!-- markdownlint-disable MD041 -->
 NOTE: We use effort-based-versioning
+<!-- markdownlint-enable MD041 -->
 
 ### [v0.1.0]
 
@@ -27,6 +29,6 @@ reflect this change.
 
 ### [v0.0.1]
 
-##### Added
+#### Added
 
 - base set of environments and algorithms

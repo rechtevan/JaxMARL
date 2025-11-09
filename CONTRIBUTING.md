@@ -173,7 +173,7 @@ git commit -s -m "Add coverage tracking workflow"
 
 This adds:
 
-```
+```text
 Signed-off-by: Your Name <your.name@bah.com>
 ```
 

@@ -30,7 +30,6 @@
       "MD033",
       "MD034",
       "MD035",
-      "MD036",
       "MD037",
       "MD038",
       "MD039",
@@ -43,13 +42,32 @@
       "MD046",
       "MD047",
       "MD048"
-    ]
+    ],
+    "md013": {
+      "line_length": 88,
+      "code_blocks": false,
+      "tables": false,
+      "headings": false
+    },
+    "md024": {
+      "allow_different_nesting": true
+    },
+    "md033": {
+      "allowed_elements": "details,summary,img,br,h1,h2,p,div,!--"
+    },
+    "md041": {
+      "level": 1
+    }
   },
-  "plugins.md013.line_length": 88,
-  "plugins.md013.code_blocks": false,
-  "plugins.md013.tables": false,
-  "plugins.md013.headings": false,
-  "plugins.md024.allow_different_nesting": true,
-  "plugins.md033.allowed_elements": "details,summary,img,br",
-  "plugins.md041.level": 1
+  "extensions": {
+    "front-matter": {
+      "type": "yaml",
+      "enabled": true
+    }
+  },
+  "log": {
+    "file_name": "pymarkdown.log",
+    "clear_log_handlers": true,
+    "stderr_log_level": "CRITICAL"
+  }
 }

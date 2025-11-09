@@ -20,6 +20,7 @@
 
 ## [**Installation**](#install) | [**Quick Start**](#start) | [**Environments**](#environments) | [**Algorithms**](#algorithms) | [**Citation**](#cite)
 
+<!-- markdownlint-disable MD013 -->
 <div class="collage">
     <div class="column" align="centre">
         <div class="row" align="centre">
@@ -36,6 +37,7 @@
         </div>
     </div>
 </div>
+<!-- markdownlint-enable MD013 -->
 
 ## Multi-Agent Reinforcement Learning in JAX
 
