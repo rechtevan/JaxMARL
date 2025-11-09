@@ -422,7 +422,7 @@ class GaussianOrthogonalRandomMatrix(RandomMatrix):
         elif self.scaling == 1:
             multiplier = jnp.sqrt(float(self.nb_columns)) * jnp.ones(self.nb_rows)
         else:
-            raise ValueError("Scaling must be one of {0, 1}. Was %s" % self._scaling)
+            raise ValueError("Scaling must be one of {{0, 1}}. Was {}".format(self._scaling))
 
         return jnp.matmul(jnp.diag(multiplier), final_matrix)
 

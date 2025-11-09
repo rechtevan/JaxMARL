@@ -213,15 +213,9 @@ class SimpleMPE(MultiAgentEnv):
         else:
             self.damping = DAMPING
 
-        if "contact_force" in kwargs:
-            self.contact_force = kwargs["contact_force"]
-        else:
-            self.contact_force = CONTACT_FORCE
+        self.contact_force = kwargs.get("contact_force", CONTACT_FORCE)
 
-        if "contact_margin" in kwargs:
-            self.contact_margin = kwargs["contact_margin"]
-        else:
-            self.contact_margin = CONTACT_MARGIN
+        self.contact_margin = kwargs.get("contact_margin", CONTACT_MARGIN)
 
     @partial(jax.jit, static_argnums=[0])
     def step_env(self, key: chex.PRNGKey, state: State, actions: dict):

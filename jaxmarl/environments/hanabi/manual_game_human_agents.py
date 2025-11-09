@@ -42,7 +42,7 @@ def get_user_action(player_legal_moves):
 
             print("---")
             return action
-        except:
+        except (ValueError, KeyError):
             print("Illegal action! Try again.")
 
 

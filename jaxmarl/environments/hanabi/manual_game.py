@@ -53,7 +53,7 @@ class ManualPlayer:
                     print("Invalid action.")
             except KeyboardInterrupt:
                 sys.exit(0)
-            except:
+            except (ValueError, KeyError):
                 action = 0
                 print("Invalid action.")
 

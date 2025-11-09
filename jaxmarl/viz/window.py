@@ -4,7 +4,7 @@ import sys
 # Only ask users to install matplotlib if they actually need it
 try:
     import matplotlib.pyplot as plt
-except:
+except ImportError:
     print("To display the environment in a window, please install matplotlib, eg:")
     print("pip3 install --user matplotlib")
     sys.exit(-1)

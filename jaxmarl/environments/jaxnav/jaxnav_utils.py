@@ -27,11 +27,18 @@ def unitvec(theta) -> chex.Array:
 
 def wrap(angle):
     """Ensure angle lies in the range [-pi, pi]"""
-    large = lambda x: x - 2 * jnp.pi
-    small = lambda x: x + 2 * jnp.pi
-    noChange = lambda x: x
-    wrapped_angle = jax.lax.cond(angle >= jnp.pi, large, noChange, angle)
-    wrapped_angle = jax.lax.cond(angle < -jnp.pi, small, noChange, wrapped_angle)
+    
+    def large(x):
+        return x - 2 * jnp.pi
+    
+    def small(x):
+        return x + 2 * jnp.pi
+        
+    def no_change(x):
+        return x
+        
+    wrapped_angle = jax.lax.cond(angle >= jnp.pi, large, no_change, angle)
+    wrapped_angle = jax.lax.cond(angle < -jnp.pi, small, no_change, wrapped_angle)
 
     return wrapped_angle
 

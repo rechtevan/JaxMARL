@@ -492,19 +492,19 @@ class CoinGame(MultiAgentEnv):
         )
 
         ax2 = fig.add_subplot(122)
-        ax2.text(0.0, 0.95, "Timestep: %s" % (state.inner_t))
-        ax2.text(0.0, 0.75, "Episode: %s" % (state.outer_t))
-        ax2.text(0.0, 0.45, "Red Coop: %s" % (state.red_coop[state.outer_t].sum()))
+        ax2.text(0.0, 0.95, "Timestep: {}".format(state.inner_t))
+        ax2.text(0.0, 0.75, "Episode: {}".format(state.outer_t))
+        ax2.text(0.0, 0.45, "Red Coop: {}".format(state.red_coop[state.outer_t].sum()))
         ax2.text(
             0.6,
             0.45,
-            "Red Defects : %s" % (state.red_defect[state.outer_t].sum()),
+            "Red Defects : {}".format(state.red_defect[state.outer_t].sum()),
         )
-        ax2.text(0.0, 0.25, "Blue Coop: %s" % (state.blue_coop[state.outer_t].sum()))
+        ax2.text(0.0, 0.25, "Blue Coop: {}".format(state.blue_coop[state.outer_t].sum()))
         ax2.text(
             0.6,
             0.25,
-            "Blue Defects : %s" % (state.blue_defect[state.outer_t].sum()),
+            "Blue Defects : {}".format(state.blue_defect[state.outer_t].sum()),
         )
         ax2.text(
             0.0,

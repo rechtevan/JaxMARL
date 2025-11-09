@@ -9,27 +9,34 @@ from jaxmarl.environments.mpe.simple import SimpleMPE, State
 from jaxmarl.environments.spaces import Box
 
 
-SimpleFacmacMPE3a = lambda: SimpleFacmacMPE(
-    num_good_agents=1,
-    num_adversaries=3,
-    num_landmarks=2,
-    view_radius=1.5,
-    score_function="min",
-)
-SimpleFacmacMPE6a = lambda: SimpleFacmacMPE(
-    num_good_agents=2,
-    num_adversaries=6,
-    num_landmarks=4,
-    view_radius=1.5,
-    score_function="min",
-)
-SimpleFacmacMPE9a = lambda: SimpleFacmacMPE(
-    num_good_agents=3,
-    num_adversaries=9,
-    num_landmarks=6,
-    view_radius=1.5,
-    score_function="min",
-)
+def SimpleFacmacMPE3a():
+    return SimpleFacmacMPE(
+        num_good_agents=1,
+        num_adversaries=3,
+        num_landmarks=2,
+        view_radius=1.5,
+        score_function="min",
+    )
+
+
+def SimpleFacmacMPE6a():
+    return SimpleFacmacMPE(
+        num_good_agents=2,
+        num_adversaries=6,
+        num_landmarks=4,
+        view_radius=1.5,
+        score_function="min",
+    )
+
+
+def SimpleFacmacMPE9a():
+    return SimpleFacmacMPE(
+        num_good_agents=3,
+        num_adversaries=9,
+        num_landmarks=6,
+        view_radius=1.5,
+        score_function="min",
+    )
 
 
 class SimpleFacmacMPE(SimpleMPE):

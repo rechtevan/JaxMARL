@@ -345,7 +345,7 @@ class SHAQMixer(nn.Module):
         if target:
             return jnp.sum(q_vals, axis=0)
         else:
-            if manual_alpha_estimates == None:
+            if manual_alpha_estimates is None:
                 alpha_estimates = AlphaEstimate(
                     sample_size=self.sample_size,
                     embedding_dim=self.embedding_dim,
