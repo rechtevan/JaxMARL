@@ -2,7 +2,6 @@
 
 from collections import OrderedDict
 from collections.abc import Sequence
-from typing import Tuple
 
 import chex
 import jax

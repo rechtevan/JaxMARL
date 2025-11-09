@@ -73,14 +73,14 @@ env = SimpleWorldCommMPE()
 
 # print("zoo time", zoo_time, "jax time", jax_time, "speedup", zoo_time / jax_time)
 
-zoo_per_step = max_steps / zoo_time
-jax_per_step = (max_steps * num_envs) / jax_time
+# zoo_per_step = max_steps / zoo_time
+# jax_per_step = (max_steps * num_envs) / jax_time
 
-print(
-    "zoo steps/sec",
-    zoo_per_step,
-    "jax steps/sec",
-    jax_per_step,
-    "speedup",
-    jax_per_step / zoo_per_step,
-)
+# print(
+#     "zoo steps/sec",
+#     zoo_per_step,
+#     "jax steps/sec",
+#     jax_per_step,
+#     "speedup",
+#     jax_per_step / zoo_per_step,
+# )

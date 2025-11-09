@@ -14,7 +14,6 @@ import optax
 import wandb
 from flax.linen.initializers import constant, orthogonal
 from flax.training.train_state import TrainState
-from gymnax.wrappers.purerl import LogWrapper
 from omegaconf import OmegaConf
 
 from jaxmarl import make

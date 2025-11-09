@@ -183,6 +183,7 @@ def make_overcooked_map(
     onion_pile_pos,
     pot_pos,
     pad_obs=False,
+    goal_color_sequence=None,
 ):
     # Expand maze map to H x W x C
     empty = jnp.array([OBJECT_TO_INDEX["empty"], 0, 0], dtype=jnp.uint8)
