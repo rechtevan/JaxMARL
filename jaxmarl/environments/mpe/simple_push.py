@@ -8,7 +8,6 @@ from jaxmarl.environments.mpe.default_params import (
     ADVERSARY_COLOUR,
     AGENT_COLOUR,
     DISCRETE_ACT,
-    OBS_COLOUR,
 )
 from jaxmarl.environments.mpe.simple import SimpleMPE, State
 from jaxmarl.environments.spaces import Box

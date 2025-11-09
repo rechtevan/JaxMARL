@@ -13,7 +13,6 @@ from flax import struct
 
 from jaxmarl.environments.multi_agent_env import MultiAgentEnv
 from jaxmarl.environments.mpe.default_params import (
-    ADVERSARY_COLOUR,
     AGENT_COLOUR,
     CONTACT_FORCE,
     CONTACT_MARGIN,
