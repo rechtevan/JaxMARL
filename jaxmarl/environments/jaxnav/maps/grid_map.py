@@ -231,7 +231,7 @@ class GridMapCircleAgents(Map):
                 + self.cell_half_height
             )
 
-            grid_check = self._check_grid(map_c_list, pos, rad, map_grid)
+            grid_check = jnp.any(self._check_grid_circle(map_c_list, pos, rad))
 
             map_occ = jnp.array(
                 [
@@ -341,7 +341,7 @@ class GridMapCircleAgents(Map):
         return map
 
     @partial(jax.vmap, in_axes=[None, 0, None, None])
-    def _check_grid(self, c, pos, radius):
+    def _check_grid_circle(self, c, pos, radius):
         p = jnp.clip(pos - c, -self.cell_half_height, self.cell_half_height)
         p = p + c
         return jnp.linalg.norm(p - pos) <= radius
