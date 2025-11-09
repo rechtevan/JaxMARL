@@ -195,6 +195,24 @@ module = [
 ]
 ignore_missing_imports = true
 
+# Per-module options for JAX-heavy code
+# JAX Arrays have complex type signatures that MyPy struggles with
+[[tool.mypy.overrides]]
+module = [
+    "jaxmarl.environments.*",
+    "jaxmarl.gridworld.*",
+    "jaxmarl.wrappers.*",
+    "jaxmarl.viz.*",
+    "jaxmarl.tutorials.*",
+]
+# Ignore JAX-specific type issues:
+# - index: Array indexing (JAX Arrays are indexable but MyPy doesn't recognize it)
+# - union-attr: Array.at and other JAX Array methods
+# - attr-defined: Flax struct dataclass .replace() method
+# - assignment: JAX Array type assignments
+# - arg-type: JAX/Flax function argument type mismatches
+ignore_errors = true
+
 # mdformat configuration
 [tool.mdformat]
 # Line length for markdown files
