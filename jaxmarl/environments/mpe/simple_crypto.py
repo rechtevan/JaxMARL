@@ -10,7 +10,6 @@ from jaxmarl.environments.mpe.default_params import (
     AGENT_COLOUR,
     CONTINUOUS_ACT,
     DISCRETE_ACT,
-    OBS_COLOUR,
 )
 from jaxmarl.environments.mpe.simple import SimpleMPE, State
 from jaxmarl.environments.spaces import Box, Discrete
