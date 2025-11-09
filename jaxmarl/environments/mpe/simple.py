@@ -12,7 +12,18 @@ import jax.numpy as jnp
 from flax import struct
 
 from jaxmarl.environments.multi_agent_env import MultiAgentEnv
-from jaxmarl.environments.mpe.default_params import *
+from jaxmarl.environments.mpe.default_params import (
+    ADVERSARY_COLOUR,
+    AGENT_COLOUR,
+    CONTACT_FORCE,
+    CONTACT_MARGIN,
+    CONTINUOUS_ACT,
+    DAMPING,
+    DISCRETE_ACT,
+    DT,
+    MAX_STEPS,
+    OBS_COLOUR,
+)
 from jaxmarl.environments.spaces import Box, Discrete
 
 

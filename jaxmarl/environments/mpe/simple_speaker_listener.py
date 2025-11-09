@@ -2,7 +2,13 @@ import chex
 import jax
 import jax.numpy as jnp
 
-from jaxmarl.environments.mpe.default_params import *
+from jaxmarl.environments.mpe.default_params import (
+    ADVERSARY_COLOUR,
+    AGENT_COLOUR,
+    CONTINUOUS_ACT,
+    DISCRETE_ACT,
+    OBS_COLOUR,
+)
 from jaxmarl.environments.mpe.simple import SimpleMPE, State
 from jaxmarl.environments.spaces import Box, Discrete
 
