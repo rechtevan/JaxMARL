@@ -1,4 +1,4 @@
-from .multi_agent_env import MultiAgentEnv, State
+from .multi_agent_env import MultiAgentEnv, State  # noqa: I001
 from .coin_game import CoinGame
 from .hanabi import Hanabi
 from .jaxnav import JaxNav
