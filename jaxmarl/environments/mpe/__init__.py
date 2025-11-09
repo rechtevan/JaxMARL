@@ -14,3 +14,21 @@ from .simple_speaker_listener import SimpleSpeakerListenerMPE
 from .simple_spread import SimpleSpreadMPE
 from .simple_tag import SimpleTagMPE
 from .simple_world_comm import SimpleWorldCommMPE
+
+
+__all__ = [
+    "MPEVisualizer",
+    "SimpleAdversaryMPE",
+    "SimpleCryptoMPE",
+    "SimpleFacmacMPE",
+    "SimpleFacmacMPE3a",
+    "SimpleFacmacMPE6a",
+    "SimpleFacmacMPE9a",
+    "SimpleMPE",
+    "SimplePushMPE",
+    "SimpleReferenceMPE",
+    "SimpleSpeakerListenerMPE",
+    "SimpleSpreadMPE",
+    "SimpleTagMPE",
+    "SimpleWorldCommMPE",
+]
