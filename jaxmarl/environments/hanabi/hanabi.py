@@ -590,13 +590,13 @@ class HanabiEnv(HanabiGame):
         for i, (agent, agent_obs) in enumerate(obs.items()):
             print(f"Obs for {agent}")
             j = 0
-            print("hand feats", obs[: self.hands_n_feats])
+            print("hand feats", agent_obs[: self.hands_n_feats])
             j += self.hands_n_feats
-            print("board feats", obs[j : j + self.board_n_feats])
+            print("board feats", agent_obs[j : j + self.board_n_feats])
             j += self.board_n_feats
-            print("discard feats", obs[j : j + self.discards_n_feats])
+            print("discard feats", agent_obs[j : j + self.discards_n_feats])
             j += self.discards_n_feats
-            print("last action feats", obs[j : j + self.last_action_n_feats])
+            print("last action feats", agent_obs[j : j + self.last_action_n_feats])
             j += self.last_action_n_feats
             beliefs = obs[-self.v0_belief_n_feats :].reshape(
                 self.num_agents, self.hand_size, -1
