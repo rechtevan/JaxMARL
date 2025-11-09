@@ -795,12 +795,12 @@ class JaxNav(MultiAgentEnv):
             jnp.std(path_len, where=passable) / jnp.sqrt(jnp.sum(passable)),
             0.0,
         )
-        return dict(
-            n_walls=n_walls,
-            shortest_path_length_mean=jnp.mean(path_len, where=passable),
-            shortest_path_lengths_stderr=shortest_path_lengths_stderr,
-            passable=jnp.mean(passable),
-        )
+        return {
+            "n_walls": n_walls,
+            "shortest_path_length_mean": jnp.mean(path_len, where=passable),
+            "shortest_path_lengths_stderr": shortest_path_lengths_stderr,
+            "passable": jnp.mean(passable),
+        }
 
     ### === VISULISATION === ###
 

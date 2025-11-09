@@ -210,7 +210,7 @@ class CircleCross(JaxNavSingleton):
         top = "1 " * int(width)
         row = "1 " + "0 " * int(width - 2) + "1"
         rows = [row for _ in range(int(height) - 2)]
-        map_data = [top] + rows + [top]
+        map_data = [top, *rows, top]
 
         start_pose = []
         goal_pose = []

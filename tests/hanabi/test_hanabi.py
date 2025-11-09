@@ -61,7 +61,7 @@ def get_injected_score(deck, actions):
     def _env_step(env_state, action):
         curr_player = jnp.where(env_state.cur_player_idx == 1, size=1)[0][0]
         actions = jnp.array([20, 20]).at[curr_player].set(action)
-        actions = {agent: action for agent, action in zip(env.agents, actions)}
+        actions = dict(zip(env.agents, actions))
 
         new_obs, new_env_state, reward, done, info = env.step(
             jax.random.PRNGKey(0), env_state, actions

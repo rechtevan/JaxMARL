@@ -58,7 +58,7 @@ for n_a in agent_pop_sizes:
             ]
 
             obs, state, reward, done, info = env.step_env(
-                rng, old_state, [a for a in actions]
+                rng, old_state, list(actions)
             )
 
             print("###################")

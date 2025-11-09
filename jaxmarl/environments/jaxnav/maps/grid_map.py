@@ -816,7 +816,7 @@ class GridMapPolygonAgents(GridMapCircleAgents):
             axis=-1,
         )
         axis_by_agent_range_by_agent = axis_ranges_by_agent.reshape(
-            (self.num_agents, -1) + axis_ranges_by_agent.shape[1:]
+            (self.num_agents, -1, *axis_ranges_by_agent.shape[1:])
         )
 
         def _calc_overlaps(agent_idx, agent_axis_ranges):

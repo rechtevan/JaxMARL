@@ -115,15 +115,15 @@ parameter_sharing = False
 
 # experiment parameters (necessary if you don't want to use the CT wrapper
 max_obs_length = max(
-    list(map(lambda x: get_space_dim(x), env_jax.observation_spaces.values()))
+    [get_space_dim(x) for x in env_jax.observation_spaces.values()]
 )
 max_action_space = max(
-    list(map(lambda x: get_space_dim(x), env_jax.action_spaces.values()))
+    [get_space_dim(x) for x in env_jax.action_spaces.values()]
 )
 valid_actions = {
     a: jnp.arange(get_space_dim(u)) for a, u in env_jax.action_spaces.items()
 }
-agents_one_hot = {a: oh for a, oh in zip(env_jax.agents, jnp.eye(len(env_jax.agents)))}
+agents_one_hot = dict(zip(env_jax.agents, jnp.eye(len(env_jax.agents))))
 agent_hidden_dim = 64
 
 # agent network
@@ -131,7 +131,7 @@ if parameter_sharing:
     agent = AgentRNN(max_action_space, agent_hidden_dim)
 params = load_params(f"{pretrained_folder}/{env_name}/{alg_name}.safetensors")
 print("params keys", params.keys())
-if "agent" in params.keys():
+if "agent" in params:
     params = params["agent"]  # qmix also have mixer params
 
 
@@ -185,7 +185,7 @@ for e in tqdm.tqdm(range(num_ep)):
 
         done_zoo = {a: jnp.array([i]) for a, i in done_zoo.items()}
         done_zoo["__all__"] = jnp.all(
-            jnp.array([done_zoo[a] for a in done_zoo.keys()])
+            jnp.array([done_zoo[a] for a in done_zoo])
         )[None]
         # print('done', done_zoo)
         acts = obs_to_act(obs_zoo, done_zoo)
@@ -198,7 +198,7 @@ for e in tqdm.tqdm(range(num_ep)):
 
     ## JAX CYCLE
     done_jax = {
-        agent: jnp.ones(1, dtype=bool) for agent in env_jax.agents + ["__all__"]
+        agent: jnp.ones(1, dtype=bool) for agent in [*env_jax.agents, "__all__"]
     }
     rew_tallys_jax = np.zeros((25, len(env_jax.agents)))
 

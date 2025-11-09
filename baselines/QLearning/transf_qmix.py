@@ -439,7 +439,7 @@ def make_train(config, env):
         init_obs, env_state = wrapped_env.batch_reset(_rng)
         init_dones = {
             agent: jnp.zeros((config["NUM_ENVS"]), dtype=bool)
-            for agent in env.agents + ["__all__"]
+            for agent in [*env.agents, "__all__"]
         }
 
         # INIT BUFFER
@@ -965,7 +965,7 @@ def make_train(config, env):
             init_obs, env_state = wrapped_env.batch_reset(_rng)
             init_dones = {
                 agent: jnp.zeros((config["NUM_ENVS"]), dtype=bool)
-                for agent in env.agents + ["__all__"]
+                for agent in [*env.agents, "__all__"]
             }
 
             # update the states
@@ -1080,7 +1080,7 @@ def make_train(config, env):
             init_obs, env_state = test_env.batch_reset(_rng)
             init_dones = {
                 agent: jnp.zeros((config["NUM_TEST_EPISODES"]), dtype=bool)
-                for agent in env.agents + ["__all__"]
+                for agent in [*env.agents, "__all__"]
             }
             rng, _rng = jax.random.split(rng)
             hstate = ScannedTransformer.initialize_carry(

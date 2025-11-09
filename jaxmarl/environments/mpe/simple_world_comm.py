@@ -50,7 +50,7 @@ class SimpleWorldCommMPE(SimpleMPE):
         self.leader = "leadadversary_0"
         self.adversaries = [f"adversary_{i}" for i in range(num_adversaries - 1)]
         self.good_agents = [f"agent_{i}" for i in range(num_good_agents)]
-        agents = [self.leader] + self.adversaries + self.good_agents
+        agents = [self.leader, *self.adversaries, *self.good_agents]
 
         landmarks = (
             [f"landmark {i}" for i in range(num_obs)]
@@ -72,7 +72,7 @@ class SimpleWorldCommMPE(SimpleMPE):
             raise NotImplementedError("Action type not implemented")
 
         observation_spaces = {
-            i: Box(-jnp.inf, jnp.inf, (34,)) for i in self.adversaries + [self.leader]
+            i: Box(-jnp.inf, jnp.inf, (34,)) for i in [*self.adversaries, self.leader]
         }
         observation_spaces.update(
             {i: Box(-jnp.inf, jnp.inf, (28,)) for i in self.good_agents}

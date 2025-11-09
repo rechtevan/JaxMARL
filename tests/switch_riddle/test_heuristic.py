@@ -180,7 +180,7 @@ class TestHeuristic:
             assert d1.keys() == d2.keys(), (
                 "The dictionaries to compare have different keys"
             )
-            return all(jnp.all(d1[a] == d2[a]) for a in d1.keys())
+            return all(jnp.all(d1[a] == d2[a]) for a in d1)
 
         # Reset both environments with the same key
         obs1, state1 = env1.reset(key)

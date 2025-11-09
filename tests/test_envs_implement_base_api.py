@@ -68,7 +68,7 @@ def test_inherits_base_env(env: MultiAgentEnv):
 def test_observation_space_definition(env: MultiAgentEnv):
     assert hasattr(env, "observation_spaces"), "`observation_spaces` does  not exist"
 
-    for agent in env.observation_spaces.keys():
+    for agent in env.observation_spaces:
         assert env.observation_spaces[agent] == env.observation_space(agent)
         assert isinstance(env.observation_spaces[agent], Space), (
             f"Agent observation space {env.observation_spaces[agent]} is not a valid JaxMARL space"
@@ -78,7 +78,7 @@ def test_observation_space_definition(env: MultiAgentEnv):
 def test_action_space_definition(env: MultiAgentEnv):
     assert hasattr(env, "action_spaces"), "`action_spaces` does  not exist"
 
-    for agent in env.action_spaces.keys():
+    for agent in env.action_spaces:
         assert env.action_spaces[agent] == env.action_space(agent)
         assert isinstance(env.action_spaces[agent], Space)
 
@@ -90,7 +90,7 @@ def test_reset_returns_valid_observation(env: MultiAgentEnv):
 
     initial_obs, _ = env.reset(rng)
     # Verify that the returned observation is contained in the observation space.
-    for agent in env.observation_spaces.keys():
+    for agent in env.observation_spaces:
         print(
             f"Agent: {agent}, Observation: {initial_obs[agent]}, Space: {env.observation_spaces[agent]}"
         )
@@ -124,7 +124,7 @@ def test_step_returns_correct_format(env):
     )
 
     next_obs, next_state, reward, done, info = result
-    for agent in env.observation_spaces.keys():
+    for agent in env.observation_spaces:
         assert env.observation_spaces[agent].contains(next_obs[agent])
 
     # Check that the reward is numeric.

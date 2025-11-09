@@ -346,19 +346,17 @@ class CTRolloutManager(JaxMARLWrapper):
 
         # assumes the observations are flattened vectors
         self.max_obs_length = max(
-            list(map(lambda x: get_space_dim(x), self.observation_spaces.values()))
+            [get_space_dim(x) for x in self.observation_spaces.values()]
         )
         self.max_action_space = max(
-            list(map(lambda x: get_space_dim(x), self.action_spaces.values()))
+            [get_space_dim(x) for x in self.action_spaces.values()]
         )
         self.obs_size = self.max_obs_length
         if self.preprocess_obs:
             self.obs_size += len(self.agents)
 
         # agents ids
-        self.agents_one_hot = {
-            a: oh for a, oh in zip(self.agents, jnp.eye(len(self.agents)))
-        }
+        self.agents_one_hot = dict(zip(self.agents, jnp.eye(len(self.agents))))
         # valid actions
         self.valid_actions = {a: jnp.arange(u.n) for a, u in self.action_spaces.items()}
         self.valid_actions_oh = {

@@ -76,7 +76,7 @@ def batchify(x: dict, agent_list, num_actors):
 
     def pad(z):
         return jnp.concatenate(
-            [z, jnp.zeros(z.shape[:-1] + (max_dim - z.shape[-1],))], -1
+            [z, jnp.zeros((*z.shape[:-1], max_dim - z.shape[-1]))], -1
         )
 
     x = jnp.stack(
@@ -284,14 +284,14 @@ def make_train(config, rng_init):
                 permutation = jax.random.permutation(_rng, batch_size)
                 batch = (traj_batch, advantages, targets)
                 batch = jax.tree.map(
-                    lambda x: x.reshape((batch_size,) + x.shape[2:]), batch
+                    lambda x: x.reshape((batch_size, *x.shape[2:])), batch
                 )
                 shuffled_batch = jax.tree.map(
                     lambda x: jnp.take(x, permutation, axis=0), batch
                 )
                 minibatches = jax.tree.map(
                     lambda x: jnp.reshape(
-                        x, [config["NUM_MINIBATCHES"], -1] + list(x.shape[1:])
+                        x, [config["NUM_MINIBATCHES"], -1, *list(x.shape[1:])]
                     ),
                     shuffled_batch,
                 )

@@ -83,7 +83,7 @@ def np_state_to_jax(env_zoo, env_jax):
 def assert_same_trans(
     step, obs_zoo, rew_zoo, done_zoo, obs_jax, rew_jax, done_jax, atol=1e-4
 ):
-    for agent in obs_zoo.keys():
+    for agent in obs_zoo:
         # print(f'{agent}: obs zoo {obs_zoo[agent]} len {len(obs_zoo[agent])}, obs jax {obs_jax[agent]} len {len(obs_jax[agent])}')
         assert np.allclose(obs_zoo[agent], obs_jax[agent], atol=atol), (
             f"Step: {step}, observations for agent {agent} do not match. \nzoo obs: {obs_zoo}, \njax obs: {obs_jax}"
@@ -100,7 +100,7 @@ def assert_same_trans(
 def assert_same_state(env_zoo, env_jax, state_jax, atol=1e-4):
     state_zoo = np_state_to_jax(env_zoo, env_jax)
 
-    for k in state_zoo.keys():
+    for k in state_zoo:
         jax_value = getattr(state_jax, k)
         if k not in ["step"]:
             assert np.allclose(jax_value, state_zoo[k], atol=atol), (

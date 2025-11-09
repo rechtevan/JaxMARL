@@ -1708,7 +1708,7 @@ class InTheMatrix(MultiAgentEnv):
         # Hash map lookup key for the cache
         key: tuple[Any, ...] = (agent_dir, agent_hat, highlight, tile_size)
         if obj:
-            key = (obj, 0, 0, 0) + key if obj else key
+            key = (obj, 0, 0, 0, *key) if obj else key
 
         if key in self.tile_cache:
             return self.tile_cache[key]

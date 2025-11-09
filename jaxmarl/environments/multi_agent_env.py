@@ -30,8 +30,8 @@ class MultiAgentEnv:
             num_agents (int): maximum number of agents within the environment, used to set array dimensions
         """
         self.num_agents = num_agents
-        self.observation_spaces = dict()
-        self.action_spaces = dict()
+        self.observation_spaces = {}
+        self.action_spaces = {}
 
     @partial(jax.jit, static_argnums=(0,))
     def reset(self, key: chex.PRNGKey) -> tuple[dict[str, chex.Array], State]:

@@ -38,7 +38,7 @@ class MultiLayerLSTM(nn.RNNCellBase):
     def initialize_carry(
         self, rng: PRNGKey, batch_dims: tuple[int, ...]
     ) -> tuple[Array, Array]:
-        mem_shape = (self.num_layers,) + batch_dims + (self.features,)
+        mem_shape = (self.num_layers, *batch_dims, self.features)
         c = jnp.zeros(mem_shape)
         h = jnp.zeros(mem_shape)
         return (c, h)

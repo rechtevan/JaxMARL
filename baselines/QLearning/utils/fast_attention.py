@@ -643,7 +643,7 @@ class FastAttentionviaLowRankDecomposition(FastAttention):
             self.projection_matrix = self.draw_weights(rng)
 
         # batch_dims is  <bs, <non-attention dims>, num_heads>
-        batch_dims = tuple(onp.delete(range(n), axis + (n - 1,)))
+        batch_dims = tuple(onp.delete(range(n), (*axis, n - 1)))
         # q & k -> (bs, <non-attention dims>, num_heads, <attention dims>, channels)
         qk_perm = batch_dims + axis + (n - 1,)
         k_extra_perm = axis + batch_dims + (n - 1,)
@@ -677,9 +677,7 @@ class FastAttentionviaLowRankDecomposition(FastAttention):
         if self.unidirectional:
             index = attention_dims_t[0]
             z_slice_shape = (
-                key_prime.shape[0 : len(batch_dims_t)]
-                + (key_prime.shape[-1],)
-                + (value.shape[-1],)
+                (*key_prime.shape[0:len(batch_dims_t)], key_prime.shape[-1], value.shape[-1])
             )
 
             numerator_fn = _numerator(z_slice_shape, precision, self.lax_scan_unroll)
@@ -704,9 +702,7 @@ class FastAttentionviaLowRankDecomposition(FastAttention):
                 )
 
                 index = attention_dims_t[0]
-                t_slice_shape = key_prime.shape[0 : len(batch_dims_t)] + (
-                    key_prime.shape[-1],
-                )
+                t_slice_shape = (*key_prime.shape[0:len(batch_dims_t)], key_prime.shape[-1])
                 denominator_fn = _denominator(
                     t_slice_shape, precision, self.lax_scan_unroll
                 )

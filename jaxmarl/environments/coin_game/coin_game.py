@@ -186,7 +186,7 @@ class CoinGame(MultiAgentEnv):
                     )
                 )
                 obs = (obs1, obs2)
-                obs = {agent: obs for agent, obs in zip(self.agents, obs)}
+                obs = dict(zip(self.agents, obs))
             else:
                 obs = _abs_position(state)
 
@@ -334,35 +334,26 @@ class CoinGame(MultiAgentEnv):
                 last_state=jnp.where(reset_inner, jnp.zeros(2), last_state),
             )
 
-            obs = {
-                agent: obs
-                for agent, obs in zip(
+            obs = dict(zip(
                     self.agents,
                     [jnp.where(reset_inner, reset_obs[i], obs[i]) for i in obs],
-                )
-            }
+                ))
 
             blue_reward = jnp.where(reset_inner, 0.0, blue_reward)
             red_reward = jnp.where(reset_inner, 0.0, red_reward)
 
             if shared_rewards:
                 # shared reward (social welfare\sum of agents individual rewards)
-                rewards = {
-                    agent: reward
-                    for agent, reward in zip(
+                rewards = dict(zip(
                         self.agents,
                         (
                             sum((red_reward, blue_reward)),
                             sum((red_reward, blue_reward)),
                         ),
-                    )
-                }
+                    ))
             else:
                 # individual reward
-                rewards = {
-                    agent: reward
-                    for agent, reward in zip(self.agents, (red_reward, blue_reward))
-                }
+                rewards = dict(zip(self.agents, (red_reward, blue_reward)))
 
             dones = dict.fromkeys(self.agents, reset_inner)
             dones["__all__"] = reset_inner

@@ -906,7 +906,7 @@ class InTheGrid_2p(MultiAgentEnv):
         # Hash map lookup key for the cache
         key: tuple[Any, ...] = (agent_dir, agent_hat, highlight, tile_size)
         if obj:
-            key = (obj, 0, 0, 0) + key if obj else key
+            key = (obj, 0, 0, 0, *key) if obj else key
 
         if key in cls.tile_cache:
             return cls.tile_cache[key]

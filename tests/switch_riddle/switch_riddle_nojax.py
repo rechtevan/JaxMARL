@@ -40,7 +40,7 @@ class SwitchRiddleNoJax:
 
         # Rewards
         self.reward = [
-            dict(zip(["__all__"] + self.agents_ids, [0] * self.n_agents))
+            dict(zip(["__all__", *self.agents_ids], [0] * self.n_agents))
             for _ in range(self.bs)
         ]
 

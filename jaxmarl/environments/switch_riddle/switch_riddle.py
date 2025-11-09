@@ -116,7 +116,7 @@ class SwitchRiddle(MultiAgentEnv):
         # prepare outputs
         obs = self.get_obs(state)
         rewards = dict.fromkeys(self.agents, reward)
-        dones = dict.fromkeys(self.agents + ["__all__"], done)
+        dones = dict.fromkeys([*self.agents, "__all__"], done)
         info = {}
 
         return obs, state, rewards, dones, info

@@ -295,7 +295,7 @@ def make_train(config, env):
             init_obs, env_state = wrapped_env.batch_reset(_rng)
             init_dones = {
                 agent: jnp.zeros((config["NUM_ENVS"]), dtype=bool)
-                for agent in env.agents + ["__all__"]
+                for agent in [*env.agents, "__all__"]
             }
             init_hs = ScannedRNN.initialize_carry(
                 config["HIDDEN_SIZE"], len(env.agents), config["NUM_ENVS"]
@@ -519,7 +519,7 @@ def make_train(config, env):
             init_obs, env_state = test_env.batch_reset(_rng)
             init_dones = {
                 agent: jnp.zeros((config["TEST_NUM_ENVS"]), dtype=bool)
-                for agent in env.agents + ["__all__"]
+                for agent in [*env.agents, "__all__"]
             }
             rng, _rng = jax.random.split(rng)
             hstate = ScannedRNN.initialize_carry(

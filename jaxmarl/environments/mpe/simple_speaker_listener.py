@@ -54,7 +54,7 @@ class SimpleSpeakerListenerMPE(SimpleMPE):
             LISTENER: Box(-jnp.inf, jnp.inf, (11,)),
         }
 
-        colour = [ADVERSARY_COLOUR] + [AGENT_COLOUR] + OBS_COLOURS
+        colour = [ADVERSARY_COLOUR, AGENT_COLOUR, *OBS_COLOURS]
 
         # Parameters
         rad = jnp.concatenate(

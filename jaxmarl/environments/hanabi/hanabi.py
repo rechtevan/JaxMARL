@@ -552,8 +552,8 @@ class HanabiEnv(HanabiGame):
                     jnp.zeros(max_ranks),
                     jnp.ones(max_ranks),
                 ),
-                [x for x in n_ranks],
-                [x for x in self.num_cards_of_rank],
+                list(n_ranks),
+                list(self.num_cards_of_rank),
             )
             return jnp.concatenate(tree)
 

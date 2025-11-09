@@ -426,7 +426,7 @@ def make_train(config, env):
                         *x.shape[:2], config["NUM_MINIBATCHES"], -1, *x.shape[3:]
                     )  # num_steps, num_agents, minibatches, batch_size/num_minbatches,
                     new_order = (
-                        [2, 0, 1, 3] + list(range(4, x.ndim))
+                        [2, 0, 1, 3, *list(range(4, x.ndim))]
                     )  # (minibatches, num_steps, num_agents, batch_size/num_minbatches, ...)
                     x = jnp.transpose(x, new_order)
                     return x
@@ -532,7 +532,7 @@ def make_train(config, env):
             init_obs, env_state = test_env.batch_reset(_rng)
             init_dones = {
                 agent: jnp.zeros((config["TEST_NUM_ENVS"]), dtype=bool)
-                for agent in env.agents + ["__all__"]
+                for agent in [*env.agents, "__all__"]
             }
             rng, _rng = jax.random.split(rng)
             hstate = ScannedRNN.initialize_carry(
@@ -567,7 +567,7 @@ def make_train(config, env):
         obs, env_state = wrapped_env.batch_reset(_rng)
         init_dones = {
             agent: jnp.zeros((config["NUM_ENVS"]), dtype=bool)
-            for agent in env.agents + ["__all__"]
+            for agent in [*env.agents, "__all__"]
         }
         init_hs = ScannedRNN.initialize_carry(
             config["HIDDEN_SIZE"], len(env.agents), config["NUM_ENVS"]

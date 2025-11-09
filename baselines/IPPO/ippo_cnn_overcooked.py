@@ -355,14 +355,14 @@ def make_train(config):
                 permutation = jax.random.permutation(_rng, batch_size)
                 batch = (traj_batch, advantages, targets)
                 batch = jax.tree.map(
-                    lambda x: x.reshape((batch_size,) + x.shape[2:]), batch
+                    lambda x: x.reshape((batch_size, *x.shape[2:])), batch
                 )
                 shuffled_batch = jax.tree.map(
                     lambda x: jnp.take(x, permutation, axis=0), batch
                 )
                 minibatches = jax.tree.map(
                     lambda x: jnp.reshape(
-                        x, [config["NUM_MINIBATCHES"], -1] + list(x.shape[1:])
+                        x, [config["NUM_MINIBATCHES"], -1, *list(x.shape[1:])]
                     ),
                     shuffled_batch,
                 )

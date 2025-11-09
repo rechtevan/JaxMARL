@@ -248,7 +248,7 @@ class Maze(Environment):
         if self.params.normalize_obs:
             image = image / 10.0
 
-        obs_dict = dict(image=image, agent_dir=state.agent_dir_idx)
+        obs_dict = {"image": image, "agent_dir": state.agent_dir_idx}
 
         return OrderedDict(obs_dict)
 
