@@ -163,5 +163,5 @@ class SimpleAdversaryMPE(SimpleMPE):
             )
 
         rew = {a: _ad(i) for i, a in enumerate(self.adversaries)}
-        rew.update({a: good_rew for a in self.good_agents})
+        rew.update(dict.fromkeys(self.good_agents, good_rew))
         return rew

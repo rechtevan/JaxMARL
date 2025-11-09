@@ -27,6 +27,7 @@ from jaxmarl.wrappers.baselines import LogWrapper
 
 class CNN(nn.Module):
     activation: str = "tanh"
+
     @nn.compact
     def __call__(self, x):
         if self.activation == "relu":
@@ -121,13 +122,13 @@ def get_rollout(params, config):
     while not done:
         key, key_a0, key_a1, key_s = jax.random.split(key, 4)
 
-        obs_batch = jnp.stack([obs[a] for a in env.agents]).reshape(-1, *env.observation_space("agent_0").shape)
+        obs_batch = jnp.stack([obs[a] for a in env.agents]).reshape(
+            -1, *env.observation_space("agent_0").shape
+        )
 
         pi, value = network.apply(params, obs_batch)
         action = pi.sample(seed=key_a0)
-        env_act = unbatchify(
-            action, env.agents, 1, env.num_agents
-        )
+        env_act = unbatchify(action, env.agents, 1, env.num_agents)
 
         env_act = {k: v.squeeze() for k, v in env_act.items()}
 
@@ -164,9 +165,7 @@ def make_train(config):
     env = LogWrapper(env, replace_info=False)
 
     rew_shaping_anneal = optax.linear_schedule(
-        init_value=1.,
-        end_value=0.,
-        transition_steps=config["REW_SHAPING_HORIZON"]
+        init_value=1.0, end_value=0.0, transition_steps=config["REW_SHAPING_HORIZON"]
     )
 
     def linear_schedule(count):
@@ -178,7 +177,6 @@ def make_train(config):
         return config["LR"] * frac
 
     def train(rng):
-
         # INIT NETWORK
         network = ActorCritic(env.action_space().n, activation=config["ACTIVATION"])
         rng, _rng = jax.random.split(rng)
@@ -215,7 +213,9 @@ def make_train(config):
                 # SELECT ACTION
                 rng, _rng = jax.random.split(rng)
 
-                obs_batch = jnp.stack([last_obs[a] for a in env.agents]).reshape(-1, *env.observation_space("agent_0").shape)
+                obs_batch = jnp.stack([last_obs[a] for a in env.agents]).reshape(
+                    -1, *env.observation_space("agent_0").shape
+                )
 
                 print("input_obs_shape", obs_batch.shape)
 
@@ -237,8 +237,14 @@ def make_train(config):
                 )(rng_step, env_state, env_act)
 
                 shaped_reward = info.pop("shaped_reward")
-                current_timestep = update_step*config["NUM_STEPS"]*config["NUM_ENVS"]
-                reward = jax.tree.map(lambda x,y: x+y*rew_shaping_anneal(current_timestep), reward, shaped_reward)
+                current_timestep = (
+                    update_step * config["NUM_STEPS"] * config["NUM_ENVS"]
+                )
+                reward = jax.tree.map(
+                    lambda x, y: x + y * rew_shaping_anneal(current_timestep),
+                    reward,
+                    shaped_reward,
+                )
 
                 info = jax.tree.map(lambda x: x.reshape(config["NUM_ACTORS"]), info)
                 transition = Transition(
@@ -259,7 +265,9 @@ def make_train(config):
 
             # CALCULATE ADVANTAGE
             train_state, env_state, last_obs, update_step, rng = runner_state
-            last_obs_batch = jnp.stack([last_obs[a] for a in env.agents]).reshape(-1, *env.observation_space("agent_0").shape)
+            last_obs_batch = jnp.stack([last_obs[a] for a in env.agents]).reshape(
+                -1, *env.observation_space("agent_0").shape
+            )
             _, last_val = network.apply(train_state.params, last_obs_batch)
 
             def _calculate_gae(traj_batch, last_val):
@@ -341,9 +349,9 @@ def make_train(config):
                 train_state, traj_batch, advantages, targets, rng = update_state
                 rng, _rng = jax.random.split(rng)
                 batch_size = config["MINIBATCH_SIZE"] * config["NUM_MINIBATCHES"]
-                assert (
-                    batch_size == config["NUM_STEPS"] * config["NUM_ACTORS"]
-                ), "batch size must be equal to number of steps * number of actors"
+                assert batch_size == config["NUM_STEPS"] * config["NUM_ACTORS"], (
+                    "batch size must be equal to number of steps * number of actors"
+                )
                 permutation = jax.random.permutation(_rng, batch_size)
                 batch = (traj_batch, advantages, targets)
                 batch = jax.tree.map(
@@ -393,6 +401,7 @@ def make_train(config):
 
     return train
 
+
 def single_run(config):
     config = OmegaConf.to_container(config)
     layout_name = copy.deepcopy(config["ENV_KWARGS"]["layout"])
@@ -404,7 +413,7 @@ def single_run(config):
         tags=["IPPO", "FF"],
         config=config,
         mode=config["WANDB_MODE"],
-        name=f'ippo_cnn_overcooked_tuned_{layout_name}'
+        name=f"ippo_cnn_overcooked_tuned_{layout_name}",
     )
 
     rng = jax.random.PRNGKey(config["SEED"])
@@ -413,7 +422,7 @@ def single_run(config):
     out = jax.vmap(train_jit)(rngs)
 
     print("** Saving Results **")
-    filename = f'{config["ENV_NAME"]}_{layout_name}_seed{config["SEED"]}'
+    filename = f"{config['ENV_NAME']}_{layout_name}_seed{config['SEED']}"
     train_state = jax.tree.map(lambda x: x[0], out["runner_state"][0])
     state_seq = get_rollout(train_state.params, config)
     viz = OvercookedVisualizer()
@@ -430,7 +439,6 @@ def tune(default_config):
     layout_name = default_config["ENV_KWARGS"]["layout"]
 
     def wrapped_make_train():
-
         wandb.init(project=default_config["PROJECT"])
         # update the default params
         config = copy.deepcopy(default_config)
@@ -477,6 +485,7 @@ def main(config):
         tune(config)
     else:
         single_run(config)
+
 
 if __name__ == "__main__":
     main()

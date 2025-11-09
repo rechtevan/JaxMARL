@@ -9,12 +9,28 @@ from jaxmarl.environments.mpe.simple import SimpleMPE, State
 from jaxmarl.environments.spaces import Box
 
 
-SimpleFacmacMPE3a = lambda: SimpleFacmacMPE(num_good_agents=1, num_adversaries=3, num_landmarks=2,
-                            view_radius=1.5, score_function="min")
-SimpleFacmacMPE6a = lambda: SimpleFacmacMPE(num_good_agents=2, num_adversaries=6, num_landmarks=4,
-                            view_radius=1.5, score_function="min")
-SimpleFacmacMPE9a = lambda: SimpleFacmacMPE(num_good_agents=3, num_adversaries=9, num_landmarks=6,
-                            view_radius=1.5, score_function="min")
+SimpleFacmacMPE3a = lambda: SimpleFacmacMPE(
+    num_good_agents=1,
+    num_adversaries=3,
+    num_landmarks=2,
+    view_radius=1.5,
+    score_function="min",
+)
+SimpleFacmacMPE6a = lambda: SimpleFacmacMPE(
+    num_good_agents=2,
+    num_adversaries=6,
+    num_landmarks=4,
+    view_radius=1.5,
+    score_function="min",
+)
+SimpleFacmacMPE9a = lambda: SimpleFacmacMPE(
+    num_good_agents=3,
+    num_adversaries=9,
+    num_landmarks=6,
+    view_radius=1.5,
+    score_function="min",
+)
+
 
 class SimpleFacmacMPE(SimpleMPE):
     def __init__(
@@ -86,9 +102,7 @@ class SimpleFacmacMPE(SimpleMPE):
         )
 
         # Overwrite action and observation spaces
-        self.observation_spaces = {
-            i: Box(-jnp.inf, jnp.inf, (16,)) for i in agents
-        }
+        self.observation_spaces = {i: Box(-jnp.inf, jnp.inf, (16,)) for i in agents}
         self.action_spaces = {i: Box(0.0, 1.0, (5,)) for i in agents}
 
         # Introduce partial observability by limiting the agents' view radii
@@ -124,7 +138,7 @@ class SimpleFacmacMPE(SimpleMPE):
 
         ad_rew = 10 * jnp.sum(c)
 
-        rew = {a: ad_rew for a in self.adversaries}
+        rew = dict.fromkeys(self.adversaries, ad_rew)
         rew.update(
             {
                 a: _good(i + self.num_adversaries, c)
@@ -141,9 +155,11 @@ class SimpleFacmacMPE(SimpleMPE):
         # angle = jnp.pi * jnp.random.uniform(0, 2, n)
 
         key, _key = jax.random.split(key)
-        length = jnp.sqrt(jax.random.uniform(_key, (n,), minval=0., maxval=1.))
+        length = jnp.sqrt(jax.random.uniform(_key, (n,), minval=0.0, maxval=1.0))
         key, _key = jax.random.split(key)
-        angle = jnp.pi * jnp.sqrt(jax.random.uniform(_key, (n,), minval=0., maxval=2.))
+        angle = jnp.pi * jnp.sqrt(
+            jax.random.uniform(_key, (n,), minval=0.0, maxval=2.0)
+        )
         x = length * jnp.cos(angle)
         y = length * jnp.sin(angle)
 
@@ -161,16 +177,24 @@ class SimpleFacmacMPE(SimpleMPE):
                 delta_pos = state.p_pos[None, :, :] - proj_pos[:, None, :]
                 dist = jnp.sqrt(jnp.sum(jnp.square(delta_pos), axis=2))
                 dist_min = self.rad + self.rad[aidx]
-                scores = jnp.where((dist < dist_min[None]).sum(axis=1), scores, -9999999)
+                scores = jnp.where(
+                    (dist < dist_min[None]).sum(axis=1), scores, -9999999
+                )
                 if i == n_iter - 1:
-                    scores += dist[:, :self.num_adversaries].sum(axis=1)
+                    scores += dist[:, : self.num_adversaries].sum(axis=1)
         elif self.score_function == "min":
             proj_pos = jnp.vstack((x, y)).transpose() + state.p_pos[aidx]
-            rel_dis = jnp.sqrt(jnp.sum(jnp.square(state.p_pos[aidx] - state.p_pos[:self.num_adversaries])))
+            rel_dis = jnp.sqrt(
+                jnp.sum(
+                    jnp.square(state.p_pos[aidx] - state.p_pos[: self.num_adversaries])
+                )
+            )
             min_dist_adv_idx = jnp.argmin(rel_dis)
-            delta_pos = state.p_pos[:self.num_adversaries][None, :, :] - proj_pos[:, None, :]
+            delta_pos = (
+                state.p_pos[: self.num_adversaries][None, :, :] - proj_pos[:, None, :]
+            )
             dist = jnp.sqrt(jnp.sum(jnp.square(delta_pos), axis=2))
-            dist_min = self.rad[:self.num_adversaries] + self.rad[aidx]
+            dist_min = self.rad[: self.num_adversaries] + self.rad[aidx]
             scores = jnp.where((dist < dist_min[None]).sum(axis=1), scores, -9999999)
             scores += dist[:, min_dist_adv_idx]
         else:
@@ -178,16 +202,18 @@ class SimpleFacmacMPE(SimpleMPE):
         # move to best position
         best_idx = jnp.argmax(scores)
         chosen_action = jnp.array([x[best_idx], y[best_idx]], dtype=jnp.float32)
-        chosen_action = jax.lax.cond(scores[best_idx] < 0, lambda: chosen_action*0.0, lambda: chosen_action)
+        chosen_action = jax.lax.cond(
+            scores[best_idx] < 0, lambda: chosen_action * 0.0, lambda: chosen_action
+        )
         return chosen_action
 
     @partial(jax.jit, static_argnums=[0])
     def step_env(self, key: chex.PRNGKey, state: State, actions: dict):
         u, c = self.set_actions(actions)
         # we throw away num_good_agents now, as num_agents does not differentiate between active and passive agents
-        u = u[:-self.num_good_agents]
+        u = u[: -self.num_good_agents]
         for i in range(self.num_good_agents):
-            prey_action = self._prey_policy(key, state, u.shape[0]-1+i)
+            prey_action = self._prey_policy(key, state, u.shape[0] - 1 + i)
             u = jnp.concatenate([u, prey_action[None]], axis=0)
         if (
             c.shape[1] < self.dim_c
@@ -227,7 +253,7 @@ class SimpleFacmacMPE(SimpleMPE):
             """Values needed in all observations"""
 
             landmark_pos = (
-                    state.p_pos[self.num_agents:] - state.p_pos[aidx]
+                state.p_pos[self.num_agents :] - state.p_pos[aidx]
             )  # Landmark positions in agent reference frame
 
             # Zero out unseen agents with other_mask
@@ -236,20 +262,20 @@ class SimpleFacmacMPE(SimpleMPE):
 
             # use jnp.roll to remove ego agent from other_pos and other_vel arrays
             other_pos = jnp.roll(other_pos, shift=self.num_agents - aidx - 1, axis=0)[
-                        : self.num_agents - 1
-                        ]
+                : self.num_agents - 1
+            ]
             other_vel = jnp.roll(other_vel, shift=self.num_agents - aidx - 1, axis=0)[
-                        : self.num_agents - 1
-                        ]
+                : self.num_agents - 1
+            ]
 
             other_pos = jnp.roll(other_pos, shift=aidx, axis=0)
             other_vel = jnp.roll(other_vel, shift=aidx, axis=0)
 
             # mask out entities and other agents not in view radius of agent
-            landmark_mask = jnp.sqrt(jnp.sum(landmark_pos ** 2)) > self.view_radius[aidx]
+            landmark_mask = jnp.sqrt(jnp.sum(landmark_pos**2)) > self.view_radius[aidx]
             landmark_pos = jnp.where(landmark_mask, 0.0, landmark_pos)
 
-            other_mask = jnp.sqrt(jnp.sum(other_pos ** 2)) > self.view_radius[aidx]
+            other_mask = jnp.sqrt(jnp.sum(other_pos**2)) > self.view_radius[aidx]
             other_pos = jnp.where(other_mask, 0.0, other_pos)
             other_vel = jnp.where(other_mask, 0.0, other_vel)
 
@@ -264,7 +290,9 @@ class SimpleFacmacMPE(SimpleMPE):
                     state.p_pos[aidx].flatten(),  # 2
                     landmark_pos[aidx].flatten(),  # 5, 2
                     other_pos[aidx].flatten(),  # 5, 2
-                    jnp.zeros_like(other_vel[aidx, -1:].flatten())  # 2 - ensure same dimensionality for all agents!
+                    jnp.zeros_like(
+                        other_vel[aidx, -1:].flatten()
+                    ),  # 2 - ensure same dimensionality for all agents!
                 ]
             )
 
@@ -291,7 +319,7 @@ class SimpleFacmacMPE(SimpleMPE):
             """Values needed in all observations"""
 
             landmark_pos = (
-                    state.p_pos[self.num_agents:] - state.p_pos[aidx]
+                state.p_pos[self.num_agents :] - state.p_pos[aidx]
             )  # Landmark positions in agent reference frame
 
             # Zero out unseen agents with other_mask
@@ -300,11 +328,11 @@ class SimpleFacmacMPE(SimpleMPE):
 
             # use jnp.roll to remove ego agent from other_pos and other_vel arrays
             other_pos = jnp.roll(other_pos, shift=self.num_agents - aidx - 1, axis=0)[
-                        : self.num_agents - 1
-                        ]
+                : self.num_agents - 1
+            ]
             other_vel = jnp.roll(other_vel, shift=self.num_agents - aidx - 1, axis=0)[
-                        : self.num_agents - 1
-                        ]
+                : self.num_agents - 1
+            ]
 
             other_pos = jnp.roll(other_pos, shift=aidx, axis=0)
             other_vel = jnp.roll(other_vel, shift=aidx, axis=0)
@@ -340,11 +368,13 @@ class SimpleFacmacMPE(SimpleMPE):
         )
         return obs
 
+
 if __name__ == "__main__":
     env = SimpleFacmacMPE(0)
     vec_step_env = jax.jit(env.step_env)
     jax.jit(env.step_env)
     import jaxmarl
+
     env = jaxmarl.make("MPE_simple_pred_prey_v1")
     get_obs = jax.jit(env.get_obs)
 
@@ -357,5 +387,7 @@ if __name__ == "__main__":
     rng, _rng = jax.random.split(rng)
     rng_step = jax.random.split(_rng, num_envs)
     env_act = jnp.zeros((num_envs, 1))
-    obsv, env_state, reward, done, info = jax.vmap(env.step)(rng_step, env_state, env_act)
+    obsv, env_state, reward, done, info = jax.vmap(env.step)(
+        rng_step, env_state, env_act
+    )
     pass

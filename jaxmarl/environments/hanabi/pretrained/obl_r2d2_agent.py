@@ -16,13 +16,11 @@ from jax import numpy as jnp
 
 
 class MultiLayerLSTM(nn.RNNCellBase):
-
     num_layers: int
     features: int
 
     @compact
     def __call__(self, carry, inputs):
-
         new_hs = []
         new_cs = []
         for l in range(self.num_layers):
@@ -51,7 +49,6 @@ class MultiLayerLSTM(nn.RNNCellBase):
 
 
 class OBLAgentR2D2(nn.Module):
-
     hid_dim: int = 512
     out_dim: int = 21
     num_lstm_layer: int = 2
@@ -59,7 +56,6 @@ class OBLAgentR2D2(nn.Module):
 
     @compact
     def __call__(self, carry, inputs):
-
         priv_s, publ_s = inputs
 
         # private net
@@ -90,7 +86,6 @@ class OBLAgentR2D2(nn.Module):
 
     @partial(jax.jit, static_argnums=[0])
     def greedy_act(self, params, carry, inputs):
-
         obs, legal_move = inputs
         priv_s = obs
         publ_s = obs[..., 125:]
@@ -111,39 +106,37 @@ class OBLAgentR2D2(nn.Module):
         ).initialize_carry(rng, batch_dims)
 
 
-
 def example():
-
     from jaxmarl import make
     from jaxmarl.wrappers.baselines import load_params
 
-    weight_file = "./obl-r2d2-flax/icml_OBL1/OFF_BELIEF1_SHUFFLE_COLOR0_BZA0_BELIEF_a.safetensors"
+    weight_file = (
+        "./obl-r2d2-flax/icml_OBL1/OFF_BELIEF1_SHUFFLE_COLOR0_BZA0_BELIEF_a.safetensors"
+    )
     params = load_params(weight_file)
 
     agent = OBLAgentR2D2()
     agent_carry = agent.initialize_carry(jax.random.PRNGKey(0), batch_dims=(2,))
 
     rng = jax.random.PRNGKey(0)
-    env = make('hanabi')
+    env = make("hanabi")
     obs, env_state = env.reset(rng)
     env.render(env_state)
 
     batchify = lambda x: jnp.stack([x[agent] for agent in env.agents])
-    unbatchify = lambda x: {agent:x[i] for i, agent in enumerate(env.agents)}
+    unbatchify = lambda x: {agent: x[i] for i, agent in enumerate(env.agents)}
 
-    agent_input = (
-        batchify(obs),
-        batchify(env.get_legal_moves(env_state))
-    )
+    agent_input = (batchify(obs), batchify(env.get_legal_moves(env_state)))
     agent_carry, actions = agent.greedy_act(params, agent_carry, agent_input)
     actions = unbatchify(actions)
 
     obs, env_state, rewards, done, info = env.step(rng, env_state, actions)
 
-    print('actions:', {agent:env.action_encoding[int(a)] for agent, a in actions.items()})
+    print(
+        "actions:", {agent: env.action_encoding[int(a)] for agent, a in actions.items()}
+    )
     env.render(env_state)
+
 
 if __name__ == "__main__":
     example()
-
-

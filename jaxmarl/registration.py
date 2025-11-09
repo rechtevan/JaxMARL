@@ -118,6 +118,7 @@ def make(env_id: str, **env_kwargs):
 
     return env
 
+
 registered_envs = [
     "MPE_simple_v3",
     "MPE_simple_tag_v3",

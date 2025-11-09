@@ -163,7 +163,7 @@ class SimpleTagMPE(SimpleMPE):
 
         ad_rew = 10 * jnp.sum(c)
 
-        rew = {a: ad_rew for a in self.adversaries}
+        rew = dict.fromkeys(self.adversaries, ad_rew)
         rew.update(
             {
                 a: _good(i + self.num_adversaries, c)

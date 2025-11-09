@@ -48,9 +48,7 @@ class SimpleWorldCommMPE(SimpleMPE):
 
         # Entity names
         self.leader = "leadadversary_0"
-        self.adversaries = [
-            f"adversary_{i}" for i in range(num_adversaries - 1)
-        ]
+        self.adversaries = [f"adversary_{i}" for i in range(num_adversaries - 1)]
         self.good_agents = [f"agent_{i}" for i in range(num_good_agents)]
         agents = [self.leader] + self.adversaries + self.good_agents
 
@@ -305,7 +303,7 @@ class SimpleWorldCommMPE(SimpleMPE):
                 aidx < self.num_adversaries,
                 self.adversary_reward,
                 self.agent_reward,
-                *(aidx, state)
+                *(aidx, state),
             )
 
         r = _reward(self.agent_range, state)

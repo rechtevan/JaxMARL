@@ -85,7 +85,7 @@ class SwitchRiddleNoJax:
                         reward = self.reward_all_live
                     else:
                         reward = self.reward_all_die
-                    self.reward[b] = {k: reward for k in self.reward[b]}
+                    self.reward[b] = dict.fromkeys(self.reward[b], reward)
                     self.terminal[b] = 1
 
         self.step_count += 1

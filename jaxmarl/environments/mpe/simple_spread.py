@@ -25,7 +25,7 @@ class SimpleSpreadMPE(SimpleMPE):
         landmarks = [f"landmark {i}" for i in range(num_landmarks)]
 
         observation_spaces = {
-            i:Box(-jnp.inf, jnp.inf, (4+(num_agents-1)*4+(num_landmarks*2),))
+            i: Box(-jnp.inf, jnp.inf, (4 + (num_agents - 1) * 4 + (num_landmarks * 2),))
             for i in agents
         }
 
@@ -33,9 +33,9 @@ class SimpleSpreadMPE(SimpleMPE):
 
         # Env specific parameters
         self.local_ratio = local_ratio
-        assert (
-            self.local_ratio >= 0.0 and self.local_ratio <= 1.0
-        ), "local_ratio must be between 0.0 and 1.0"
+        assert self.local_ratio >= 0.0 and self.local_ratio <= 1.0, (
+            "local_ratio must be between 0.0 and 1.0"
+        )
 
         # Parameters
         rad = jnp.concatenate(

@@ -206,6 +206,7 @@ class Transition(NamedTuple):
     obs: jnp.ndarray
     info: jnp.ndarray
 
+
 def batchify(x: dict, agent_list, num_actors):
     x = jnp.stack([x[a] for a in agent_list])
     return x.reshape((num_actors, -1))
@@ -236,9 +237,7 @@ def make_train(config):
         update_steps = config["NUM_UPDATES"]
         warmup_steps = int(lr_warmup * update_steps)
 
-        steps_per_epoch = (
-            config["NUM_MINIBATCHES"] * config["UPDATE_EPOCHS"]
-        )
+        steps_per_epoch = config["NUM_MINIBATCHES"] * config["UPDATE_EPOCHS"]
 
         warmup_fn = optax.linear_schedule(
             init_value=0.0,
@@ -265,7 +264,6 @@ def make_train(config):
     )
 
     def train(rng):
-
         # INIT NETWORK
         network = ActorCriticRNN(env.action_space(env.agents[0]).n, config=config)
 

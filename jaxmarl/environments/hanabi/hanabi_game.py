@@ -38,7 +38,6 @@ class State:
 
 
 class HanabiGame(MultiAgentEnv):
-
     def __init__(
         self,
         num_agents=2,
@@ -64,21 +63,16 @@ class HanabiGame(MultiAgentEnv):
         self.color_map = color_map
 
         # action ranges - useful to know
-        self.discard_action_range = jnp.arange(
-            0,
-            self.hand_size
-        )
-        self.play_action_range = jnp.arange(
-            self.hand_size,
-            2 * self.hand_size
-        )
+        self.discard_action_range = jnp.arange(0, self.hand_size)
+        self.play_action_range = jnp.arange(self.hand_size, 2 * self.hand_size)
         self.color_action_range = jnp.arange(
             2 * self.hand_size,
-            2 * self.hand_size + (self.num_agents - 1) * self.num_colors
+            2 * self.hand_size + (self.num_agents - 1) * self.num_colors,
         )
         self.rank_action_range = jnp.arange(
             2 * self.hand_size + (self.num_agents - 1) * self.num_colors,
-            2 * self.hand_size + (self.num_agents - 1) * (self.num_colors + self.num_ranks)
+            2 * self.hand_size
+            + (self.num_agents - 1) * (self.num_colors + self.num_ranks),
         )
 
     @partial(jax.jit, static_argnums=[0])
@@ -211,7 +205,7 @@ class HanabiGame(MultiAgentEnv):
             info_tokens = jnp.where(
                 new_infos > 0,
                 state.info_tokens.at[new_infos - 1].set(1),
-                state.info_tokens
+                state.info_tokens,
             )
 
             # play selected card if play action
@@ -230,9 +224,7 @@ class HanabiGame(MultiAgentEnv):
             infos_depleted = infos_remaining < self.max_info_tokens
             new_infos = infos_remaining + (is_final_card * infos_depleted)
             info_tokens = jnp.where(
-                new_infos > 0,
-                info_tokens.at[new_infos - 1].set(1),
-                info_tokens
+                new_infos > 0, info_tokens.at[new_infos - 1].set(1), info_tokens
             )
 
             # increment fireworks if valid play action
@@ -257,7 +249,7 @@ class HanabiGame(MultiAgentEnv):
             life_tokens = jnp.where(
                 life_lost,
                 state.life_tokens.at[num_life_tokens - 1].set(0),
-                state.life_tokens
+                state.life_tokens,
             )
 
             # color hint knowledge removal
@@ -334,8 +326,13 @@ class HanabiGame(MultiAgentEnv):
 
             hint_player, hint_idx = self._get_target_player_and_hint_index(aidx, action)
 
-            hint_color = jnp.zeros(self.num_colors, dtype=int).at[hint_idx].set(1) * is_color_hint
-            hint_rank = jnp.zeros(self.num_ranks, dtype=int).at[hint_idx].set(1) * is_rank_hint
+            hint_color = (
+                jnp.zeros(self.num_colors, dtype=int).at[hint_idx].set(1)
+                * is_color_hint
+            )
+            hint_rank = (
+                jnp.zeros(self.num_ranks, dtype=int).at[hint_idx].set(1) * is_rank_hint
+            )
 
             # get current card knowledge of relevant player
             cur_knowledge = state.card_knowledge.at[hint_player].get()
@@ -358,14 +355,22 @@ class HanabiGame(MultiAgentEnv):
                 negative_rank_hints, self.num_ranks, axis=0
             ).reshape(cur_knowledge.shape)
 
-            color_mask = (color_hint_matches * jnp.ones((self.num_colors, self.hand_size))).transpose()
-            rank_mask = (rank_hint_matches * jnp.ones((self.num_ranks, self.hand_size))).transpose()
+            color_mask = (
+                color_hint_matches * jnp.ones((self.num_colors, self.hand_size))
+            ).transpose()
+            rank_mask = (
+                rank_hint_matches * jnp.ones((self.num_ranks, self.hand_size))
+            ).transpose()
 
-            color_hints = color_mask * (1 - hint_color * jnp.ones((self.hand_size, self.num_colors)))
+            color_hints = color_mask * (
+                1 - hint_color * jnp.ones((self.hand_size, self.num_colors))
+            )
             color_hints = jnp.repeat(color_hints, self.num_colors, axis=1).reshape(
                 cur_knowledge.shape
             )
-            rank_hints = rank_mask * (1 - hint_rank * jnp.ones((self.hand_size, self.num_ranks)))
+            rank_hints = rank_mask * (
+                1 - hint_rank * jnp.ones((self.hand_size, self.num_ranks))
+            )
             rank_hints = jnp.repeat(rank_hints, self.num_ranks, axis=0).reshape(
                 cur_knowledge.shape
             )
@@ -494,24 +499,26 @@ class HanabiGame(MultiAgentEnv):
         action_idx = jnp.where(
             is_hint_color,
             action_idx,
-            action_idx - (self.num_agents - 1) * self.num_colors
+            action_idx - (self.num_agents - 1) * self.num_colors,
         )
 
         # get the index of hint (rank/color) played
         hint_idx = jnp.where(
             is_hint_color,
             jnp.mod(action_idx, self.num_colors),
-            jnp.mod(action_idx, self.num_ranks)
+            jnp.mod(action_idx, self.num_ranks),
         )
 
         # get the player to hint.
         target_player_absolute = jnp.where(
             is_hint_color,
             jnp.floor_divide(action_idx, self.num_colors),
-            jnp.floor_divide(action_idx, self.num_ranks)
+            jnp.floor_divide(action_idx, self.num_ranks),
         )
         # adjust for the player who is hinting - wrap around
-        target_player = jnp.mod(target_player_absolute + aidx + 1, self.num_agents).astype(int)
+        target_player = jnp.mod(
+            target_player_absolute + aidx + 1, self.num_agents
+        ).astype(int)
 
         return target_player, hint_idx
 

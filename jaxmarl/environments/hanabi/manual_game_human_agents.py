@@ -8,13 +8,15 @@ from jaxmarl.environments.hanabi.hanabi import HanabiEnv
 
 FLAGS = flags.FLAGS
 
-flags.DEFINE_integer('num_players', default=2, help='Number of players playing the game.')
-flags.DEFINE_integer('seed', default=0, help='Game seed. Used for deck generation.')
+flags.DEFINE_integer(
+    "num_players", default=2, help="Number of players playing the game."
+)
+flags.DEFINE_integer("seed", default=0, help="Game seed. Used for deck generation.")
 
 flags.register_validator(
-    'num_players',
+    "num_players",
     lambda value: 2 <= value <= 5,
-    message='--num_players must be between 2 and 5'
+    message="--num_players must be between 2 and 5",
 )
 
 
@@ -71,32 +73,31 @@ def main(argv):
         print("Legal moves for current player:")
         legal_moves_encoded = {
             i: env.action_encoding[i]
-            for i, m
-            in enumerate(cur_player_legal_moves)
-            if m == 1.
+            for i, m in enumerate(cur_player_legal_moves)
+            if m == 1.0
         }
         print(legal_moves_encoded)
 
         user_action = get_user_action(cur_player_legal_moves)
 
-        actions = jnp.full(
-            env.num_agents, env.num_actions - 1
-        ).at[cur_player].set(user_action)
+        actions = (
+            jnp.full(env.num_agents, env.num_actions - 1)
+            .at[cur_player]
+            .set(user_action)
+        )
 
         rng, _rng = jax.random.split(rng)
         actions = unbatchify(actions, env.agents)
-        obs, env_state, rewards, dones, infos = env_step_jit(
-            _rng, env_state, actions
-        )
+        obs, env_state, rewards, dones, infos = env_step_jit(_rng, env_state, actions)
         print(f"Action played: {env.action_encoding[user_action]}")
 
-        score += rewards['__all__']
+        score += rewards["__all__"]
 
-        if dones['__all__']:
+        if dones["__all__"]:
             break
 
     print(f"Game ended.\nScore: {score}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run(main)

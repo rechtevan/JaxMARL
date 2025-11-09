@@ -149,7 +149,6 @@ class OvercookedPathPlanner:
     def get_closest_target_pos_static(
         cls, move_area: jnp.ndarray, targets: jnp.ndarray, pos: Position, dir: Direction
     ) -> tuple[Position, bool]:
-
         def _compute_min_moves(pos, dir):
             min_moves = cls._compute_min_moves(pos, dir, move_area)
             return cls._get_pos_from_min_moves_grid(min_moves, targets)

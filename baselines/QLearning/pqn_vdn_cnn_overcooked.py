@@ -1,6 +1,7 @@
 """
 Specific to this implementation: CNN network and Reward Shaping Annealing as per Overcooked paper.
 """
+
 import copy
 import os
 from typing import Any
@@ -32,7 +33,6 @@ class CNN(nn.Module):
 
     @nn.compact
     def __call__(self, x, train=False):
-
         activation = nn.relu
 
         if self.norm_type == "layer_norm":
@@ -74,7 +74,6 @@ class QNetwork(nn.Module):
 
     @nn.compact
     def __call__(self, x: jnp.ndarray, train=False):
-
         if self.norm_type == "layer_norm":
             normalize = lambda x: nn.LayerNorm()(x)
         elif self.norm_type == "batch_norm":
@@ -107,6 +106,7 @@ class Transition:
     avail_actions: chex.Array
     q_vals: chex.Array
 
+
 class CustomTrainState(TrainState):
     batch_stats: Any
     timesteps: int = 0
@@ -115,10 +115,9 @@ class CustomTrainState(TrainState):
 
 
 def make_train(config, env):
-
-    assert (
-        (config["NUM_ENVS"]*config["NUM_STEPS"]) % config["NUM_MINIBATCHES"] == 0
-    ), "NUM_ENVS*NUM_STEPS must be divisible by NUM_MINIBATCHES"
+    assert (config["NUM_ENVS"] * config["NUM_STEPS"]) % config[
+        "NUM_MINIBATCHES"
+    ] == 0, "NUM_ENVS*NUM_STEPS must be divisible by NUM_MINIBATCHES"
 
     config["NUM_UPDATES"] = (
         config["TOTAL_TIMESTEPS"] // config["NUM_STEPS"] // config["NUM_ENVS"]
@@ -141,7 +140,6 @@ def make_train(config, env):
 
     # epsilon-greedy exploration
     def eps_greedy_exploration(rng, q_vals, eps, valid_actions):
-
         rng_a, rng_e = jax.random.split(
             rng
         )  # a key for sampling random actions and one for picking
@@ -174,7 +172,6 @@ def make_train(config, env):
         return {agent: x[i] for i, agent in enumerate(env.agents)}
 
     def train(rng):
-
         original_seed = rng[0]
 
         # INIT ENV
@@ -227,7 +224,6 @@ def make_train(config, env):
 
         # TRAINING LOOP
         def _update_step(runner_state, unused):
-
             train_state, expl_state, test_state, rng = runner_state
 
             # SAMPLE PHASE
@@ -318,8 +314,10 @@ def make_train(config, env):
 
             def _compute_targets(last_q, q_vals, reward, done):
                 def _get_target(lambda_returns_and_next_q, rew_q_done):
-                    reward, q, done = rew_q_done # (num_envs) except for q (num_agents, num_envs, num_actions)
-                    lambda_returns, next_q = lambda_returns_and_next_q # (num_envs)
+                    reward, q, done = (
+                        rew_q_done  # (num_envs) except for q (num_agents, num_envs, num_actions)
+                    )
+                    lambda_returns, next_q = lambda_returns_and_next_q  # (num_envs)
                     target_bootstrap = reward + config["GAMMA"] * (1 - done) * next_q
                     delta = lambda_returns - next_q
                     lambda_returns = (
@@ -327,12 +325,12 @@ def make_train(config, env):
                     )
                     lambda_returns = (1 - done) * lambda_returns + done * reward
                     next_q = jnp.max(q, axis=-1)
-                    next_q = next_q.sum(axis=0) # sum over agents (vdn)
+                    next_q = next_q.sum(axis=0)  # sum over agents (vdn)
                     return (lambda_returns, next_q), lambda_returns
 
                 lambda_returns = reward[-1] + config["GAMMA"] * (1 - done[-1]) * last_q
                 last_q = jnp.max(q_vals[-1], axis=-1)
-                last_q = jnp.sum(last_q, axis=0) # sum over agents
+                last_q = jnp.sum(last_q, axis=0)  # sum over agents
                 _, targets = jax.lax.scan(
                     _get_target,
                     (lambda_returns, last_q),
@@ -342,16 +340,16 @@ def make_train(config, env):
                 targets = jnp.concatenate((targets, lambda_returns[np.newaxis]))
                 return targets
 
-            if config["NUM_STEPS"] > 1: # q-lambda returns
-                q_vals = transitions.q_vals - (1 - transitions.avail_actions) * 1e10 # mask invalid actions
+            if config["NUM_STEPS"] > 1:  # q-lambda returns
+                q_vals = (
+                    transitions.q_vals - (1 - transitions.avail_actions) * 1e10
+                )  # mask invalid actions
                 lambda_targets = _compute_targets(
                     last_q,
                     q_vals,  # vdn sum,
                     transitions.reward[:, 0],  # _all_
                     transitions.done[:, 0],  # _all_
-                ).reshape(
-                    -1
-                )  # (num_steps*num_envs)
+                ).reshape(-1)  # (num_steps*num_envs)
             else:  # standard 1 step qlearning
                 lambda_targets = (
                     transitions.reward[-1, 0]
@@ -363,7 +361,6 @@ def make_train(config, env):
                 train_state, rng = carry
 
                 def _learn_phase(carry, minibatch_and_target):
-
                     # minibatch shape: num_agents, batch_size, ...
                     # target shape: batch_size
                     # with batch_size = num_envs/num_minibatches
@@ -389,9 +386,7 @@ def make_train(config, env):
                             q_vals,
                             jnp.expand_dims(minibatch.action, axis=-1),
                             axis=-1,
-                        ).squeeze(
-                            axis=-1
-                        )  # (num_agents, batch_size,)
+                        ).squeeze(axis=-1)  # (num_agents, batch_size,)
                         vdn_chosen_action_qvals = jnp.sum(
                             chosen_action_qvals, axis=0
                         )  # (batch_size)
@@ -582,11 +577,10 @@ def env_from_config(config):
 
 
 def single_run(config):
-
     config = {**config, **config["alg"]}  # merge the alg config with the main config
     print("Config:\n", OmegaConf.to_yaml(config))
 
-    alg_name = config.get('ALG_NAME', "pqn_vdn_cnn")
+    alg_name = config.get("ALG_NAME", "pqn_vdn_cnn")
     env, env_name = env_from_config(copy.deepcopy(config))
 
     wandb.init(
@@ -609,7 +603,7 @@ def single_run(config):
     outs = jax.block_until_ready(train_vjit(rngs))
 
     # save params
-    if config.get("SAVE_PATH", None) is not None:
+    if config.get("SAVE_PATH") is not None:
         from jaxmarl.wrappers.baselines import save_params
 
         model_state = outs["runner_state"][0]
@@ -618,7 +612,7 @@ def single_run(config):
         OmegaConf.save(
             config,
             os.path.join(
-                save_dir, f'{alg_name}_{env_name}_seed{config["SEED"]}_config.yaml'
+                save_dir, f"{alg_name}_{env_name}_seed{config['SEED']}_config.yaml"
             ),
         )
 
@@ -626,7 +620,7 @@ def single_run(config):
             params = jax.tree.map(lambda x: x[i], model_state.params)
             save_path = os.path.join(
                 save_dir,
-                f'{alg_name}_{env_name}_seed{config["SEED"]}_vmap{i}.safetensors',
+                f"{alg_name}_{env_name}_seed{config['SEED']}_vmap{i}.safetensors",
             )
             save_params(params, save_path)
 

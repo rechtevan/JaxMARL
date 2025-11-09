@@ -261,12 +261,17 @@ class SMAX(MultiAgentEnv):
     def reset(self, key: chex.PRNGKey) -> tuple[dict[str, chex.Array], State]:
         """Environment-specific reset."""
         key, team_0_key, team_1_key = jax.random.split(key, num=3)
-        team_0_start = jnp.stack([jnp.array([self.map_width / 4, self.map_height / 2])] * self.num_allies)
+        team_0_start = jnp.stack(
+            [jnp.array([self.map_width / 4, self.map_height / 2])] * self.num_allies
+        )
         team_0_start_noise = jax.random.uniform(
             team_0_key, shape=(self.num_allies, 2), minval=-2, maxval=2
         )
         team_0_start = team_0_start + team_0_start_noise
-        team_1_start = jnp.stack([jnp.array([self.map_width / 4 * 3, self.map_height / 2])] * self.num_enemies)
+        team_1_start = jnp.stack(
+            [jnp.array([self.map_width / 4 * 3, self.map_height / 2])]
+            * self.num_enemies
+        )
         team_1_start_noise = jax.random.uniform(
             team_1_key, shape=(self.num_enemies, 2), minval=-2, maxval=2
         )
@@ -956,7 +961,10 @@ class SMAX(MultiAgentEnv):
         for key, state, actions in state_seq:
             states = self.step_env(key, state, actions, get_state_sequence=True)
             states = list(map(State, *dataclasses.astuple(states)))
-            viz_actions = {agent: states[0].prev_attack_actions[i] for i, agent in enumerate(self.agents)}
+            viz_actions = {
+                agent: states[0].prev_attack_actions[i]
+                for i, agent in enumerate(self.agents)
+            }
             expanded_state_seq.extend(
                 zip([key] * len(states), states, [viz_actions] * len(states))
             )

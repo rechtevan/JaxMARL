@@ -24,9 +24,9 @@ class SimplePushMPE(SimpleMPE):
         action_type=DISCRETE_ACT,
         **kwargs,
     ):
-        assert (
-            num_landmarks == 2
-        ), "SimplePushMPE only supports 2 landmarks (yes, this is a departure from the docs but follows the code)"
+        assert num_landmarks == 2, (
+            "SimplePushMPE only supports 2 landmarks (yes, this is a departure from the docs but follows the code)"
+        )
 
         dim_c = 2  # NOTE follows code rather than docs
 

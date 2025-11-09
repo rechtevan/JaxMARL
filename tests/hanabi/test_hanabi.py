@@ -11,6 +11,7 @@ from jaxmarl import make
 env = make("hanabi")
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
+
 def pad_array(arr, target_length):
     pad_size = target_length - len(arr)
     if pad_size > 0:
@@ -29,7 +30,6 @@ def get_action_sequences():
 
 
 def get_decks():
-
     color_map = dict(zip(["R", "Y", "G", "W", "B"], range(5)))
 
     def gen_cards(color, rank):
@@ -58,9 +58,7 @@ def get_scores():
 
 
 def get_injected_score(deck, actions):
-
     def _env_step(env_state, action):
-
         curr_player = jnp.where(env_state.cur_player_idx == 1, size=1)[0][0]
         actions = jnp.array([20, 20]).at[curr_player].set(action)
         actions = {agent: action for agent, action in zip(env.agents, actions)}
@@ -91,19 +89,20 @@ def test_injected_decks():
     This tests consists in injecting in the Hanabi environment a set of decks and actions that are known to produce a certain score.
     The test checks if the scores produced by the environment are the same as the expected ones.
     """
-    print('Hanabi Test: test_injected_decks')
+    print("Hanabi Test: test_injected_decks")
     actions_seq = get_action_sequences()
     decks = get_decks()
     true_scores = get_scores()
     scores = jax.jit(jax.vmap(get_injected_score))(decks, actions_seq)
-    assert (
-        true_scores == scores
-    ).all(), "The injected decks-actions didn't produce the expeceted scores"
+    assert (true_scores == scores).all(), (
+        "The injected decks-actions didn't produce the expeceted scores"
+    )
     print("Test passed")
 
 
 def main():
     test_injected_decks()
+
 
 if __name__ == "__main__":
     main()

@@ -1,4 +1,3 @@
-
 import chex
 import jax
 import jax.numpy as jnp
@@ -13,6 +12,7 @@ LISTENER = "listener_0"
 AGENT_NAMES = [SPEAKER, LISTENER]
 
 OBS_COLOURS = [(166, 38, 38), (38, 166, 38), (38, 38, 166)]
+
 
 class SimpleSpeakerListenerMPE(SimpleMPE):
     def __init__(
@@ -54,11 +54,7 @@ class SimpleSpeakerListenerMPE(SimpleMPE):
             LISTENER: Box(-jnp.inf, jnp.inf, (11,)),
         }
 
-        colour = (
-            [ADVERSARY_COLOUR]
-            + [AGENT_COLOUR]
-            + OBS_COLOURS
-        )
+        colour = [ADVERSARY_COLOUR] + [AGENT_COLOUR] + OBS_COLOURS
 
         # Parameters
         rad = jnp.concatenate(
@@ -160,7 +156,7 @@ class SimpleSpeakerListenerMPE(SimpleMPE):
         r = -1 * jnp.sum(
             jnp.square(state.p_pos[1] - state.p_pos[state.goal + self.num_agents])
         )
-        return {a: r for a in self.agents}
+        return dict.fromkeys(self.agents, r)
 
     def get_obs(self, state: State) -> dict[str, chex.Array]:
         goal_colour = jnp.full((3,), 0.15)

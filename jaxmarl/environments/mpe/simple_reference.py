@@ -12,6 +12,7 @@ from jaxmarl.environments.spaces import Box, Discrete
 # Obstacle Colours
 OBS_COLOUR = [(191, 64, 64), (64, 191, 64), (64, 64, 191)]
 
+
 class SimpleReferenceMPE(SimpleMPE):
     def __init__(
         self,

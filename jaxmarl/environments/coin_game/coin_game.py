@@ -1,10 +1,9 @@
-
 import chex
 import jax
 import jax.numpy as jnp
 
-from jaxmarl.environments import spaces
 from jaxmarl.environments.multi_agent_env import MultiAgentEnv
+from jaxmarl.environments import spaces
 
 
 @chex.dataclass
@@ -64,7 +63,6 @@ class CoinGame(MultiAgentEnv):
         shared_rewards: bool = False,
         payoff_matrix=[[1, 1, -2], [1, 1, -2]],
     ):
-
         super().__init__(num_agents=2)
         self.agents = [str(i) for i in list(range(2))]
         self.payoff_matrix = payoff_matrix
@@ -104,15 +102,15 @@ class CoinGame(MultiAgentEnv):
             convention_2 = jnp.where(a2 > 0, a2, state.last_state[1])
 
             idx = state2idx(state.last_state)
-            counter = state.counter + jnp.zeros_like(
-                state.counter, dtype=jnp.int16
-            ).at[idx].set(1)
-            coop1 = state.coop1 + jnp.zeros_like(
-                state.counter, dtype=jnp.int16
-            ).at[idx].set(rr)
-            coop2 = state.coop2 + jnp.zeros_like(
-                state.counter, dtype=jnp.int16
-            ).at[idx].set(bb)
+            counter = state.counter + jnp.zeros_like(state.counter, dtype=jnp.int16).at[
+                idx
+            ].set(1)
+            coop1 = state.coop1 + jnp.zeros_like(state.counter, dtype=jnp.int16).at[
+                idx
+            ].set(rr)
+            coop2 = state.coop2 + jnp.zeros_like(state.counter, dtype=jnp.int16).at[
+                idx
+            ].set(bb)
             convention = jnp.stack([convention_1, convention_2]).reshape(2)
             return counter, coop1, coop2, convention
 
@@ -123,12 +121,8 @@ class CoinGame(MultiAgentEnv):
             # obs channels are [red_player, blue_player, red_coin, blue_coin]
             obs1 = obs1.at[state.red_pos[0], state.red_pos[1], 0].set(1)
             obs1 = obs1.at[state.blue_pos[0], state.blue_pos[1], 1].set(1)
-            obs1 = obs1.at[
-                state.red_coin_pos[0], state.red_coin_pos[1], 2
-            ].set(1)
-            obs1 = obs1.at[
-                state.blue_coin_pos[0], state.blue_coin_pos[1], 3
-            ].set(1)
+            obs1 = obs1.at[state.red_coin_pos[0], state.red_coin_pos[1], 2].set(1)
+            obs1 = obs1.at[state.blue_coin_pos[0], state.blue_coin_pos[1], 3].set(1)
 
             # each agent has egotistic color (so thinks they are red)
             obs2 = jnp.stack(
@@ -202,11 +196,10 @@ class CoinGame(MultiAgentEnv):
 
         _shape = (3, 3, 4) if self.cnn else (36,)
         self.observation_spaces = {
-            a: spaces.Box(low=0, high=1, shape=_shape, dtype=jnp.uint8) for a in self.agents
+            a: spaces.Box(low=0, high=1, shape=_shape, dtype=jnp.uint8)
+            for a in self.agents
         }
-        self.action_spaces = {
-            a: spaces.Discrete(5) for a in self.agents
-        }
+        self.action_spaces = {a: spaces.Discrete(5) for a in self.agents}
 
         def _step(
             key: chex.PRNGKey,
@@ -218,19 +211,11 @@ class CoinGame(MultiAgentEnv):
             new_blue_pos = (state.blue_pos + MOVES[action_1]) % 3
             red_reward, blue_reward = 0, 0
 
-            red_red_matches = jnp.all(
-                new_red_pos == state.red_coin_pos, axis=-1
-            )
-            red_blue_matches = jnp.all(
-                new_red_pos == state.blue_coin_pos, axis=-1
-            )
+            red_red_matches = jnp.all(new_red_pos == state.red_coin_pos, axis=-1)
+            red_blue_matches = jnp.all(new_red_pos == state.blue_coin_pos, axis=-1)
 
-            blue_red_matches = jnp.all(
-                new_blue_pos == state.red_coin_pos, axis=-1
-            )
-            blue_blue_matches = jnp.all(
-                new_blue_pos == state.blue_coin_pos, axis=-1
-            )
+            blue_red_matches = jnp.all(new_blue_pos == state.red_coin_pos, axis=-1)
+            blue_blue_matches = jnp.all(new_blue_pos == state.blue_coin_pos, axis=-1)
 
             ### [[1, 1, -2],[1, 1, -2]]
             _rr_reward = self.payoff_matrix[0][0]
@@ -240,9 +225,7 @@ class CoinGame(MultiAgentEnv):
             _bb_reward = self.payoff_matrix[1][1]
             _b_penalty = self.payoff_matrix[1][2]
 
-            red_reward = jnp.where(
-                red_red_matches, red_reward + _rr_reward, red_reward
-            )
+            red_reward = jnp.where(red_red_matches, red_reward + _rr_reward, red_reward)
             red_reward = jnp.where(
                 red_blue_matches, red_reward + _rb_reward, red_reward
             )
@@ -323,9 +306,7 @@ class CoinGame(MultiAgentEnv):
             # if inner episode is done, return start state for next game
             reset_obs, reset_state = _reset(key)
             next_state = EnvState(
-                red_pos=jnp.where(
-                    reset_inner, reset_state.red_pos, next_state.red_pos
-                ),
+                red_pos=jnp.where(reset_inner, reset_state.red_pos, next_state.red_pos),
                 blue_pos=jnp.where(
                     reset_inner, reset_state.blue_pos, next_state.blue_pos
                 ),
@@ -353,20 +334,38 @@ class CoinGame(MultiAgentEnv):
                 last_state=jnp.where(reset_inner, jnp.zeros(2), last_state),
             )
 
-            obs = {agent: obs for agent, obs in zip(self.agents, [jnp.where(reset_inner, reset_obs[i], obs[i]) for i in obs])}
+            obs = {
+                agent: obs
+                for agent, obs in zip(
+                    self.agents,
+                    [jnp.where(reset_inner, reset_obs[i], obs[i]) for i in obs],
+                )
+            }
 
             blue_reward = jnp.where(reset_inner, 0.0, blue_reward)
             red_reward = jnp.where(reset_inner, 0.0, red_reward)
 
             if shared_rewards:
                 # shared reward (social welfare\sum of agents individual rewards)
-                rewards = {agent: reward for agent, reward in zip(self.agents, (sum((red_reward, blue_reward)),  sum((red_reward, blue_reward))))}
+                rewards = {
+                    agent: reward
+                    for agent, reward in zip(
+                        self.agents,
+                        (
+                            sum((red_reward, blue_reward)),
+                            sum((red_reward, blue_reward)),
+                        ),
+                    )
+                }
             else:
                 # individual reward
-                rewards = {agent: reward for agent, reward in zip(self.agents, (red_reward, blue_reward))}
+                rewards = {
+                    agent: reward
+                    for agent, reward in zip(self.agents, (red_reward, blue_reward))
+                }
 
-            dones = {agent: reset_inner for agent in self.agents}
-            dones['__all__'] = reset_inner
+            dones = dict.fromkeys(self.agents, reset_inner)
+            dones["__all__"] = reset_inner
 
             infos = {}
             return (
@@ -377,13 +376,9 @@ class CoinGame(MultiAgentEnv):
                 infos,
             )
 
-        def _reset(
-            key: jnp.ndarray
-        ) -> tuple[jnp.ndarray, EnvState]:
+        def _reset(key: jnp.ndarray) -> tuple[jnp.ndarray, EnvState]:
             key, subkey = jax.random.split(key)
-            all_pos = jax.random.randint(
-                subkey, shape=(4, 2), minval=0, maxval=3
-            )
+            all_pos = jax.random.randint(subkey, shape=(4, 2), minval=0, maxval=3)
 
             empty_stats = jnp.zeros((num_outer_steps), dtype=jnp.int8)
             state_stats = jnp.zeros(9)
@@ -410,7 +405,6 @@ class CoinGame(MultiAgentEnv):
         # overwrite Gymnax as it makes single-agent assumptions
         self.step = jax.jit(_step)
         self.reset = jax.jit(_reset)
-
 
         self.step = _step
         self.reset = _reset
@@ -509,17 +503,13 @@ class CoinGame(MultiAgentEnv):
         ax2 = fig.add_subplot(122)
         ax2.text(0.0, 0.95, "Timestep: %s" % (state.inner_t))
         ax2.text(0.0, 0.75, "Episode: %s" % (state.outer_t))
-        ax2.text(
-            0.0, 0.45, "Red Coop: %s" % (state.red_coop[state.outer_t].sum())
-        )
+        ax2.text(0.0, 0.45, "Red Coop: %s" % (state.red_coop[state.outer_t].sum()))
         ax2.text(
             0.6,
             0.45,
             "Red Defects : %s" % (state.red_defect[state.outer_t].sum()),
         )
-        ax2.text(
-            0.0, 0.25, "Blue Coop: %s" % (state.blue_coop[state.outer_t].sum())
-        )
+        ax2.text(0.0, 0.25, "Blue Coop: %s" % (state.blue_coop[state.outer_t].sum()))
         ax2.text(
             0.6,
             0.25,

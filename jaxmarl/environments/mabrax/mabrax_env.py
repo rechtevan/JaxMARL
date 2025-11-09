@@ -6,8 +6,8 @@ import jax
 import jax.numpy as jnp
 from brax import envs
 
-from jaxmarl.environments import spaces
 from jaxmarl.environments.multi_agent_env import MultiAgentEnv
+from jaxmarl.environments import spaces
 
 from .mappings import _agent_action_mapping, _agent_observation_mapping
 
@@ -24,7 +24,7 @@ class MABraxEnv(MultiAgentEnv):
         auto_reset: bool = True,
         homogenisation_method: Literal["max", "concat"] | None = None,
         backend: str = "positional",
-        **kwargs
+        **kwargs,
     ):
         """Multi-Agent Brax environment.
 
@@ -47,7 +47,12 @@ class MABraxEnv(MultiAgentEnv):
         """
         base_env_name = env_name.split("_")[0]
         env = envs.create(
-            base_env_name, episode_length, action_repeat, auto_reset, backend=backend, **kwargs
+            base_env_name,
+            episode_length,
+            action_repeat,
+            auto_reset,
+            backend=backend,
+            **kwargs,
         )
         self.env = env
         self.episode_length = episode_length
@@ -111,7 +116,7 @@ class MABraxEnv(MultiAgentEnv):
         global_action = self.map_agents_to_global_action(actions)
         next_state = self.env.step(state, global_action)  # type: ignore
         observations = self.get_obs(next_state)
-        rewards = {agent: next_state.reward for agent in self.agents}
+        rewards = dict.fromkeys(self.agents, next_state.reward)
         rewards["__all__"] = next_state.reward
         dones = {agent: next_state.done.astype(jnp.bool_) for agent in self.agents}
         dones["__all__"] = next_state.done.astype(jnp.bool_)

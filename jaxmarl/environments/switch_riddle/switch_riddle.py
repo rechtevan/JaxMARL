@@ -115,8 +115,8 @@ class SwitchRiddle(MultiAgentEnv):
 
         # prepare outputs
         obs = self.get_obs(state)
-        rewards = {a: reward for a in self.agents}
-        dones = {a: done for a in self.agents + ["__all__"]}
+        rewards = dict.fromkeys(self.agents, reward)
+        dones = dict.fromkeys(self.agents + ["__all__"], done)
         info = {}
 
         return obs, state, rewards, dones, info
@@ -126,18 +126,18 @@ class SwitchRiddle(MultiAgentEnv):
         @partial(jax.vmap, in_axes=[0, None])
         def _observation(aidx: int, state: State) -> jnp.ndarray:
             """Return observation for agent i."""
-            #print('state agent in room', state.agent_in_room)
-            agent_in_room = (state.agent_in_room == aidx)
-            #print('agent in room', agent_in_room)
+            # print('state agent in room', state.agent_in_room)
+            agent_in_room = state.agent_in_room == aidx
+            # print('agent in room', agent_in_room)
             bulb_state = jnp.logical_and(
-                agent_in_room, # only the current agent in the room can see the bulb state
-                state.bulb_state
+                agent_in_room,  # only the current agent in the room can see the bulb state
+                state.bulb_state,
             ).squeeze()
-            #print('agent shape', agent_in_room.shape, 'bulb state', bulb_state.shape)
+            # print('agent shape', agent_in_room.shape, 'bulb state', bulb_state.shape)
             return jnp.array([agent_in_room, bulb_state]).astype(int)
 
         obs = _observation(self.agent_range, state)
-        #print('obs', obs.shape)
+        # print('obs', obs.shape)
         return {a: obs[i] for i, a in enumerate(self.agents)}
 
     def render(self, state: State):
@@ -158,7 +158,8 @@ def example():
     key = jax.random.PRNGKey(0)
 
     from jaxmarl import make
-    env = make('switch_riddle', num_agents=num_agents)
+
+    env = make("switch_riddle", num_agents=num_agents)
 
     obs, state = env.reset(key)
     env.render(state)

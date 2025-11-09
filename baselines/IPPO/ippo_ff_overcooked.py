@@ -71,6 +71,7 @@ class Transition(NamedTuple):
     log_prob: jnp.ndarray
     obs: jnp.ndarray
 
+
 def get_rollout(train_state, config):
     env = jaxmarl.make(config["ENV_NAME"], **config["ENV_KWARGS"])
     # env_params = env.default_params
@@ -102,18 +103,20 @@ def get_rollout(train_state, config):
         pi_0, _ = network.apply(network_params, obs["agent_0"])
         pi_1, _ = network.apply(network_params, obs["agent_1"])
 
-        actions = {"agent_0": pi_0.sample(seed=key_a0), "agent_1": pi_1.sample(seed=key_a1)}
+        actions = {
+            "agent_0": pi_0.sample(seed=key_a0),
+            "agent_1": pi_1.sample(seed=key_a1),
+        }
         # env_act = unbatchify(action, env.agents, config["NUM_ENVS"], env.num_agents)
         # env_act = {k: v.flatten() for k, v in env_act.items()}
 
         # STEP ENV
         obs, state, reward, done, info = env.step(key_s, state, actions)
         done = done["__all__"]
-        rewards.append(reward['agent_0'])
-        shaped_rewards.append(info["shaped_reward"]['agent_0'])
+        rewards.append(reward["agent_0"])
+        shaped_rewards.append(info["shaped_reward"]["agent_0"])
 
         state_seq.append(state)
-
 
     plt.plot(rewards, label="reward")
     plt.plot(shaped_rewards, label="shaped_reward")
@@ -123,6 +126,7 @@ def get_rollout(train_state, config):
 
     return state_seq
 
+
 def batchify(x: dict, agent_list, num_actors):
     x = jnp.stack([x[a] for a in agent_list])
     return x.reshape((num_actors, -1))
@@ -131,6 +135,7 @@ def batchify(x: dict, agent_list, num_actors):
 def unbatchify(x: jnp.ndarray, agent_list, num_envs, num_actors):
     x = x.reshape((num_actors, num_envs, -1))
     return {a: x[i] for i, a in enumerate(agent_list)}
+
 
 def make_train(config):
     env = jaxmarl.make(config["ENV_NAME"], **config["ENV_KWARGS"])
@@ -146,17 +151,18 @@ def make_train(config):
     env = LogWrapper(env, replace_info=False)
 
     def linear_schedule(count):
-        frac = 1.0 - (count // (config["NUM_MINIBATCHES"] * config["UPDATE_EPOCHS"])) / config["NUM_UPDATES"]
+        frac = (
+            1.0
+            - (count // (config["NUM_MINIBATCHES"] * config["UPDATE_EPOCHS"]))
+            / config["NUM_UPDATES"]
+        )
         return config["LR"] * frac
 
     rew_shaping_anneal = optax.linear_schedule(
-        init_value=1.,
-        end_value=0.,
-        transition_steps=config["REW_SHAPING_HORIZON"]
+        init_value=1.0, end_value=0.0, transition_steps=config["REW_SHAPING_HORIZON"]
     )
 
     def train(rng):
-
         # INIT NETWORK
         network = ActorCritic(env.action_space().n, activation=config["ACTIVATION"])
         rng, _rng = jax.random.split(rng)
@@ -171,7 +177,10 @@ def make_train(config):
                 optax.adam(learning_rate=linear_schedule, eps=1e-5),
             )
         else:
-            tx = optax.chain(optax.clip_by_global_norm(config["MAX_GRAD_NORM"]), optax.adam(config["LR"], eps=1e-5))
+            tx = optax.chain(
+                optax.clip_by_global_norm(config["MAX_GRAD_NORM"]),
+                optax.adam(config["LR"], eps=1e-5),
+            )
         train_state = TrainState.create(
             apply_fn=network.apply,
             params=network_params,
@@ -199,22 +208,30 @@ def make_train(config):
                 pi, value = network.apply(train_state.params, obs_batch)
                 action = pi.sample(seed=_rng)
                 log_prob = pi.log_prob(action)
-                env_act = unbatchify(action, env.agents, config["NUM_ENVS"], env.num_agents)
+                env_act = unbatchify(
+                    action, env.agents, config["NUM_ENVS"], env.num_agents
+                )
 
-                env_act = {k:v.flatten() for k,v in env_act.items()}
+                env_act = {k: v.flatten() for k, v in env_act.items()}
 
                 # STEP ENV
                 rng, _rng = jax.random.split(rng)
                 rng_step = jax.random.split(_rng, config["NUM_ENVS"])
 
-                obsv, env_state, reward, done, info = jax.vmap(env.step, in_axes=(0,0,0))(
-                    rng_step, env_state, env_act
-                )
+                obsv, env_state, reward, done, info = jax.vmap(
+                    env.step, in_axes=(0, 0, 0)
+                )(rng_step, env_state, env_act)
 
                 info["reward"] = reward["agent_0"]
 
-                current_timestep = update_step*config["NUM_STEPS"]*config["NUM_ENVS"]
-                reward = jax.tree.map(lambda x,y: x+y*rew_shaping_anneal(current_timestep), reward, info["shaped_reward"])
+                current_timestep = (
+                    update_step * config["NUM_STEPS"] * config["NUM_ENVS"]
+                )
+                reward = jax.tree.map(
+                    lambda x, y: x + y * rew_shaping_anneal(current_timestep),
+                    reward,
+                    info["shaped_reward"],
+                )
 
                 transition = Transition(
                     batchify(done, env.agents, config["NUM_ACTORS"]).squeeze(),
@@ -315,9 +332,9 @@ def make_train(config):
                 train_state, traj_batch, advantages, targets, rng = update_state
                 rng, _rng = jax.random.split(rng)
                 batch_size = config["MINIBATCH_SIZE"] * config["NUM_MINIBATCHES"]
-                assert (
-                    batch_size == config["NUM_STEPS"] * config["NUM_ACTORS"]
-                ), "batch size must be equal to number of steps * number of actors"
+                assert batch_size == config["NUM_STEPS"] * config["NUM_ACTORS"], (
+                    "batch size must be equal to number of steps * number of actors"
+                )
                 permutation = jax.random.permutation(_rng, batch_size)
                 batch = (traj_batch, advantages, targets)
                 batch = jax.tree.map(
@@ -344,20 +361,21 @@ def make_train(config):
             )
             train_state = update_state[0]
             metric = info
-            current_timestep = update_step*config["NUM_STEPS"]*config["NUM_ENVS"]
+            current_timestep = update_step * config["NUM_STEPS"] * config["NUM_ENVS"]
             metric["shaped_reward"] = metric["shaped_reward"]["agent_0"]
-            metric["shaped_reward_annealed"] = metric["shaped_reward"]*rew_shaping_anneal(current_timestep)
+            metric["shaped_reward_annealed"] = metric[
+                "shaped_reward"
+            ] * rew_shaping_anneal(current_timestep)
 
             rng = update_state[-1]
 
             def callback(metric):
-                wandb.log(
-                    metric
-                )
+                wandb.log(metric)
+
             update_step = update_step + 1
             metric = jax.tree.map(lambda x: x.mean(), metric)
             metric["update_step"] = update_step
-            metric["env_step"] = update_step*config["NUM_STEPS"]*config["NUM_ENVS"]
+            metric["env_step"] = update_step * config["NUM_STEPS"] * config["NUM_ENVS"]
             jax.debug.callback(callback, metric)
 
             runner_state = (train_state, env_state, last_obs, update_step, rng)
@@ -373,7 +391,6 @@ def make_train(config):
     return train
 
 
-
 @hydra.main(version_base=None, config_path="config", config_name="ippo_ff_overcooked")
 def main(config):
     config = OmegaConf.to_container(config)
@@ -386,7 +403,7 @@ def main(config):
         tags=["IPPO", "FF"],
         config=config,
         mode=config["WANDB_MODE"],
-        name=f'ippo_ff_overcooked_{layout_name}'
+        name=f"ippo_ff_overcooked_{layout_name}",
     )
 
     rng = jax.random.PRNGKey(config["SEED"])
@@ -394,13 +411,12 @@ def main(config):
     train_jit = jax.jit(make_train(config))
     out = jax.vmap(train_jit)(rngs)
 
-    filename = f'{config["ENV_NAME"]}_{layout_name}'
+    filename = f"{config['ENV_NAME']}_{layout_name}"
     train_state = jax.tree.map(lambda x: x[0], out["runner_state"][0])
     state_seq = get_rollout(train_state, config)
     viz = OvercookedVisualizer()
     # agent_view_size is hardcoded as it determines the padding around the layout.
     viz.animate(state_seq, agent_view_size=5, filename=f"{filename}.gif")
-
 
     """
     print('** Saving Results **')
@@ -423,6 +439,7 @@ def main(config):
     # agent_view_size is hardcoded as it determines the padding around the layout.
     viz.animate(state_seq, agent_view_size=5, filename=f"{filename}.gif")
     """
+
 
 if __name__ == "__main__":
     main()

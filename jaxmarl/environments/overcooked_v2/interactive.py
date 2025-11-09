@@ -10,7 +10,6 @@ from jaxmarl.viz.overcooked_v2_visualizer import OvercookedV2Visualizer
 
 
 class InteractiveOvercookedV2:
-
     def __init__(self, layout, agent_view_size=None, no_jit=False, debug=False):
         self.debug = debug
         self.no_jit = no_jit

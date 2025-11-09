@@ -29,7 +29,6 @@ from jaxmarl.wrappers.baselines import (
 
 
 class ScannedRNN(nn.Module):
-
     @partial(
         nn.scan,
         variable_broadcast="params",
@@ -120,7 +119,6 @@ class MixingNetwork(nn.Module):
 
     @nn.compact
     def __call__(self, q_vals, states):
-
         n_agents, time_steps, batch_size = q_vals.shape
         q_vals = jnp.transpose(q_vals, (1, 2, 0))  # (time_steps, batch_size, n_agents)
 
@@ -172,8 +170,8 @@ class CustomTrainState(TrainState):
     n_updates: int = 0
     grad_steps: int = 0
 
-def make_train(config, env):
 
+def make_train(config, env):
     config["NUM_UPDATES"] = (
         config["TOTAL_TIMESTEPS"] // config["NUM_STEPS"] // config["NUM_ENVS"]
     )
@@ -191,7 +189,6 @@ def make_train(config, env):
 
     # epsilon-greedy exploration
     def eps_greedy_exploration(rng, q_vals, eps, valid_actions):
-
         rng_a, rng_e = jax.random.split(
             rng
         )  # a key for sampling random actions and one for picking
@@ -224,7 +221,6 @@ def make_train(config, env):
         return {agent: x[i] for i, agent in enumerate(env.agents)}
 
     def train(rng):
-
         # INIT ENV
         original_seed = rng[0]
         rng, _rng = jax.random.split(rng)
@@ -290,14 +286,16 @@ def make_train(config, env):
 
             # init mixer
             rng, _rng = jax.random.split(rng)
-            init_x = jnp.zeros((len(env.agents), 1, 1)) # q vals: agents, time, batch
+            init_x = jnp.zeros((len(env.agents), 1, 1))  # q vals: agents, time, batch
             state_size = sample_traj.obs["__all__"].shape[
                 -1
             ]  # get the state shape from the buffer
-            init_state = jnp.zeros((1, 1, state_size)) # (time_step, batch_size, obs_size)
+            init_state = jnp.zeros(
+                (1, 1, state_size)
+            )  # (time_step, batch_size, obs_size)
             mixer_params = mixer.init(_rng, init_x, init_state)
 
-            network_params = {'agent':agent_params, 'mixer':mixer_params}
+            network_params = {"agent": agent_params, "mixer": mixer_params}
 
             lr_scheduler = optax.linear_schedule(
                 init_value=config["LR"],
@@ -336,7 +334,6 @@ def make_train(config, env):
 
         # TRAINING LOOP
         def _update_step(runner_state, unused):
-
             train_state, buffer_state, test_state, rng = runner_state
 
             # SAMPLE PHASE
@@ -351,7 +348,7 @@ def make_train(config, env):
                 new_hs, q_vals = jax.vmap(
                     network.apply, in_axes=(None, 0, 0, 0)
                 )(  # vmap across the agent dim
-                    train_state.params['agent'],
+                    train_state.params["agent"],
                     hs,
                     _obs,
                     _dones,
@@ -376,7 +373,9 @@ def make_train(config, env):
                 timestep = Timestep(
                     obs=last_obs,
                     actions=actions,
-                    rewards=jax.tree.map(lambda x:config.get("REW_SCALE", 1)*x, rewards),
+                    rewards=jax.tree.map(
+                        lambda x: config.get("REW_SCALE", 1) * x, rewards
+                    ),
                     dones=last_dones,
                     avail_actions=avail_actions,
                 )
@@ -417,7 +416,6 @@ def make_train(config, env):
 
             # NETWORKS UPDATE
             def _learn_phase(carry, _):
-
                 train_state, rng = carry
                 rng, _rng = jax.random.split(rng)
                 minibatch = buffer.sample(buffer_state, _rng).experience
@@ -442,7 +440,7 @@ def make_train(config, env):
                 _avail_actions = batchify(minibatch.avail_actions)
 
                 _, q_next_target = jax.vmap(network.apply, in_axes=(None, 0, 0, 0))(
-                    train_state.target_network_params['agent'],
+                    train_state.target_network_params["agent"],
                     init_hs,
                     _obs,
                     _dones,
@@ -450,7 +448,7 @@ def make_train(config, env):
 
                 def _loss_fn(params):
                     _, q_vals = jax.vmap(network.apply, in_axes=(None, 0, 0, 0))(
-                        params['agent'],
+                        params["agent"],
                         init_hs,
                         _obs,
                         _dones,
@@ -473,7 +471,11 @@ def make_train(config, env):
                         axis=-1,
                     ).squeeze(-1)  # (num_agents, timesteps, batch_size,)
 
-                    qmix_next = mixer.apply(train_state.target_network_params['mixer'], q_next, minibatch.obs["__all__"])
+                    qmix_next = mixer.apply(
+                        train_state.target_network_params["mixer"],
+                        q_next,
+                        minibatch.obs["__all__"],
+                    )
                     qmix_target = (
                         minibatch.rewards["__all__"][:-1]
                         + (
@@ -483,10 +485,10 @@ def make_train(config, env):
                         * qmix_next[1:]  # sum over agents
                     )
 
-                    qmix = mixer.apply(params['mixer'], chosen_action_q_vals, minibatch.obs["__all__"])[:-1]
-                    loss = jnp.mean(
-                        (qmix - jax.lax.stop_gradient(qmix_target)) ** 2
-                    )
+                    qmix = mixer.apply(
+                        params["mixer"], chosen_action_q_vals, minibatch.obs["__all__"]
+                    )[:-1]
+                    loss = jnp.mean((qmix - jax.lax.stop_gradient(qmix_target)) ** 2)
 
                     return loss, chosen_action_q_vals.mean()
 
@@ -563,9 +565,12 @@ def make_train(config, env):
             if config["WANDB_MODE"] != "disabled":
 
                 def callback(metrics, original_seed):
-                    if config.get('WANDB_LOG_ALL_SEEDS', False):
+                    if config.get("WANDB_LOG_ALL_SEEDS", False):
                         metrics.update(
-                            {f"rng{int(original_seed)}/{k}": v for k, v in metrics.items()}
+                            {
+                                f"rng{int(original_seed)}/{k}": v
+                                for k, v in metrics.items()
+                            }
                         )
                     wandb.log(metrics)
 
@@ -580,7 +585,8 @@ def make_train(config, env):
             if not config.get("TEST_DURING_TRAINING", True):
                 return None
 
-            params = train_state.params['agent']
+            params = train_state.params["agent"]
+
             def _greedy_env_step(step_state, unused):
                 params, env_state, last_obs, last_dones, hstate, rng = step_state
                 rng, key_s = jax.random.split(rng)
@@ -677,7 +683,6 @@ def env_from_config(config):
 
 
 def single_run(config):
-
     config = {**config, **config["alg"]}  # merge the alg config with the main config
     print("Config:\n", OmegaConf.to_yaml(config))
 
@@ -704,7 +709,7 @@ def single_run(config):
     outs = jax.block_until_ready(train_vjit(rngs))
 
     # save params
-    if config.get("SAVE_PATH", None) is not None:
+    if config.get("SAVE_PATH") is not None:
         from jaxmarl.wrappers.baselines import save_params
 
         model_state = outs["runner_state"][0]
@@ -713,7 +718,7 @@ def single_run(config):
         OmegaConf.save(
             config,
             os.path.join(
-                save_dir, f'{alg_name}_{env_name}_seed{config["SEED"]}_config.yaml'
+                save_dir, f"{alg_name}_{env_name}_seed{config['SEED']}_config.yaml"
             ),
         )
 
@@ -721,7 +726,7 @@ def single_run(config):
             params = jax.tree.map(lambda x: x[i], model_state.params)
             save_path = os.path.join(
                 save_dir,
-                f'{alg_name}_{env_name}_seed{config["SEED"]}_vmap{i}.safetensors',
+                f"{alg_name}_{env_name}_seed{config['SEED']}_vmap{i}.safetensors",
             )
             save_params(params, save_path)
 
@@ -729,7 +734,10 @@ def single_run(config):
 def tune(default_config):
     """Hyperparameter sweep with wandb."""
 
-    default_config = {**default_config, **default_config["alg"]}  # merge the alg config with the main config
+    default_config = {
+        **default_config,
+        **default_config["alg"],
+    }  # merge the alg config with the main config
     env_name = default_config["ENV_NAME"]
     alg_name = default_config.get("ALG_NAME", "qmix_rnn")
     env, env_name = env_from_config(default_config)

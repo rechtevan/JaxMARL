@@ -25,7 +25,13 @@ class ManualPlayer:
         legal_moves = batchify(legal_moves)
         actions = np.array([20, 20])
 
-        print("valid actions:", [(a, env.action_encoding[a]) for a in np.where(legal_moves[curr_player] == 1)[0]])
+        print(
+            "valid actions:",
+            [
+                (a, env.action_encoding[a])
+                for a in np.where(legal_moves[curr_player] == 1)[0]
+            ],
+        )
 
         if curr_player != self._player_idx:
             return actions
@@ -80,9 +86,9 @@ def get_agents(args):
         if player_type == "manual":
             agents.append(ManualPlayer(player_idx))
         elif player_type == "obl":
-            assert (
-                weight_file is not None
-            ), "Weight file must be provided for all the OBL agents."
+            assert weight_file is not None, (
+                "Weight file must be provided for all the OBL agents."
+            )
             agents.append(ManualGameOBLAgentR2D2(weight_file, player_idx))
     return agents
 
@@ -92,13 +98,12 @@ def play_game(args):
         seed = args.seed
     else:
         seed = random.randint(0, 10000)
-    print(f"{'-'*10}\nStarting new game with random seed: {seed}\n")
+    print(f"{'-' * 10}\nStarting new game with random seed: {seed}\n")
 
     agents = get_agents(args)
 
     use_jit = args.use_jit if args.use_jit is not None else True
     with jax.disable_jit(not use_jit):
-
         rng = jax.random.PRNGKey(seed)
         rng, _rng = jax.random.split(rng)
 

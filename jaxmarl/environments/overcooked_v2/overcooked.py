@@ -64,7 +64,8 @@ class OvercookedV2(MultiAgentEnv):
         self,
         layout: str | Layout = "cramped_room",
         max_steps: int = 400,
-        observation_type: ObservationType | list[ObservationType] = ObservationType.DEFAULT,
+        observation_type: ObservationType
+        | list[ObservationType] = ObservationType.DEFAULT,
         agent_view_size: int | None = None,
         random_reset: bool = False,
         random_agent_positions: bool = False,
@@ -400,7 +401,6 @@ class OvercookedV2(MultiAgentEnv):
         )
 
         def _sample_grid_states_wrapper(cell, key):
-
             def _sample_pot_states(key):
                 key, key_ing, key_num, key_timer = jax.random.split(key, 4)
                 raw_ingridients = jax.random.randint(
@@ -575,7 +575,6 @@ class OvercookedV2(MultiAgentEnv):
         return {f"agent_{i}": obs for i, obs in enumerate(all_obs)}
 
     def get_obs_default(self, state: State) -> dict[str, chex.Array]:
-
         width = self.width
         height = self.height
         num_ingredients = self.layout.num_ingredients
@@ -668,8 +667,6 @@ class OvercookedV2(MultiAgentEnv):
                 ],
                 axis=-1,
             )
-
-
 
         def _agent_obs(agent_id):
             ingredient_mapping = None
@@ -819,7 +816,6 @@ class OvercookedV2(MultiAgentEnv):
                     mask = mask.at[pos.y, pos.x].set(inv == dynamic_locator)
 
                 mask &= reachable_area
-
 
                 obj_pos, is_valid = self.path_planer.get_closest_target_pos(
                     mask, pos, direction

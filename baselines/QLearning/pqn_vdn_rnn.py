@@ -26,7 +26,6 @@ from jaxmarl.wrappers.baselines import (
 
 
 class ScannedRNN(nn.Module):
-
     @partial(
         nn.scan,
         variable_broadcast="params",
@@ -117,10 +116,9 @@ class CustomTrainState(TrainState):
 
 
 def make_train(config, env):
-
-    assert (
-        config["NUM_ENVS"] % config["NUM_MINIBATCHES"] == 0
-    ), "NUM_ENVS must be divisible by NUM_MINIBATCHES"
+    assert config["NUM_ENVS"] % config["NUM_MINIBATCHES"] == 0, (
+        "NUM_ENVS must be divisible by NUM_MINIBATCHES"
+    )
 
     config["NUM_UPDATES"] = (
         config["TOTAL_TIMESTEPS"] // config["NUM_STEPS"] // config["NUM_ENVS"]
@@ -139,7 +137,6 @@ def make_train(config, env):
 
     # epsilon-greedy exploration
     def eps_greedy_exploration(rng, q_vals, eps, valid_actions):
-
         rng_a, rng_e = jax.random.split(
             rng
         )  # a key for sampling random actions and one for picking
@@ -172,7 +169,6 @@ def make_train(config, env):
         return {agent: x[i] for i, agent in enumerate(env.agents)}
 
     def train(rng):
-
         original_seed = rng[0]
 
         # INIT ENV
@@ -236,7 +232,6 @@ def make_train(config, env):
 
         # TRAINING LOOP
         def _update_step(runner_state, unused):
-
             train_state, memory_transitions, expl_state, test_state, rng = runner_state
 
             # SAMPLE PHASE
@@ -323,7 +318,6 @@ def make_train(config, env):
                 train_state, rng = carry
 
                 def _learn_phase(carry, minibatch):
-
                     # minibatch shape: num_steps, num_agents, batch_size, ...
                     # with batch_size = num_envs/num_minibatches
 
@@ -354,12 +348,14 @@ def make_train(config, env):
                             )
                             lambda_returns = (1 - done) * lambda_returns + done * reward
                             next_q = jnp.max(q, axis=-1)
-                            next_q = jnp.sum(next_q, axis=0) # sum over agents
+                            next_q = jnp.sum(next_q, axis=0)  # sum over agents
                             return (lambda_returns, next_q), lambda_returns
 
-                        lambda_returns = reward[-1] + config["GAMMA"] * (1 - done[-1]) * last_q
+                        lambda_returns = (
+                            reward[-1] + config["GAMMA"] * (1 - done[-1]) * last_q
+                        )
                         last_q = jnp.max(q_vals[-1], axis=-1)
-                        last_q = jnp.sum(last_q, axis=0) # sum over agents
+                        last_q = jnp.sum(last_q, axis=0)  # sum over agents
                         _, targets = jax.lax.scan(
                             _get_target,
                             (lambda_returns, last_q),
@@ -387,28 +383,22 @@ def make_train(config, env):
 
                         # lambda returns are computed using NUM_STEPS as the horizon, and optimizing from t=0 to NUM_STEPS-1
                         last_q = valid_q_vals[-1].max(axis=-1)
-                        last_q = last_q.sum(axis=0) # sum over agents
+                        last_q = last_q.sum(axis=0)  # sum over agents
                         target = _compute_targets(
                             last_q,  # q_vals at t=NUM_STEPS-1
                             valid_q_vals[:-1],
                             minibatch.reward[:-1, 0],  # _all_
                             minibatch.done[:-1, 0],  # _all_
-                        ).reshape(
-                            -1
-                        )  # (num_steps-1*batch_size,)
+                        ).reshape(-1)  # (num_steps-1*batch_size,)
 
                         chosen_action_qvals = jnp.take_along_axis(
                             q_vals,
                             jnp.expand_dims(minibatch.action, axis=-1),
                             axis=-1,
-                        ).squeeze(
-                            axis=-1
-                        )  # (num_steps, num_agents, batch_size,)
+                        ).squeeze(axis=-1)  # (num_steps, num_agents, batch_size,)
                         vdn_chosen_action_qvals = jnp.sum(chosen_action_qvals, axis=1)[
                             :-1
-                        ].reshape(
-                            -1
-                        )  # (num_steps-1*batch_size,)
+                        ].reshape(-1)  # (num_steps-1*batch_size,)
 
                         loss = jnp.mean(
                             (vdn_chosen_action_qvals - jax.lax.stop_gradient(target))
@@ -435,8 +425,8 @@ def make_train(config, env):
                     x = x.reshape(
                         *x.shape[:2], config["NUM_MINIBATCHES"], -1, *x.shape[3:]
                     )  # num_steps, num_agents, minibatches, batch_size/num_minbatches,
-                    new_order = [2, 0, 1, 3] + list(
-                        range(4, x.ndim)
+                    new_order = (
+                        [2, 0, 1, 3] + list(range(4, x.ndim))
                     )  # (minibatches, num_steps, num_agents, batch_size/num_minbatches, ...)
                     x = jnp.transpose(x, new_order)
                     return x
@@ -675,7 +665,6 @@ def env_from_config(config):
 
 
 def single_run(config):
-
     config = {**config, **config["alg"]}  # merge the alg config with the main config
     print("Config:\n", OmegaConf.to_yaml(config))
 
@@ -702,7 +691,7 @@ def single_run(config):
     outs = jax.block_until_ready(train_vjit(rngs))
 
     # save params
-    if config.get("SAVE_PATH", None) is not None:
+    if config.get("SAVE_PATH") is not None:
         from jaxmarl.wrappers.baselines import save_params
 
         model_state = outs["runner_state"][0]
@@ -711,7 +700,7 @@ def single_run(config):
         OmegaConf.save(
             config,
             os.path.join(
-                save_dir, f'{alg_name}_{env_name}_seed{config["SEED"]}_config.yaml'
+                save_dir, f"{alg_name}_{env_name}_seed{config['SEED']}_config.yaml"
             ),
         )
 
@@ -719,7 +708,7 @@ def single_run(config):
             params = jax.tree.map(lambda x: x[i], model_state.params)
             save_path = os.path.join(
                 save_dir,
-                f'{alg_name}_{env_name}_seed{config["SEED"]}_vmap{i}.safetensors',
+                f"{alg_name}_{env_name}_seed{config['SEED']}_vmap{i}.safetensors",
             )
             save_params(params, save_path)
 

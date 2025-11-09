@@ -28,7 +28,6 @@ from jaxmarl.wrappers.baselines import (
 
 
 class ScannedRNN(nn.Module):
-
     @partial(
         nn.scan,
         variable_broadcast="params",
@@ -102,7 +101,6 @@ class CustomTrainState(TrainState):
 
 
 def make_train(config, env):
-
     config["NUM_UPDATES"] = (
         config["TOTAL_TIMESTEPS"] // config["NUM_STEPS"] // config["NUM_ENVS"]
     )
@@ -120,7 +118,6 @@ def make_train(config, env):
 
     # epsilon-greedy exploration
     def eps_greedy_exploration(rng, q_vals, eps, valid_actions):
-
         rng_a, rng_e = jax.random.split(
             rng
         )  # a key for sampling random actions and one for picking
@@ -153,7 +150,6 @@ def make_train(config, env):
         return {agent: x[i] for i, agent in enumerate(env.agents)}
 
     def train(rng):
-
         # INIT ENV
         original_seed = rng[0]
         rng, _rng = jax.random.split(rng)
@@ -247,7 +243,6 @@ def make_train(config, env):
 
         # TRAINING LOOP
         def _update_step(runner_state, unused):
-
             train_state, buffer_state, test_state, rng = runner_state
 
             # SAMPLE PHASE
@@ -287,7 +282,9 @@ def make_train(config, env):
                 timestep = Timestep(
                     obs=last_obs,
                     actions=actions,
-                    rewards=jax.tree.map(lambda x:config.get("REW_SCALE", 1)*x, rewards),
+                    rewards=jax.tree.map(
+                        lambda x: config.get("REW_SCALE", 1) * x, rewards
+                    ),
                     dones=last_dones,
                     avail_actions=avail_actions,
                 )
@@ -328,7 +325,6 @@ def make_train(config, env):
 
             # NETWORKS UPDATE
             def _learn_phase(carry, _):
-
                 train_state, rng = carry
                 rng, _rng = jax.random.split(rng)
                 minibatch = buffer.sample(buffer_state, _rng).experience
@@ -372,9 +368,7 @@ def make_train(config, env):
                         q_vals,
                         _actions[..., np.newaxis],
                         axis=-1,
-                    ).squeeze(
-                        -1
-                    )  # (num_agents, timesteps, batch_size,)
+                    ).squeeze(-1)  # (num_agents, timesteps, batch_size,)
 
                     unavailable_actions = 1 - _avail_actions
                     valid_q_vals = q_vals - (unavailable_actions * 1e10)
@@ -384,9 +378,7 @@ def make_train(config, env):
                         q_next_target,
                         jnp.argmax(valid_q_vals, axis=-1)[..., np.newaxis],
                         axis=-1,
-                    ).squeeze(
-                        -1
-                    )  # (num_agents, timesteps, batch_size,)
+                    ).squeeze(-1)  # (num_agents, timesteps, batch_size,)
 
                     target = (
                         _rewards[:, :-1]
@@ -481,9 +473,12 @@ def make_train(config, env):
             if config["WANDB_MODE"] != "disabled":
 
                 def callback(metrics, original_seed):
-                    if config.get('WANDB_LOG_ALL_SEEDS', False):
+                    if config.get("WANDB_LOG_ALL_SEEDS", False):
                         metrics.update(
-                            {f"rng{int(original_seed)}/{k}": v for k, v in metrics.items()}
+                            {
+                                f"rng{int(original_seed)}/{k}": v
+                                for k, v in metrics.items()
+                            }
                         )
                     wandb.log(metrics)
 
@@ -498,6 +493,7 @@ def make_train(config, env):
             if not config.get("TEST_DURING_TRAINING", True):
                 return None
             params = train_state.params
+
             def _greedy_env_step(step_state, unused):
                 params, env_state, last_obs, last_dones, hstate, rng = step_state
                 rng, key_s = jax.random.split(rng)
@@ -610,12 +606,11 @@ def env_from_config(config):
 
 
 def single_run(config):
-
     config = {**config, **config["alg"]}  # merge the alg config with the main config
     print("Config:\n", OmegaConf.to_yaml(config))
 
     alg_name = config.get("ALG_NAME", "iql_rnn")
-    env, env_name= env_from_config(copy.deepcopy(config))
+    env, env_name = env_from_config(copy.deepcopy(config))
 
     wandb.init(
         entity=config["ENTITY"],
@@ -637,7 +632,7 @@ def single_run(config):
     outs = jax.block_until_ready(train_vjit(rngs))
 
     # save params
-    if config.get("SAVE_PATH", None) is not None:
+    if config.get("SAVE_PATH") is not None:
         from jaxmarl.wrappers.baselines import save_params
 
         model_state = outs["runner_state"][0]
@@ -646,7 +641,7 @@ def single_run(config):
         OmegaConf.save(
             config,
             os.path.join(
-                save_dir, f'{alg_name}_{env_name}_seed{config["SEED"]}_config.yaml'
+                save_dir, f"{alg_name}_{env_name}_seed{config['SEED']}_config.yaml"
             ),
         )
 
@@ -654,7 +649,7 @@ def single_run(config):
             params = jax.tree.map(lambda x: x[i], model_state.params)
             save_path = os.path.join(
                 save_dir,
-                f'{alg_name}_{env_name}_seed{config["SEED"]}_vmap{i}.safetensors',
+                f"{alg_name}_{env_name}_seed{config['SEED']}_vmap{i}.safetensors",
             )
             save_params(params, save_path)
 
@@ -662,7 +657,10 @@ def single_run(config):
 def tune(default_config):
     """Hyperparameter sweep with wandb."""
 
-    default_config = {**default_config, **default_config["alg"]}  # merge the alg config with the main config
+    default_config = {
+        **default_config,
+        **default_config["alg"],
+    }  # merge the alg config with the main config
     env_name = default_config["ENV_NAME"]
     alg_name = default_config.get("ALG_NAME", "iql_rnn")
     env, env_name = env_from_config(default_config)

@@ -483,9 +483,7 @@ def test_continuous_obs_function(do_jit):
         state = state.replace(unit_positions=unit_positions)
         obs = env.get_obs(state)
         real_obs = obs["ally_0"][
-            expected_obs_idx
-            * 2
-            * len(env.unit_features) : (expected_obs_idx * 2 + 1)
+            expected_obs_idx * 2 * len(env.unit_features) : (expected_obs_idx * 2 + 1)
             * len(env.unit_features)
         ]
         assert jnp.allclose(
@@ -507,28 +505,33 @@ def test_continuous_obs_max_two_observed(do_jit):
         state = state.replace(unit_positions=unit_positions)
         obs = env.get_obs(state)
         real_obs = obs["ally_0"][
-            expected_obs_idx
-            * 2
-            * len(env.unit_features) : (expected_obs_idx * 2 + 1)
+            expected_obs_idx * 2 * len(env.unit_features) : (expected_obs_idx * 2 + 1)
             * len(env.unit_features)
         ]
-        expected_obs = jnp.array([1.0, 0.1374999999, 0.125, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0])
+        expected_obs = jnp.array(
+            [1.0, 0.1374999999, 0.125, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0]
+        )
         assert jnp.allclose(
             real_obs,
             expected_obs,
         )
 
         real_obs = obs["ally_0"][
-            (expected_obs_idx * 2 + 1) * len(env.unit_features):
-            (2 * expected_obs_idx + 2) * len(env.unit_features)
+            (expected_obs_idx * 2 + 1) * len(env.unit_features) : (
+                2 * expected_obs_idx + 2
+            )
+            * len(env.unit_features)
         ]
         assert jnp.allclose(real_obs, expected_obs)
 
         real_obs = obs["ally_0"][
-            (expected_obs_idx * 2 + 2) * len(env.unit_features):
-            (expected_obs_idx * 2 + 3) * len(env.unit_features)
+            (expected_obs_idx * 2 + 2) * len(env.unit_features) : (
+                expected_obs_idx * 2 + 3
+            )
+            * len(env.unit_features)
         ]
         assert jnp.allclose(real_obs, jnp.zeros_like(real_obs))
+
 
 @pytest.mark.parametrize(("do_jit"), [False, True])
 def test_obs_function(do_jit):
@@ -549,8 +552,12 @@ def test_obs_function(do_jit):
         ally_0_first_unit = obs["ally_0"][0 : len(env.unit_features)]
         assert ally_0_first_unit.shape == (len(env.unit_features),)
         assert ally_0_first_unit[0] == 1.0  # Health should be 1.0 at start
-        assert jnp.all(jnp.abs(ally_0_first_unit[1:3]) <= 32.0)  # Position diffs within map bounds
-        assert jnp.all(ally_0_first_unit >= -32.0) and jnp.all(ally_0_first_unit <= 32.0)  # All values reasonable
+        assert jnp.all(
+            jnp.abs(ally_0_first_unit[1:3]) <= 32.0
+        )  # Position diffs within map bounds
+        assert jnp.all(ally_0_first_unit >= -32.0) and jnp.all(
+            ally_0_first_unit <= 32.0
+        )  # All values reasonable
 
         # Check that out-of-sight enemies are zeroed
         assert jnp.allclose(
@@ -562,8 +569,12 @@ def test_obs_function(do_jit):
         enemy_0_first_unit = obs["enemy_0"][0 : len(env.unit_features)]
         assert enemy_0_first_unit.shape == (len(env.unit_features),)
         assert enemy_0_first_unit[0] == 1.0  # Health should be 1.0 at start
-        assert jnp.all(jnp.abs(enemy_0_first_unit[1:3]) <= 32.0)  # Position diffs within map bounds
-        assert jnp.all(enemy_0_first_unit >= -32.0) and jnp.all(enemy_0_first_unit <= 32.0)  # All values reasonable
+        assert jnp.all(
+            jnp.abs(enemy_0_first_unit[1:3]) <= 32.0
+        )  # Position diffs within map bounds
+        assert jnp.all(enemy_0_first_unit >= -32.0) and jnp.all(
+            enemy_0_first_unit <= 32.0
+        )  # All values reasonable
 
         # Check that out-of-sight allies are zeroed
         assert jnp.allclose(
@@ -605,14 +616,20 @@ def test_obs_function(do_jit):
 
         # Check last ally observation - validate structure instead of exact values
         last_ally_idx = first_enemy_idx - len(env.unit_features)
-        last_ally_obs = obs["enemy_0"][last_ally_idx : last_ally_idx + len(env.unit_features)]
+        last_ally_obs = obs["enemy_0"][
+            last_ally_idx : last_ally_idx + len(env.unit_features)
+        ]
         assert last_ally_obs.shape == (len(env.unit_features),)
         # Health should be in valid range (we set some allies to 0.5, but visible one may be different)
         assert 0.0 <= last_ally_obs[0] <= 1.0
-        assert jnp.all(jnp.abs(last_ally_obs[1:3]) <= 1.0)  # Position diffs normalized to sight range
+        assert jnp.all(
+            jnp.abs(last_ally_obs[1:3]) <= 1.0
+        )  # Position diffs normalized to sight range
         # Unit type bit at index 7 should be set for visible units
         assert last_ally_obs[7] == 1.0  # Unit type bit 0 (only one unit type)
-        assert jnp.all(last_ally_obs >= -1.0) and jnp.all(last_ally_obs <= 1.0)  # All values in normalized range
+        assert jnp.all(last_ally_obs >= -1.0) and jnp.all(
+            last_ally_obs <= 1.0
+        )  # All values in normalized range
 
 
 @pytest.mark.parametrize("do_jit", [True, False])

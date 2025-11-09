@@ -1,10 +1,10 @@
-
 import matplotlib.animation as animation
 import matplotlib.pyplot as plt
 import numpy as np
 
 
 ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
 
 class MPEVisualizer:
     def __init__(
@@ -19,9 +19,8 @@ class MPEVisualizer:
         self.state_seq = state_seq
         self.reward_seq = reward_seq
 
-
         self.comm_active = not np.all(self.env.silent)
-        print('Comm active? ', self.comm_active)
+        print("Comm active? ", self.comm_active)
 
         self.init_render()
 
@@ -47,6 +46,7 @@ class MPEVisualizer:
 
     def init_render(self):
         from matplotlib.patches import Circle
+
         state = self.state_seq[0]
 
         self.fig, self.ax = plt.subplots(1, 1, figsize=(5, 5))
@@ -58,7 +58,9 @@ class MPEVisualizer:
         self.entity_artists = []
         for i in range(self.env.num_entities):
             c = Circle(
-                state.p_pos[i], self.env.rad[i], color=np.array(self.env.colour[i]) / 255
+                state.p_pos[i],
+                self.env.rad[i],
+                color=np.array(self.env.colour[i]) / 255,
             )
             self.ax.add_patch(c)
             self.entity_artists.append(c)
@@ -67,13 +69,14 @@ class MPEVisualizer:
 
         if self.comm_active:
             self.comm_idx = np.where(self.env.silent == 0)[0]
-            print('comm idx', self.comm_idx)
+            print("comm idx", self.comm_idx)
             self.comm_artists = []
             i = 0
             for idx in self.comm_idx:
-
                 letter = ALPHABET[np.argmax(state.c[idx])]
-                a = self.ax.text(-1.95, -1.95 + i*0.17, f"{self.env.agents[idx]} sends {letter}")
+                a = self.ax.text(
+                    -1.95, -1.95 + i * 0.17, f"{self.env.agents[idx]} sends {letter}"
+                )
 
                 self.comm_artists.append(a)
                 i += 1

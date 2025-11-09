@@ -1,4 +1,5 @@
-""" Built off gymnax vizualizer.py"""
+"""Built off gymnax vizualizer.py"""
+
 import matplotlib.animation as animation
 import matplotlib.pyplot as plt
 
@@ -49,9 +50,7 @@ class Visualizer:
         self.im = self.env.init_render(self.ax, self.state_seq[0])
 
     def update(self, frame):
-        self.im = self.env.update_render(
-            self.im, self.state_seq[frame]
-        )
+        self.im = self.env.update_render(self.im, self.state_seq[frame])
 
 
 class SMAXVisualizer(Visualizer):
@@ -81,9 +80,7 @@ class SMAXVisualizer(Visualizer):
         return super().animate(save_fname, view)
 
     def init(self):
-        self.im = self.env.init_render(
-            self.ax, self.state_seq[0], 0, 0
-        )
+        self.im = self.env.init_render(self.ax, self.state_seq[0], 0, 0)
 
     def update(self, frame):
         self.im = self.env.update_render(

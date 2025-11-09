@@ -59,6 +59,7 @@ class ActorCritic(nn.Module):
 
         return pi, jnp.squeeze(critic, axis=-1)
 
+
 class Transition(NamedTuple):
     done: jnp.ndarray
     action: jnp.ndarray
@@ -68,17 +69,25 @@ class Transition(NamedTuple):
     obs: jnp.ndarray
     info: jnp.ndarray
 
+
 def batchify(x: dict, agent_list, num_actors):
     max_dim = max([x[a].shape[-1] for a in agent_list])
-    def pad(z, length):
-        return jnp.concatenate([z, jnp.zeros(z.shape[:-1] + [length - z.shape[-1]])], -1)
 
-    x = jnp.stack([x[a] if x[a].shape[-1] == max_dim else pad(x[a]) for a in agent_list])
+    def pad(z, length):
+        return jnp.concatenate(
+            [z, jnp.zeros(z.shape[:-1] + [length - z.shape[-1]])], -1
+        )
+
+    x = jnp.stack(
+        [x[a] if x[a].shape[-1] == max_dim else pad(x[a]) for a in agent_list]
+    )
     return x.reshape((num_actors, -1))
+
 
 def unbatchify(x: jnp.ndarray, agent_list, num_envs, num_actors):
     x = x.reshape((num_actors, num_envs, -1))
     return {a: x[i] for i, a in enumerate(agent_list)}
+
 
 def make_train(config):
     env = jaxmarl.make(config["ENV_NAME"], **config["ENV_KWARGS"])
@@ -93,13 +102,18 @@ def make_train(config):
     env = LogWrapper(env)
 
     def linear_schedule(count):
-        frac = 1.0 - (count // (config["NUM_MINIBATCHES"] * config["UPDATE_EPOCHS"])) / config["NUM_UPDATES"]
+        frac = (
+            1.0
+            - (count // (config["NUM_MINIBATCHES"] * config["UPDATE_EPOCHS"]))
+            / config["NUM_UPDATES"]
+        )
         return config["LR"] * frac
 
     def train(rng):
-
         # INIT NETWORK
-        network = ActorCritic(env.action_space(env.agents[0]).n, activation=config["ACTIVATION"])
+        network = ActorCritic(
+            env.action_space(env.agents[0]).n, activation=config["ACTIVATION"]
+        )
         rng, _rng = jax.random.split(rng)
         init_x = jnp.zeros(env.observation_space(env.agents[0]).shape)
         network_params = network.init(_rng, init_x)
@@ -109,7 +123,10 @@ def make_train(config):
                 optax.adam(learning_rate=linear_schedule, eps=1e-5),
             )
         else:
-            tx = optax.chain(optax.clip_by_global_norm(config["MAX_GRAD_NORM"]), optax.adam(config["LR"], eps=1e-5))
+            tx = optax.chain(
+                optax.clip_by_global_norm(config["MAX_GRAD_NORM"]),
+                optax.adam(config["LR"], eps=1e-5),
+            )
 
         train_state = TrainState.create(
             apply_fn=network.apply,
@@ -135,13 +152,17 @@ def make_train(config):
                 pi, value = network.apply(train_state.params, obs_batch)
                 action = pi.sample(seed=_rng)
                 log_prob = pi.log_prob(action)
-                env_act = unbatchify(action, env.agents, config["NUM_ENVS"], env.num_agents)
+                env_act = unbatchify(
+                    action, env.agents, config["NUM_ENVS"], env.num_agents
+                )
 
                 # STEP ENV
                 rng, _rng = jax.random.split(rng)
                 rng_step = jax.random.split(_rng, config["NUM_ENVS"])
                 obsv, env_state, reward, done, info = jax.vmap(env.step)(
-                    rng_step, env_state, env_act,
+                    rng_step,
+                    env_state,
+                    env_act,
                 )
 
                 info = jax.tree.map(lambda x: x.reshape(config["NUM_ACTORS"]), info)
@@ -254,9 +275,9 @@ def make_train(config):
                 train_state, traj_batch, advantages, targets, rng = update_state
                 rng, _rng = jax.random.split(rng)
                 batch_size = config["MINIBATCH_SIZE"] * config["NUM_MINIBATCHES"]
-                assert (
-                    batch_size == config["NUM_STEPS"] * config["NUM_ACTORS"]
-                ), "batch size must be equal to number of steps * number of actors"
+                assert batch_size == config["NUM_STEPS"] * config["NUM_ACTORS"], (
+                    "batch size must be equal to number of steps * number of actors"
+                )
                 permutation = jax.random.permutation(_rng, batch_size)
                 batch = (traj_batch, advantages, targets)
                 batch = jax.tree.map(
@@ -278,9 +299,7 @@ def make_train(config):
                 return update_state, loss_info
 
             def callback(metric):
-                wandb.log(
-                    metric
-                )
+                wandb.log(metric)
 
             update_state = (train_state, traj_batch, advantages, targets, rng)
             update_state, loss_info = jax.lax.scan(
@@ -290,7 +309,7 @@ def make_train(config):
             metric = traj_batch.info
             rng = update_state[-1]
 
-            r0 = {"ratio0": loss_info["ratio"][0,0].mean()}
+            r0 = {"ratio0": loss_info["ratio"][0, 0].mean()}
             # jax.debug.print('ratio0 {x}', x=r0["ratio0"])
             loss_info = jax.tree.map(lambda x: x.mean(), loss_info)
             metric = jax.tree.map(lambda x: x.mean(), metric)
@@ -332,7 +351,7 @@ def main(config):
     plt.ylabel("Returns")
     plt.title(f"IPPO-FF={config['ENV_NAME']}")
 
-    '''updates_x = jnp.arange(out["metrics"]["total_loss"][0].shape[0])
+    """updates_x = jnp.arange(out["metrics"]["total_loss"][0].shape[0])
     loss_table = jnp.stack([updates_x, out["metrics"]["total_loss"].mean(axis=0), out["metrics"]["actor_loss"].mean(axis=0), out["metrics"]["critic_loss"].mean(axis=0), out["metrics"]["entropy"].mean(axis=0), out["metrics"]["ratio"].mean(axis=0)], axis=1)
     loss_table = wandb.Table(data=loss_table.tolist(), columns=["updates", "total_loss", "actor_loss", "critic_loss", "entropy", "ratio"])
     updates_x = jnp.arange(out["metrics"]["returned_episode_returns"][0].shape[0])
@@ -346,7 +365,7 @@ def main(config):
         "critic_loss_plot": wandb.plot.line(loss_table, "updates", "critic_loss", title="critic_loss_vs_updates"),
         "entropy_plot": wandb.plot.line(loss_table, "updates", "entropy", title="entropy_vs_updates"),
         "ratio_plot": wandb.plot.line(loss_table, "updates", "ratio", title="ratio_vs_updates"),
-    })'''
+    })"""
 
 
 if __name__ == "__main__":

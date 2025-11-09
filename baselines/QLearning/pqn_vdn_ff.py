@@ -34,7 +34,6 @@ class QNetwork(nn.Module):
 
     @nn.compact
     def __call__(self, x: jnp.ndarray, train: bool = False):
-
         if self.norm_input:
             x = nn.BatchNorm(use_running_average=not train)(x)
         else:
@@ -81,7 +80,6 @@ class CustomTrainState(TrainState):
 
 
 def make_train(config, env):
-
     assert (config["NUM_ENVS"] * config["NUM_STEPS"]) % config[
         "NUM_MINIBATCHES"
     ] == 0, "NUM_ENVS*NUM_STEPS must be divisible by NUM_MINIBATCHES"
@@ -103,7 +101,6 @@ def make_train(config, env):
 
     # epsilon-greedy exploration
     def eps_greedy_exploration(rng, q_vals, eps, valid_actions):
-
         rng_a, rng_e = jax.random.split(
             rng
         )  # a key for sampling random actions and one for picking
@@ -136,7 +133,6 @@ def make_train(config, env):
         return {agent: x[i] for i, agent in enumerate(env.agents)}
 
     def train(rng):
-
         original_seed = rng[0]
 
         # INIT ENV
@@ -192,7 +188,6 @@ def make_train(config, env):
 
         # TRAINING LOOP
         def _update_step(runner_state, unused):
-
             train_state, expl_state, test_state, rng = runner_state
 
             # SAMPLE PHASE
@@ -305,9 +300,7 @@ def make_train(config, env):
                     q_vals,  # vdn sum,
                     transitions.reward[:, 0],  # _all_
                     transitions.done[:, 0],  # _all_
-                ).reshape(
-                    -1
-                )  # (num_steps*num_envs)
+                ).reshape(-1)  # (num_steps*num_envs)
             else:  # standard 1 step qlearning
                 lambda_targets = (
                     transitions.reward[-1, 0]
@@ -319,7 +312,6 @@ def make_train(config, env):
                 train_state, rng = carry
 
                 def _learn_phase(carry, minibatch_and_target):
-
                     # minibatch shape: num_agents, batch_size, ...
                     # target shape: batch_size
                     # with batch_size = num_envs/num_minibatches
@@ -345,9 +337,7 @@ def make_train(config, env):
                             q_vals,
                             jnp.expand_dims(minibatch.action, axis=-1),
                             axis=-1,
-                        ).squeeze(
-                            axis=-1
-                        )  # (num_agents, batch_size,)
+                        ).squeeze(axis=-1)  # (num_agents, batch_size,)
                         vdn_chosen_action_qvals = jnp.sum(
                             chosen_action_qvals, axis=0
                         )  # (batch_size)
@@ -546,7 +536,6 @@ def env_from_config(config):
 
 
 def single_run(config):
-
     config = {**config, **config["alg"]}  # merge the alg config with the main config
     print("Config:\n", OmegaConf.to_yaml(config))
 
@@ -573,7 +562,7 @@ def single_run(config):
     outs = jax.block_until_ready(train_vjit(rngs))
 
     # save params
-    if config.get("SAVE_PATH", None) is not None:
+    if config.get("SAVE_PATH") is not None:
         from jaxmarl.wrappers.baselines import save_params
 
         model_state = outs["runner_state"][0]
@@ -582,7 +571,7 @@ def single_run(config):
         OmegaConf.save(
             config,
             os.path.join(
-                save_dir, f'{alg_name}_{env_name}_seed{config["SEED"]}_config.yaml'
+                save_dir, f"{alg_name}_{env_name}_seed{config['SEED']}_config.yaml"
             ),
         )
 
@@ -590,7 +579,7 @@ def single_run(config):
             params = jax.tree.map(lambda x: x[i], model_state.params)
             save_path = os.path.join(
                 save_dir,
-                f'{alg_name}_{env_name}_seed{config["SEED"]}_vmap{i}.safetensors',
+                f"{alg_name}_{env_name}_seed{config['SEED']}_vmap{i}.safetensors",
             )
             save_params(params, save_path)
 

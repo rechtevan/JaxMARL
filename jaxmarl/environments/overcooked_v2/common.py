@@ -81,7 +81,6 @@ class DynamicObject(IntEnum):
 
     @staticmethod
     def get_ingredient_idx_list_jit(obj):
-
         def _loop_body(carry):
             obj, pos, idx, res = carry
             count = obj & 0x3
@@ -109,7 +108,6 @@ class DynamicObject(IntEnum):
 
     @staticmethod
     def get_ingredient_idx(obj):
-
         def _body_fun(val):
             obj, idx, res = val
             new_res = jax.lax.select(obj & 0x3 != 0, idx, res)

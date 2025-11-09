@@ -7,9 +7,7 @@ from jaxmarl.environments.multi_agent_env import MultiAgentEnv
 
 
 class RolloutManager:
-
     def __init__(self, env: MultiAgentEnv):
-
         self.env = env
 
     @partial(jax.jit, static_argnums=[0])

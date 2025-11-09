@@ -33,7 +33,13 @@ class SimpleCryptoMPE(SimpleMPE):
     Note, currently only have continuous actions implemented.
     """
 
-    def __init__(self, num_agents=3, num_landmarks=2, action_type=DISCRETE_ACT, **kwargs,):
+    def __init__(
+        self,
+        num_agents=3,
+        num_landmarks=2,
+        action_type=DISCRETE_ACT,
+        **kwargs,
+    ):
         assert num_agents == 3, "Simple Crypto only supports 3 agents"
         assert num_landmarks == 2, "Simple Crypto only supports 2 landmarks"
 

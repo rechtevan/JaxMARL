@@ -58,6 +58,7 @@ class ActorCritic(nn.Module):
 
         return pi, jnp.squeeze(critic, axis=-1)
 
+
 class Transition(NamedTuple):
     done: jnp.ndarray
     action: jnp.ndarray
@@ -67,17 +68,25 @@ class Transition(NamedTuple):
     obs: jnp.ndarray
     info: jnp.ndarray
 
+
 def batchify(x: dict, agent_list, num_actors):
     max_dim = max([x[a].shape[-1] for a in agent_list])
-    def pad(z, length):
-        return jnp.concatenate([z, jnp.zeros(z.shape[:-1] + [length - z.shape[-1]])], -1)
 
-    x = jnp.stack([x[a] if x[a].shape[-1] == max_dim else pad(x[a]) for a in agent_list])
+    def pad(z, length):
+        return jnp.concatenate(
+            [z, jnp.zeros(z.shape[:-1] + [length - z.shape[-1]])], -1
+        )
+
+    x = jnp.stack(
+        [x[a] if x[a].shape[-1] == max_dim else pad(x[a]) for a in agent_list]
+    )
     return x.reshape((num_actors, -1))
+
 
 def unbatchify(x: jnp.ndarray, agent_list, num_envs, num_actors):
     x = x.reshape((num_actors, num_envs, -1))
     return {a: x[i] for i, a in enumerate(agent_list)}
+
 
 def make_train(config):
     env = jaxmarl.make(config["ENV_NAME"], **config["ENV_KWARGS"])
@@ -92,13 +101,18 @@ def make_train(config):
     env = LogWrapper(env)
 
     def linear_schedule(count):
-        frac = 1.0 - (count // (config["NUM_MINIBATCHES"] * config["UPDATE_EPOCHS"])) / config["NUM_UPDATES"]
+        frac = (
+            1.0
+            - (count // (config["NUM_MINIBATCHES"] * config["UPDATE_EPOCHS"]))
+            / config["NUM_UPDATES"]
+        )
         return config["LR"] * frac
 
     def train(rng):
-
         # INIT NETWORK
-        network = ActorCritic(env.action_space(env.agents[0]).n, activation=config["ACTIVATION"])
+        network = ActorCritic(
+            env.action_space(env.agents[0]).n, activation=config["ACTIVATION"]
+        )
         rng, _rng = jax.random.split(rng)
         init_x = jnp.zeros(env.observation_space(env.agents[0]).shape)
         network_params = network.init(_rng, init_x)
@@ -108,7 +122,10 @@ def make_train(config):
                 optax.adam(learning_rate=linear_schedule, eps=1e-5),
             )
         else:
-            tx = optax.chain(optax.clip_by_global_norm(config["MAX_GRAD_NORM"]), optax.adam(config["LR"], eps=1e-5))
+            tx = optax.chain(
+                optax.clip_by_global_norm(config["MAX_GRAD_NORM"]),
+                optax.adam(config["LR"], eps=1e-5),
+            )
 
         train_state = TrainState.create(
             apply_fn=network.apply,
@@ -134,13 +151,17 @@ def make_train(config):
                 pi, value = network.apply(train_state.params, obs_batch)
                 action = pi.sample(seed=_rng)
                 log_prob = pi.log_prob(action)
-                env_act = unbatchify(action, env.agents, config["NUM_ENVS"], env.num_agents)
+                env_act = unbatchify(
+                    action, env.agents, config["NUM_ENVS"], env.num_agents
+                )
 
                 # STEP ENV
                 rng, _rng = jax.random.split(rng)
                 rng_step = jax.random.split(_rng, config["NUM_ENVS"])
                 obsv, env_state, reward, done, info = jax.vmap(env.step)(
-                    rng_step, env_state, env_act,
+                    rng_step,
+                    env_state,
+                    env_act,
                 )
 
                 info = jax.tree.map(lambda x: x.reshape(config["NUM_ACTORS"]), info)
@@ -244,9 +265,9 @@ def make_train(config):
                 train_state, traj_batch, advantages, targets, rng = update_state
                 rng, _rng = jax.random.split(rng)
                 batch_size = config["MINIBATCH_SIZE"] * config["NUM_MINIBATCHES"]
-                assert (
-                    batch_size == config["NUM_STEPS"] * config["NUM_ACTORS"]
-                ), "batch size must be equal to number of steps * number of actors"
+                assert batch_size == config["NUM_STEPS"] * config["NUM_ACTORS"], (
+                    "batch size must be equal to number of steps * number of actors"
+                )
                 permutation = jax.random.permutation(_rng, batch_size)
                 batch = (traj_batch, advantages, targets)
                 batch = jax.tree.map(
@@ -288,9 +309,10 @@ def make_train(config):
     return train
 
 
-@hydra.main(version_base=None, config_path="config", config_name="ippo_ff_switch_riddle")
+@hydra.main(
+    version_base=None, config_path="config", config_name="ippo_ff_switch_riddle"
+)
 def main(config):
-
     config = OmegaConf.to_container(config)
     wandb.init(
         entity=config["ENTITY"],
@@ -306,12 +328,21 @@ def main(config):
         out = train_jit(rng)
 
     updates_x = jnp.arange(out["metrics"]["returned_episode_returns"].shape[0])
-    returns_table = jnp.stack([updates_x, out["metrics"]["returned_episode_returns"].mean(axis=(-2, -1))], axis=1)
-    returns_table = wandb.Table(data=returns_table.tolist(), columns=["updates", "returns"])
-    wandb.log({
-        "returns_plot": wandb.plot.line(returns_table, "updates", "returns", title="returns_vs_updates"),
-        "returns": out["metrics"]["returned_episode_returns"].mean()
-    })
+    returns_table = jnp.stack(
+        [updates_x, out["metrics"]["returned_episode_returns"].mean(axis=(-2, -1))],
+        axis=1,
+    )
+    returns_table = wandb.Table(
+        data=returns_table.tolist(), columns=["updates", "returns"]
+    )
+    wandb.log(
+        {
+            "returns_plot": wandb.plot.line(
+                returns_table, "updates", "returns", title="returns_vs_updates"
+            ),
+            "returns": out["metrics"]["returned_episode_returns"].mean(),
+        }
+    )
 
     # mean_returns = out["metrics"]["returned_episode_returns"].mean(-1).reshape(-1)
     # x = np.arange(len(mean_returns)) * config["NUM_ACTORS"]
@@ -320,8 +351,8 @@ def main(config):
     # plt.ylabel("Return")
     # plt.savefig(f'switch_riddle_ippo_ret.png')
 
-
     # import pdb; pdb.set_trace()
 
-if __name__=="__main__":
+
+if __name__ == "__main__":
     main()
