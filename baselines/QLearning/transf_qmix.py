@@ -1220,7 +1220,7 @@ def single_run(config):
         )
 
         for i, _rng in enumerate(rngs):
-            params = jax.tree.map(lambda x: x[i], model_state.params)
+            params = jax.tree.map(lambda x, i=i: x[i], model_state.params)
             save_path = os.path.join(
                 save_dir,
                 f"{alg_name}_{env_name}_seed{config['SEED']}_vmap{i}.safetensors",

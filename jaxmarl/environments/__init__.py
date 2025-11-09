@@ -18,6 +18,7 @@ from .mpe import (
     SimpleTagMPE,
     SimpleWorldCommMPE,
 )
+from .multi_agent_env import MultiAgentEnv, State
 from .overcooked import Overcooked, overcooked_layouts
 from .overcooked_v2 import OvercookedV2, overcooked_v2_layouts
 from .smax import SMAX, HeuristicEnemySMAX, LearnedPolicyEnemySMAX

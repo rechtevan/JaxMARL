@@ -450,7 +450,7 @@ def make_train(config, env):
             if config.get("LOG_AGENTS_SEPARATELY", False):
                 for i, a in enumerate(env.agents):
                     m = jax.tree.map(
-                        lambda x: x[..., i].mean(),
+                        lambda x, i=i: x[..., i].mean(),
                         infos,
                     )
                     m = {k + f"_{a}": v for k, v in m.items()}
@@ -540,7 +540,7 @@ def make_train(config, env):
                 metrics = {}
                 for i, a in enumerate(env.agents):
                     m = jax.tree.map(
-                        lambda x: jnp.nanmean(
+                        lambda x, i=i: jnp.nanmean(
                             jnp.where(
                                 infos["returned_episode"][..., i],
                                 x[..., i],
@@ -646,7 +646,7 @@ def single_run(config):
         )
 
         for i, _rng in enumerate(rngs):
-            params = jax.tree.map(lambda x: x[i], model_state.params)
+            params = jax.tree.map(lambda x, i=i: x[i], model_state.params)
             save_path = os.path.join(
                 save_dir,
                 f"{alg_name}_{env_name}_seed{config['SEED']}_vmap{i}.safetensors",
