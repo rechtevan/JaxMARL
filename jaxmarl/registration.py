@@ -1,3 +1,5 @@
+from typing import TYPE_CHECKING
+
 from .environments import (
     SMAX,
     Ant,
@@ -12,6 +14,7 @@ from .environments import (
     InTheMatrix,
     JaxNav,
     LearnedPolicyEnemySMAX,
+    MultiAgentEnv,
     Overcooked,
     OvercookedV2,
     SimpleAdversaryMPE,
@@ -31,11 +34,16 @@ from .environments import (
     Walker2d,
 )
 
+if TYPE_CHECKING:
+    from typing import Any
 
-def make(env_id: str, **env_kwargs):
+
+def make(env_id: str, **env_kwargs: "Any") -> MultiAgentEnv:
     """A JAX-version of OpenAI's env.make(env_name), built off Gymnax"""
     if env_id not in registered_envs:
         raise ValueError(f"{env_id} is not in registered jaxmarl environments.")
+
+    env: MultiAgentEnv
 
     # 1. MPE PettingZoo Environments
     if env_id == "MPE_simple_v3":
