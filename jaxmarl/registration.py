@@ -34,6 +34,7 @@ from .environments import (
     Walker2d,
 )
 
+
 if TYPE_CHECKING:
     from typing import Any
 
