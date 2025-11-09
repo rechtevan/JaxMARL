@@ -1,5 +1,7 @@
 <!-- markdownlint-disable MD041 -->
+
 NOTE: We use effort-based-versioning
+
 <!-- markdownlint-enable MD041 -->
 
 ### [v0.1.0]
