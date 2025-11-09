@@ -1,9 +1,6 @@
 # Markdown formatting configuration for JaxMARL
 # Used by mdformat via pre-commit hooks
 
-# Exclude AI-generated and cache directories
-exclude = [".local", ".pytest_cache", ".git"]
-
 # Wrap text at 88 characters (match Python line length)
 wrap = 88
 
