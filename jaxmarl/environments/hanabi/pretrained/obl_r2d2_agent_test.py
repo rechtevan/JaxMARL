@@ -14,8 +14,13 @@ time_limit = 80
 env = LogWrapper(make("hanabi"))
 agent = OBLAgentR2D2()
 
-batchify = lambda x: jnp.stack([x[a] for a in env.agents])
-unbatchify = lambda x: {a: x[i] for i, a in enumerate(env.agents)}
+
+def batchify(x):
+    return jnp.stack([x[a] for a in env.agents])
+
+
+def unbatchify(x):
+    return {a: x[i] for i, a in enumerate(env.agents)}
 
 
 @jax.jit

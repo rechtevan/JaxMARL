@@ -203,7 +203,7 @@ def make_train(config, env):
         # INIT BUFFER
         # to initalize the buffer is necessary to sample a trajectory to know its strucutre
         def _env_sample_step(env_state, unused):
-            rng, key_a, key_s = jax.random.split(
+            _rng, key_a, key_s = jax.random.split(
                 jax.random.PRNGKey(0), 3
             )  # use a dummy rng here
             key_a = jax.random.split(key_a, env.num_agents)
@@ -645,7 +645,7 @@ def single_run(config):
             ),
         )
 
-        for i, rng in enumerate(rngs):
+        for i, _rng in enumerate(rngs):
             params = jax.tree.map(lambda x: x[i], model_state.params)
             save_path = os.path.join(
                 save_dir,

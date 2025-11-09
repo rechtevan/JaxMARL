@@ -119,10 +119,9 @@ class OvercookedV2(MultiAgentEnv):
         self.agents = [f"agent_{i}" for i in range(num_agents)]
         self.action_set = jnp.array(list(Actions))
 
-        if isinstance(observation_type, list):
-            if len(observation_type) != num_agents:
-                raise ValueError(
-                    "Number of observation types must match the number of agents"
+        if isinstance(observation_type, list) and len(observation_type) != num_agents:
+            raise ValueError(
+                "Number of observation types must match the number of agents"
                 )
 
         self.observation_type = observation_type

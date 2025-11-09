@@ -357,7 +357,7 @@ class InTheGrid(MultiAgentEnv):
             state = state.replace(grid=grid)
 
             # Get agent positions and orientations
-            agent_positions = state.agent_positions[:, :2]
+            state.agent_positions[:, :2]
             state.agent_positions[:, 2]
 
             zaps = actions == Actions.interact

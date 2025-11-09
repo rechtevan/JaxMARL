@@ -58,7 +58,7 @@ def main(argv):
     print(f"Action encoding for the environment: {env.action_encoding}")
 
     rng, _rng = jax.random.split(key)
-    obs, env_state = env.reset(_rng)
+    _obs, env_state = env.reset(_rng)
 
     score = 0
     env_step_jit = jax.jit(env.step)

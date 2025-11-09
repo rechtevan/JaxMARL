@@ -432,7 +432,7 @@ def make_train(config, env):
         # INIT BUFFER
         # to initalize the buffer is necessary to sample a trajectory to know its strucutre
         def _env_sample_step(env_state, unused):
-            rng, key_a, key_s = jax.random.split(
+            _rng, key_a, key_s = jax.random.split(
                 jax.random.PRNGKey(0), 3
             )  # use a dummy rng here
             key_a = jax.random.split(key_a, env.num_agents)
@@ -996,7 +996,7 @@ def make_train(config, env):
                 hstate,
                 _rng,
             )
-            step_state, (rewards, dones, infos) = jax.lax.scan(
+            step_state, (_rewards, _dones, infos) = jax.lax.scan(
                 _greedy_env_step, step_state, None, config["NUM_STEPS"]
             )
 

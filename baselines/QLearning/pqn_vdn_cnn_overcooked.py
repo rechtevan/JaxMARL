@@ -616,7 +616,7 @@ def single_run(config):
             ),
         )
 
-        for i, rng in enumerate(rngs):
+        for i, _rng in enumerate(rngs):
             params = jax.tree.map(lambda x: x[i], model_state.params)
             save_path = os.path.join(
                 save_dir,

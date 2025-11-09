@@ -98,11 +98,11 @@ def grid_to_graph(grid):
         # Return length n boolean mask of neighbors
         # We then vmap this function over all n
         r = idx + 1
-        l = idx - 1
+        left = idx - 1
         t = idx - w
         b = idx + w
 
-        l_border = jnp.logical_or(idx % w == 0, nodes[l])
+        l_border = jnp.logical_or(idx % w == 0, nodes[left])
         r_border = jnp.logical_or(r % w == 0, nodes[r])
         t_border = jnp.logical_or(
             idx // w == 0,

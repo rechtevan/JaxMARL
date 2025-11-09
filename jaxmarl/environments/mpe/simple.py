@@ -70,7 +70,7 @@ class SimpleMPE(MultiAgentEnv):
                 f"Number of landmarks {len(landmarks)} does not match number of landmarks {num_landmarks}"
             )
             self.landmarks = landmarks
-        self.l_to_i = {l: i + self.num_agents for i, l in enumerate(self.landmarks)}
+        self.l_to_i = {landmark: i + self.num_agents for i, landmark in enumerate(self.landmarks)}
 
         if action_spaces is None:
             if action_type == DISCRETE_ACT:
@@ -388,12 +388,12 @@ class SimpleMPE(MultiAgentEnv):
         def __env_force_outer(idx: int):
             @partial(jax.vmap, in_axes=[None, 0])
             def __env_force_inner(idx_a: int, idx_b: int):
-                l = idx_b <= idx_a
+                is_before = idx_b <= idx_a
                 l_a = jnp.zeros((2, 2))
 
                 collision_force = self._get_collision_force(idx_a, idx_b, state)
 
-                xx = jax.lax.select(l, l_a, collision_force)
+                xx = jax.lax.select(is_before, l_a, collision_force)
                 # jax.debug.print('{a} {b} {f}', a=idx_a, b=idx_b, f=xx)
                 return xx
 

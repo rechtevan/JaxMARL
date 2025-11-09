@@ -460,9 +460,11 @@ class Overcooked(MultiAgentEnv):
         # Can't go past wall or goal
         def _wall_or_goal(fwd_position, wall_map, goal_pos):
             fwd_wall = wall_map.at[fwd_position[1], fwd_position[0]].get()
-            goal_collision = lambda pos, goal: jnp.logical_and(
-                pos[0] == goal[0], pos[1] == goal[1]
-            )
+
+            def goal_collision(pos, goal):
+                return jnp.logical_and(
+                    pos[0] == goal[0], pos[1] == goal[1]
+                )
             fwd_goal = jax.vmap(goal_collision, in_axes=(None, 0))(
                 fwd_position, goal_pos
             )

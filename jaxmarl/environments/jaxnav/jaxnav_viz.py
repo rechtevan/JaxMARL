@@ -85,9 +85,8 @@ class JaxNavVisualizer:
         if self.plot_path:
             for a in range(self.env.num_agents):
                 plot_frame = frame
-                if self.done_frames is not None:
-                    if self.done_frames[a] < frame:
-                        plot_frame = self.done_frames[a]
+                if self.done_frames is not None and self.done_frames[a] < frame:
+                    plot_frame = self.done_frames[a]
                 self.env.map_obj.plot_agent_path(
                     self.ax,
                     self.path_seq[:plot_frame, a, 0],

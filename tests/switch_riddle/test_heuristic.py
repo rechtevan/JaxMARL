@@ -146,7 +146,7 @@ class TestHeuristic:
             obs, state = env.reset(key_reset)
 
             actions = action_for_agent_in_room(env, state, "TELL")
-            obs, state, reward, done, infos = env.step_env(key_step, state, actions)
+            _obs, state, _reward, done, _infos = env.step_env(key_step, state, actions)
 
             assert done["__all__"], (
                 "The environment did not terminate correctly when an agent speaks."
@@ -155,7 +155,7 @@ class TestHeuristic:
         # Case where maximum time steps is reached
         for _ in range(100):
             key, key_reset, key_step = jax.random.split(key, 3)
-            obs, state = env.reset(key_reset)
+            _obs, state = env.reset(key_reset)
 
             for _i in range(env.max_steps):
                 key, key_step = jax.random.split(key)

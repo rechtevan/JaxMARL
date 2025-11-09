@@ -395,7 +395,7 @@ def make_train(config, env):
                 init_obs,
                 _rng,
             )
-            step_state, (rewards, dones, infos) = jax.lax.scan(
+            step_state, (_rewards, _dones, infos) = jax.lax.scan(
                 _greedy_env_step, step_state, None, config["TEST_NUM_STEPS"]
             )
             metrics = jax.tree.map(
@@ -491,7 +491,7 @@ def single_run(config):
             ),
         )
 
-        for i, rng in enumerate(rngs):
+        for i, _rng in enumerate(rngs):
             params = jax.tree.map(lambda x: x[i], model_state.params)
             save_path = os.path.join(
                 save_dir,

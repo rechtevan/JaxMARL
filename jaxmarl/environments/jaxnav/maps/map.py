@@ -77,7 +77,7 @@ class Map:
 
         def _cond_idx(val):
             """true while i is less than the number of agents"""
-            key, i, case = val
+            _key, i, case = val
             return i < case.shape[0]
 
         def _body_idx(val, key):
@@ -92,7 +92,7 @@ class Map:
                 5. check if start and goal are too close
                 """
 
-                key, pair, case = val
+                _key, pair, case = val
                 temp_case = case.at[i].set(pair + self.rad * 3)  # ensure no conflict
 
                 map_collisions = jnp.any(

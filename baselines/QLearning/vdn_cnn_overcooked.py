@@ -439,7 +439,7 @@ def make_train(config, env):
             rng, _rng = jax.random.split(rng)
             init_obs, env_state = test_env.batch_reset(_rng)
             rng, _rng = jax.random.split(rng)
-            _step_state, (rewards, dones, infos) = jax.lax.scan(
+            _step_state, (_rewards, _dones, infos) = jax.lax.scan(
                 _greedy_env_step,
                 (init_obs, env_state, _rng),
                 None,
@@ -541,7 +541,7 @@ def single_run(config):
             ),
         )
 
-        for i, rng in enumerate(rngs):
+        for i, _rng in enumerate(rngs):
             params = jax.tree.map(lambda x: x[i], model_state.params)
             save_path = os.path.join(
                 save_dir,

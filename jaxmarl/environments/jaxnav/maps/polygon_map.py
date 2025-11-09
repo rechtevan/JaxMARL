@@ -125,9 +125,9 @@ class PolygonMap(Map):
     @partial(jax.jit, static_argnums=[0])
     def check_map_collision(self, pos, coords, radius):
         """For a circle agent"""
-        l = self.check_agent_map_collision(pos, coords)
-        i = jnp.any(self.check_point_map_collision(pos, coords))
-        return l | i
+        agent_collision = self.check_agent_map_collision(pos, coords)
+        point_collision = jnp.any(self.check_point_map_collision(pos, coords))
+        return agent_collision | point_collision
 
     # NOTE need to add ray tracing for lidar - constrains size of usable polygon
 

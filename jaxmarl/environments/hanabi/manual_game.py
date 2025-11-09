@@ -13,8 +13,14 @@ from jaxmarl.wrappers.baselines import load_params
 
 
 env = make("hanabi")
-batchify = lambda x: jnp.stack([x[agent] for agent in env.agents])
-unbatchify = lambda x: {agent: x[i] for i, agent in enumerate(env.agents)}
+
+
+def batchify(x):
+    return jnp.stack([x[agent] for agent in env.agents])
+
+
+def unbatchify(x):
+    return {agent: x[i] for i, agent in enumerate(env.agents)}
 
 
 class ManualPlayer:

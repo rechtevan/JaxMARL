@@ -339,7 +339,7 @@ class InTheMatrix(MultiAgentEnv):
 
             conflicts = jnp.clip(jnp.sum(conflicts_matrix, axis=-1), 0, 1)
 
-            k1, k2, k3 = jax.random.split(key, 3)
+            _k1, k2, k3 = jax.random.split(key, 3)
             one_step = rand_interaction(k2, conflicts, conflicts_matrix, forward)
 
             # if an interaction 2 steps away (diagonally or straight ahead)
@@ -607,7 +607,7 @@ class InTheMatrix(MultiAgentEnv):
             k1, k2 = jax.random.split(key, 2)
             rand_idx = select_random_true_index(k1, collisions)
             collisions_rand = collisions.at[rand_idx].set(False)  # <<<< PROBLEM LINE
-            new_locs_rand = jax.vmap(lambda p, l, n: jnp.where(p, l, n))(
+            new_locs_rand = jax.vmap(lambda p, loc, n: jnp.where(p, loc, n))(
                 collisions_rand, agent_locs, new_agent_locs
             )
 
@@ -616,7 +616,7 @@ class InTheMatrix(MultiAgentEnv):
                 collisions.at[stayed_idx].set(False),
                 collisions_rand,
             )
-            new_locs_stayed = jax.vmap(lambda p, l, n: jnp.where(p, l, n))(
+            new_locs_stayed = jax.vmap(lambda p, loc, n: jnp.where(p, loc, n))(
                 collisions_stayed, agent_locs, new_agent_locs
             )
 

@@ -23,9 +23,9 @@ class MultiLayerLSTM(nn.RNNCellBase):
     def __call__(self, carry, inputs):
         new_hs = []
         new_cs = []
-        for l in range(self.num_layers):
-            new_carry, y = nn.LSTMCell(self.features, name=f"l{l}")(
-                jax.tree.map(lambda x: x[l], carry), inputs
+        for layer_idx in range(self.num_layers):
+            new_carry, y = nn.LSTMCell(self.features, name=f"l{layer_idx}")(
+                jax.tree.map(lambda x: x[layer_idx], carry), inputs
             )
             new_cs.append(new_carry[0])
             new_hs.append(new_carry[1])
@@ -123,8 +123,11 @@ def example():
     obs, env_state = env.reset(rng)
     env.render(env_state)
 
-    batchify = lambda x: jnp.stack([x[agent] for agent in env.agents])
-    unbatchify = lambda x: {agent: x[i] for i, agent in enumerate(env.agents)}
+    def batchify(x):
+        return jnp.stack([x[agent] for agent in env.agents])
+
+    def unbatchify(x):
+        return {agent: x[i] for i, agent in enumerate(env.agents)}
 
     agent_input = (batchify(obs), batchify(env.get_legal_moves(env_state)))
     agent_carry, actions = agent.greedy_act(params, agent_carry, agent_input)

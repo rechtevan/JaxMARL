@@ -254,7 +254,7 @@ if __name__ == "__main__":
     obs_viz2 = None
     if args.render_agent_view:
         obs_viz = Visualizer()
-        if args.env == "MAMaze" or "Overcooked":
+        if args.env in ("MAMaze", "Overcooked"):
             obs_viz2 = Visualizer()
 
     with jax.disable_jit(False):

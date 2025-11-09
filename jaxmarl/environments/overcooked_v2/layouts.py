@@ -233,9 +233,9 @@ class Layout:
         """
         available_ingredients = list(range(num_ingredients)) * 3
         raw_combinations = itertools.combinations(available_ingredients, 3)
-        unique_recipes = set(
+        unique_recipes = {
             tuple(sorted(combination)) for combination in raw_combinations
-        )
+        }
 
         return [list(recipe) for recipe in unique_recipes]
 

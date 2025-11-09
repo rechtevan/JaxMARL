@@ -472,11 +472,12 @@ class HanabiEnv(HanabiGame):
         """Get the features of the board."""
         # by default the fireworks are incremental, i.e. [1,1,0,0,0] one and two are in the board
         # must be OH of only the highest rank, i.e. [0,1,0,0,0]
-        keep_only_last_one = lambda x: jnp.where(
-            jnp.arange(x.size) < (x.size - 1 - jnp.argmax(jnp.flip(x))),  # last argmax
-            0,
-            x,
-        )
+        def keep_only_last_one(x):
+            return jnp.where(
+                jnp.arange(x.size) < (x.size - 1 - jnp.argmax(jnp.flip(x))),  # last argmax
+                0,
+                x,
+            )
 
         fireworks = jax.vmap(keep_only_last_one)(state.fireworks)
         deck = jnp.any(jnp.any(state.deck, axis=1), axis=1).astype(int)
@@ -532,7 +533,8 @@ class HanabiEnv(HanabiGame):
             ).ravel()
 
         # compute my belief and the beliefs of other players, starting from self cards
-        rel_pos = lambda x: jnp.roll(x, -aidx, axis=0)
+        def rel_pos(x):
+            return jnp.roll(x, -aidx, axis=0)
         belief = jax.vmap(belief_per_hand)(
             rel_pos(state.card_knowledge),
             rel_pos(state.colors_revealed),
@@ -585,7 +587,7 @@ class HanabiEnv(HanabiGame):
 
     def render_obs(self, obs: dict):
         # print the dictionary of agents observations
-        for i, (agent, obs) in enumerate(obs.items()):
+        for i, (agent, agent_obs) in enumerate(obs.items()):
             print(f"Obs for {agent}")
             j = 0
             print("hand feats", obs[: self.hands_n_feats])
@@ -661,11 +663,12 @@ class HanabiEnv(HanabiGame):
 
             return actor_hand_str
 
-        keep_only_last_one = lambda x: jnp.where(
-            jnp.arange(x.size) < (x.size - 1 - jnp.argmax(jnp.flip(x))),  # last argmax
-            0,
-            x,
-        )
+        def keep_only_last_one(x):
+            return jnp.where(
+                jnp.arange(x.size) < (x.size - 1 - jnp.argmax(jnp.flip(x))),  # last argmax
+                0,
+                x,
+            )
         fireworks = jax.vmap(keep_only_last_one)(state.fireworks)
         fireworks_cards = [
             jnp.zeros((self.num_colors, self.num_ranks)).at[i].set(fireworks[i])
@@ -764,11 +767,12 @@ class HanabiEnv(HanabiGame):
 
             return actor_hand_str
 
-        keep_only_last_one = lambda x: jnp.where(
-            jnp.arange(x.size) < (x.size - 1 - jnp.argmax(jnp.flip(x))),  # last argmax
-            0,
-            x,
-        )
+        def keep_only_last_one(x):
+            return jnp.where(
+                jnp.arange(x.size) < (x.size - 1 - jnp.argmax(jnp.flip(x))),  # last argmax
+                0,
+                x,
+            )
         fireworks = jax.vmap(keep_only_last_one)(new_state.fireworks)
         fireworks_cards = [
             jnp.zeros((self.num_colors, self.num_ranks)).at[i].set(fireworks[i])

@@ -1004,12 +1004,12 @@ class SMAX(MultiAgentEnv):
                 & (dist < self.unit_type_attack_ranges[state.unit_types[shooter_idx]])
             )
 
-        attacked_agents = set(
+        attacked_agents = {
             int(agent_being_shot(i, actions[agent]))
             for i, agent in enumerate(self.agents)
             if actions[agent] > self.num_movement_actions - 1
             and agent_can_shoot(i, actions[agent])
-        )
+        }
         # render circles
         ax.clear()
         ax.set_xlim([0.0, self.map_width])
