@@ -1,58 +1,75 @@
 # Hanabi
 
-This directory contains a MARL environment for the cooperative card game, Hanabi, implemented in JAX. It is inspired by the popular [Hanabi Learning Environment (HLE)](https://arxiv.org/pdf/1902.00506.pdf), but intended to be simpler to integrate and run with the growing ecosystem of JAX implemented RL research pipelines.
-
+This directory contains a MARL environment for the cooperative card game, Hanabi,
+implemented in JAX. It is inspired by the popular
+[Hanabi Learning Environment (HLE)](https://arxiv.org/pdf/1902.00506.pdf), but intended
+to be simpler to integrate and run with the growing ecosystem of JAX implemented RL
+research pipelines.
 
 ## Action Space
-Hanabi is a turn-based game. The current player can choose to discard or play any of the cards in their hand, or hint a colour or rank to any one of their teammates.
+
+Hanabi is a turn-based game. The current player can choose to discard or play any of the
+cards in their hand, or hint a colour or rank to any one of their teammates.
 
 ## Observation Space
-The observations closely follow the featurization in the HLE. Each observation is comprised of 658 features:
 
-* **Hands (127)**: information about the visible hands.
-  * other player hand: 125
-    * card 0: 25,
-    * card 1: 25
-    * card 2: 25
-    * card 3: 25
-    * card 4: 25
-  * Hands missing card: 2 (one-hot)
+The observations closely follow the featurization in the HLE. Each observation is
+comprised of 658 features:
 
-* **Board (76)**: encoding of the public information visible in the board.
-  * Deck: 40, thermometer
-  * Fireworks: 25, one-hot
-  * Info Tokens: 8, thermometer
-  * ife Tokens: 3, thermometer
+- **Hands (127)**: information about the visible hands.
 
-* **Discards (50)**: encoding of the cards in the discard pile.
-  * Colour R: 10 bits for each card
-  * Colour Y: 10 bits for each card
-  * Colour G: 10 bits for each card
-  * Colour W: 10 bits for each card
-  * Colour B: 10 bits for each card
+  - other player hand: 125
+    - card 0: 25,
+    - card 1: 25
+    - card 2: 25
+    - card 3: 25
+    - card 4: 25
+  - Hands missing card: 2 (one-hot)
 
-* **Last Action (55)**: encoding of the last move of the previous player.
-  * Acting player index, relative to yourself: 2, one-hot
-  * MoveType: 4, one-hot
-  * Target player index, relative to acting player: 2, one-hot
-  * Color revealed: 5, one-hot
-  * Rank revealed: 5, one-hot
-  * Reveal outcome 5 bits, each bit is 1 if the card was hinted at
-  * Position played/discarded: 5, one-hot
-  * Card played/discarded 25, one-hot
-  * Card played scored: 1
-  * Card played added info token: 1
+- **Board (76)**: encoding of the public information visible in the board.
 
-* **V0 belief (350)**: trivially-computed probability of being a specific car (given the played-discarded cards and the hints given), for each card of each player.
-  * Possible Card (for each card): 25 (* 10)
-  * Colour hinted (for each card): 5 (* 10)
-  * Rank hinted (for each card): 5 (* 10)
+  - Deck: 40, thermometer
+  - Fireworks: 25, one-hot
+  - Info Tokens: 8, thermometer
+  - ife Tokens: 3, thermometer
+
+- **Discards (50)**: encoding of the cards in the discard pile.
+
+  - Colour R: 10 bits for each card
+  - Colour Y: 10 bits for each card
+  - Colour G: 10 bits for each card
+  - Colour W: 10 bits for each card
+  - Colour B: 10 bits for each card
+
+- **Last Action (55)**: encoding of the last move of the previous player.
+
+  - Acting player index, relative to yourself: 2, one-hot
+  - MoveType: 4, one-hot
+  - Target player index, relative to acting player: 2, one-hot
+  - Color revealed: 5, one-hot
+  - Rank revealed: 5, one-hot
+  - Reveal outcome 5 bits, each bit is 1 if the card was hinted at
+  - Position played/discarded: 5, one-hot
+  - Card played/discarded 25, one-hot
+  - Card played scored: 1
+  - Card played added info token: 1
+
+- **V0 belief (350)**: trivially-computed probability of being a specific car (given the
+  played-discarded cards and the hints given), for each card of each player.
+
+  - Possible Card (for each card): 25 (\* 10)
+  - Colour hinted (for each card): 5 (\* 10)
+  - Rank hinted (for each card): 5 (\* 10)
 
 ## Pretrained Models
 
-We make available to use some pretrained models. For example you can use a jax conversion of the original R2D2 OBL model in this way:
+We make available to use some pretrained models. For example you can use a jax
+conversion of the original R2D2 OBL model in this way:
 
-1. Download the models from Hugginface: ```git clone https://huggingface.co/mttga/obl-r2d2-flax``` (ensure to have git lfs installed). You can also use the script: ```bash jaxmarl/environments/hanabi/models/download_r2d2_obl.sh```
+1. Download the models from Hugginface:
+   `git clone https://huggingface.co/mttga/obl-r2d2-flax` (ensure to have git lfs
+   installed). You can also use the script:
+   `bash jaxmarl/environments/hanabi/models/download_r2d2_obl.sh`
 2. Load the parameters, import the agent wrapper and use it with JaxMarl Hanabi:
 
 ```python
@@ -154,7 +171,10 @@ Legal Actions: ['D0', 'D1', 'D2', 'D3', 'D4', 'P0', 'P1', 'P2', 'P3', 'P4', 'HY'
 
 ## Manual Game
 
-You can test the environment and your models by using the ```manual_game.py``` script in this folder. It allows to control one or two agents with the keyboard and one or two agents with a pretrained model (an obl model by default). For example, to play with an obl pretrained model:
+You can test the environment and your models by using the `manual_game.py` script in
+this folder. It allows to control one or two agents with the keyboard and one or two
+agents with a pretrained model (an obl model by default). For example, to play with an
+obl pretrained model:
 
 ```
 python manual_game.py \
@@ -174,7 +194,9 @@ python manual_game.py \
 ```
 
 ## Citation
+
 The environment was orginally described in the following work:
+
 ```
 @article{bard2019hanabi,
   title={The Hanabi Challenge: A New Frontier for AI Research},

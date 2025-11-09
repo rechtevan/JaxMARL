@@ -122,9 +122,9 @@ def grid_to_graph(grid):
 
         neighbor_mask = jnp.zeros(n, dtype=jnp.bool_)
         # jax.debug.print('idx {x}, neigh {n}', x=idx, n=jnp.array([left_idx, right_idx, top_idx, bottom_idx]))
-        neighbor_mask = neighbor_mask.at[jnp.array([left_idx, right_idx, top_idx, bottom_idx])].set(
-            True
-        )
+        neighbor_mask = neighbor_mask.at[
+            jnp.array([left_idx, right_idx, top_idx, bottom_idx])
+        ].set(True)
 
         neighbor_mask = (1 - nodes[idx]) * neighbor_mask + nodes[
             idx

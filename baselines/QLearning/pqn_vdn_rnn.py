@@ -425,9 +425,13 @@ def make_train(config, env):
                     x = x.reshape(
                         *x.shape[:2], config["NUM_MINIBATCHES"], -1, *x.shape[3:]
                     )  # num_steps, num_agents, minibatches, batch_size/num_minbatches,
-                    new_order = (
-                        [2, 0, 1, 3, *list(range(4, x.ndim))]
-                    )  # (minibatches, num_steps, num_agents, batch_size/num_minbatches, ...)
+                    new_order = [
+                        2,
+                        0,
+                        1,
+                        3,
+                        *list(range(4, x.ndim)),
+                    ]  # (minibatches, num_steps, num_agents, batch_size/num_minbatches, ...)
                     x = jnp.transpose(x, new_order)
                     return x
 

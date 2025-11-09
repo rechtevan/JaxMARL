@@ -462,9 +462,8 @@ class Overcooked(MultiAgentEnv):
             fwd_wall = wall_map.at[fwd_position[1], fwd_position[0]].get()
 
             def goal_collision(pos, goal):
-                return jnp.logical_and(
-                    pos[0] == goal[0], pos[1] == goal[1]
-                )
+                return jnp.logical_and(pos[0] == goal[0], pos[1] == goal[1])
+
             fwd_goal = jax.vmap(goal_collision, in_axes=(None, 0))(
                 fwd_position, goal_pos
             )

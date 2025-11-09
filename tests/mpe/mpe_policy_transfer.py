@@ -114,12 +114,8 @@ parameter_sharing = False
 
 
 # experiment parameters (necessary if you don't want to use the CT wrapper
-max_obs_length = max(
-    [get_space_dim(x) for x in env_jax.observation_spaces.values()]
-)
-max_action_space = max(
-    [get_space_dim(x) for x in env_jax.action_spaces.values()]
-)
+max_obs_length = max([get_space_dim(x) for x in env_jax.observation_spaces.values()])
+max_action_space = max([get_space_dim(x) for x in env_jax.action_spaces.values()])
 valid_actions = {
     a: jnp.arange(get_space_dim(u)) for a, u in env_jax.action_spaces.items()
 }
@@ -184,9 +180,7 @@ for e in tqdm.tqdm(range(num_ep)):
         # print('obs', obs_zoo)
 
         done_zoo = {a: jnp.array([i]) for a, i in done_zoo.items()}
-        done_zoo["__all__"] = jnp.all(
-            jnp.array([done_zoo[a] for a in done_zoo])
-        )[None]
+        done_zoo["__all__"] = jnp.all(jnp.array([done_zoo[a] for a in done_zoo]))[None]
         # print('done', done_zoo)
         acts = obs_to_act(obs_zoo, done_zoo)
         acts = {a: int(i) for a, i in acts.items()}

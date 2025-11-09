@@ -80,7 +80,9 @@ class SimpleMPE(MultiAgentEnv):
                 f"Number of landmarks {len(landmarks)} does not match number of landmarks {num_landmarks}"
             )
             self.landmarks = landmarks
-        self.l_to_i = {landmark: i + self.num_agents for i, landmark in enumerate(self.landmarks)}
+        self.l_to_i = {
+            landmark: i + self.num_agents for i, landmark in enumerate(self.landmarks)
+        }
 
         if action_spaces is None:
             if action_type == DISCRETE_ACT:

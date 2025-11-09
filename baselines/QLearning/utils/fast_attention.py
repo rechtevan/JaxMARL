@@ -677,7 +677,9 @@ class FastAttentionviaLowRankDecomposition(FastAttention):
         if self.unidirectional:
             index = attention_dims_t[0]
             z_slice_shape = (
-                (*key_prime.shape[0:len(batch_dims_t)], key_prime.shape[-1], value.shape[-1])
+                *key_prime.shape[0 : len(batch_dims_t)],
+                key_prime.shape[-1],
+                value.shape[-1],
             )
 
             numerator_fn = _numerator(z_slice_shape, precision, self.lax_scan_unroll)
@@ -702,7 +704,10 @@ class FastAttentionviaLowRankDecomposition(FastAttention):
                 )
 
                 index = attention_dims_t[0]
-                t_slice_shape = (*key_prime.shape[0:len(batch_dims_t)], key_prime.shape[-1])
+                t_slice_shape = (
+                    *key_prime.shape[0 : len(batch_dims_t)],
+                    key_prime.shape[-1],
+                )
                 denominator_fn = _denominator(
                     t_slice_shape, precision, self.lax_scan_unroll
                 )

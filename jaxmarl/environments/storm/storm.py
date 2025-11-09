@@ -163,9 +163,7 @@ class InTheMatrix(MultiAgentEnv):
         self.OBS_SIZE = obs_size
         self.PADDING = self.OBS_SIZE - 1
         self.NUM_COINS = num_coins  # per type
-        (
-            2 + NUM_COIN_TYPES * self.NUM_COINS + 1
-        )  # red, blue, 2 red coin, 2 blue coin
+        (2 + NUM_COIN_TYPES * self.NUM_COINS + 1)  # red, blue, 2 red coin, 2 blue coin
 
         GRID = jnp.zeros(
             (self.GRID_SIZE + 2 * self.PADDING, self.GRID_SIZE + 2 * self.PADDING),

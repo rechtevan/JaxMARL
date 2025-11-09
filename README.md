@@ -39,15 +39,15 @@
 
 ## Multi-Agent Reinforcement Learning in JAX
 
-JaxMARL combines ease-of-use with GPU-enabled efficiency, and supports a wide
-range of commonly used MARL environments as well as popular baseline algorithms.
-Our aim is for one library that enables thorough evaluation of MARL methods
-across a wide range of tasks and against relevant baselines. We also introduce
-SMAX, a vectorised, simplified version of the popular StarCraft Multi-Agent
-Challenge, which removes the need to run the StarCraft II game engine.
+JaxMARL combines ease-of-use with GPU-enabled efficiency, and supports a wide range of
+commonly used MARL environments as well as popular baseline algorithms. Our aim is for
+one library that enables thorough evaluation of MARL methods across a wide range of
+tasks and against relevant baselines. We also introduce SMAX, a vectorised, simplified
+version of the popular StarCraft Multi-Agent Challenge, which removes the need to run
+the StarCraft II game engine.
 
-For more details, take a look at our
-[blog post](https://blog.foersterlab.com/jaxmarl/) or our
+For more details, take a look at our [blog post](https://blog.foersterlab.com/jaxmarl/)
+or our
 [Colab notebook](https://colab.research.google.com/github/FLAIROx/JaxMARL/blob/main/jaxmarl/tutorials/JaxMARL_Walkthrough.ipynb),
 which walks through the basic usage.
 
@@ -68,11 +68,10 @@ which walks through the basic usage.
 
 <h2 name="algorithms" id="algorithms">Baseline Algorithms 🦉 </h2>
 
-We follow CleanRL's philosophy of providing single file implementations which
-can be found within the `baselines` directory. We use Hydra to manage our config
-files, with specifics explained in each algorithm's README. Most files include
-`wandb` logging code, this is disabled by default but can be enabled within the
-file's config.
+We follow CleanRL's philosophy of providing single file implementations which can be
+found within the `baselines` directory. We use Hydra to manage our config files, with
+specifics explained in each algorithm's README. Most files include `wandb` logging code,
+this is disabled by default but can be enabled within the file's config.
 
 | Algorithm  | Reference                                                           | README                                                                     |
 | ---------- | ------------------------------------------------------------------- | -------------------------------------------------------------------------- |
@@ -89,15 +88,15 @@ file's config.
 
 **Environments** - Before installing, ensure you have the correct
 [JAX installation](https://github.com/google/jax#installation) for your hardware
-accelerator. We have tested up to JAX version 0.4.36. The JaxMARL environments
-can be installed directly from PyPi:
+accelerator. We have tested up to JAX version 0.4.36. The JaxMARL environments can be
+installed directly from PyPi:
 
 ```bash
 pip install jaxmarl
 ```
 
-**Algorithms** - If you would like to also run the algorithms, install the
-source code as follows:
+**Algorithms** - If you would like to also run the algorithms, install the source code
+as follows:
 
 1. Clone the repository:
    ```bash
@@ -108,8 +107,8 @@ source code as follows:
    pip install -e .[algs]
    export PYTHONPATH=./JaxMARL:$PYTHONPATH
    ```
-3. For the fastest start, we recommend using our Dockerfile, the usage of which
-   is outlined below.
+3. For the fastest start, we recommend using our Dockerfile, the usage of which is
+   outlined below.
 
 **Development** - If you would like to run our test suite, install the additonal
 dependencies with: `pip install -e .[dev]`, after cloning the repository.
@@ -118,20 +117,20 @@ dependencies with: `pip install -e .[dev]`, after cloning the repository.
 
 We take inspiration from the
 [PettingZoo](https://github.com/Farama-Foundation/PettingZoo) and
-[Gymnax](https://github.com/RobertTLange/gymnax) interfaces. You can try out
-training an agent in our
+[Gymnax](https://github.com/RobertTLange/gymnax) interfaces. You can try out training an
+agent in our
 [Colab notebook](https://colab.research.google.com/github/FLAIROx/JaxMARL/blob/main/jaxmarl/tutorials/JaxMARL_Walkthrough.ipynb).
 Further introduction scripts can be found
 [here](https://github.com/FLAIROx/JaxMARL/tree/main/jaxmarl/tutorials).
 
 ### Basic JaxMARL API Usage 🖥️
 
-Actions, observations, rewards and done values are passed as dictionaries keyed
-by agent name, allowing for differing action and observation spaces. The done
-dictionary contains an additional `"__all__"` key, specifying whether the
-episode has ended. We follow a parallel structure, with each agent passing an
-action at each timestep. For asynchronous games, such as Hanabi, a dummy action
-is passed for agents not acting at a given timestep.
+Actions, observations, rewards and done values are passed as dictionaries keyed by agent
+name, allowing for differing action and observation spaces. The done dictionary contains
+an additional `"__all__"` key, specifying whether the episode has ended. We follow a
+parallel structure, with each agent passing an action at each timestep. For asynchronous
+games, such as Hanabi, a dummy action is passed for agents not acting at a given
+timestep.
 
 ```python
 import jax
@@ -161,8 +160,8 @@ obs, state, reward, done, infos = env.step(key_step, state, actions)
 
 To help get experiments up and running we include a
 [Dockerfile](https://github.com/FLAIROx/JaxMARL/blob/main/Dockerfile) and its
-corresponding [Makefile](https://github.com/FLAIROx/JaxMARL/blob/main/Makefile).
-With Docker and the
+corresponding [Makefile](https://github.com/FLAIROx/JaxMARL/blob/main/Makefile). With
+Docker and the
 [Nvidia Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/index.html)
 installed, the container can be built with:
 
@@ -179,18 +178,17 @@ make run
 ## Contributing 🔨
 
 Please contribute! Please take a look at our
-[contributing guide](https://github.com/FLAIROx/JaxMARL/blob/main/CONTRIBUTING.md)
-for how to add an environment/algorithm or submit a bug report. If you're
-looking for a project, we also have a few suggestions listed under the roadmap
-:)
+[contributing guide](https://github.com/FLAIROx/JaxMARL/blob/main/CONTRIBUTING.md) for
+how to add an environment/algorithm or submit a bug report. If you're looking for a
+project, we also have a few suggestions listed under the roadmap :)
 
 ## Contributors 👥
 
-JaxMARL is developed and maintained by the **Foerster Lab for AI Research** at
-the University of Oxford.
+JaxMARL is developed and maintained by the **Foerster Lab for AI Research** at the
+University of Oxford.
 
-This fork (rechtevan/JaxMARL) includes contributions from **Booz Allen
-Hamilton** focused on:
+This fork (rechtevan/JaxMARL) includes contributions from **Booz Allen Hamilton**
+focused on:
 
 - Quality improvement infrastructure and testing enhancements
 - Test coverage measurement and expansion
@@ -198,8 +196,8 @@ Hamilton** focused on:
 - CI/CD improvements and workflow automation
 - Static analysis integration (Ruff, MyPy)
 
-All contributions are licensed under the Apache License 2.0. For detailed
-contribution history, see the [NOTICE](NOTICE) file and git commit log.
+All contributions are licensed under the Apache License 2.0. For detailed contribution
+history, see the [NOTICE](NOTICE) file and git commit log.
 
 <h2 name="cite" id="cite">Citing JaxMARL 📜 </h2>
 If you use JaxMARL in your work, please cite us as follows:
@@ -216,27 +214,26 @@ If you use JaxMARL in your work, please cite us as follows:
 
 ## See Also 🙌
 
-There are a number of other libraries which inspired this work, we encourage you
-to take a look!
+There are a number of other libraries which inspired this work, we encourage you to take
+a look!
 
 JAX-native algorithms:
 
-- [Mava](https://github.com/instadeepai/Mava): JAX implementations of popular
-  MARL algorithms.
-- [PureJaxRL](https://github.com/luchris429/purejaxrl): JAX implementation of
-  PPO, and demonstration of end-to-end JAX-based RL training.
+- [Mava](https://github.com/instadeepai/Mava): JAX implementations of popular MARL
+  algorithms.
+- [PureJaxRL](https://github.com/luchris429/purejaxrl): JAX implementation of PPO, and
+  demonstration of end-to-end JAX-based RL training.
 
 JAX-native environments:
 
-- [Gymnax](https://github.com/RobertTLange/gymnax): Implementations of classic
-  RL tasks including classic control, bsuite and MinAtar.
-- [Jumanji](https://github.com/instadeepai/jumanji): A diverse set of
-  environments ranging from simple games to NP-hard combinatorial problems.
-- [Pgx](https://github.com/sotetsuk/pgx): JAX implementations of classic board
-  games, such as Chess, Go and Shogi.
-- [Brax](https://github.com/google/brax): A fully differentiable physics engine
-  written in JAX, features continuous control tasks.
-- [XLand-MiniGrid](https://github.com/corl-team/xland-minigrid): Meta-RL
-  gridworld environments inspired by XLand and MiniGrid.
-- [Craftax](https://github.com/MichaelTMatthews/Craftax): (Crafter + NetHack) in
-  JAX.
+- [Gymnax](https://github.com/RobertTLange/gymnax): Implementations of classic RL tasks
+  including classic control, bsuite and MinAtar.
+- [Jumanji](https://github.com/instadeepai/jumanji): A diverse set of environments
+  ranging from simple games to NP-hard combinatorial problems.
+- [Pgx](https://github.com/sotetsuk/pgx): JAX implementations of classic board games,
+  such as Chess, Go and Shogi.
+- [Brax](https://github.com/google/brax): A fully differentiable physics engine written
+  in JAX, features continuous control tasks.
+- [XLand-MiniGrid](https://github.com/corl-team/xland-minigrid): Meta-RL gridworld
+  environments inspired by XLand and MiniGrid.
+- [Craftax](https://github.com/MichaelTMatthews/Craftax): (Crafter + NetHack) in JAX.

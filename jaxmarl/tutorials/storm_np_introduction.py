@@ -57,9 +57,7 @@ for n_a in agent_pop_sizes:
                 for a in range(num_agents)
             ]
 
-            obs, state, reward, done, info = env.step_env(
-                rng, old_state, list(actions)
-            )
+            obs, state, reward, done, info = env.step_env(rng, old_state, list(actions))
 
             print("###################")
             print(f"timestep: {t} to {t + 1}")

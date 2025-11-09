@@ -66,9 +66,9 @@ env = SimpleWorldCommMPE()
 #     # print('actions', actions)
 #     key_s = jax.random.split(key_s, num_envs)
 #     obs, state, rew, dones, _ = rollout_manager.batch_step(key_s, state, actions)
-    # env.step_env(key_s, state, actions)
-    # env.render(state)
-    # print('rew', rew)
+# env.step_env(key_s, state, actions)
+# env.render(state)
+# print('rew', rew)
 # jax_time = time.time() - start_time  # Commented out - requires rollout_manager
 
 # print("zoo time", zoo_time, "jax time", jax_time, "speedup", zoo_time / jax_time)

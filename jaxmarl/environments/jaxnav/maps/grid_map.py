@@ -757,7 +757,9 @@ class GridMapPolygonAgents(GridMapCircleAgents):
                 """Check if point (x, y) is within rectangle with bottom left corner at (rx, ry) and width and height of 1."""
                 return (x >= rx) & (x <= rx + 1) & (y >= ry) & (y <= ry + 1)
 
-            vmap_check_point_rect = jax.vmap(_check_point_rect, in_axes=(0, 0, None, None))
+            vmap_check_point_rect = jax.vmap(
+                _check_point_rect, in_axes=(0, 0, None, None)
+            )
             checks = vmap_check_point_rect(sides[:, 0], sides[:, 1], rx, ry)
             return jnp.all(checks)
 

@@ -122,7 +122,7 @@ class OvercookedV2(MultiAgentEnv):
         if isinstance(observation_type, list) and len(observation_type) != num_agents:
             raise ValueError(
                 "Number of observation types must match the number of agents"
-                )
+            )
 
         self.observation_type = observation_type
 

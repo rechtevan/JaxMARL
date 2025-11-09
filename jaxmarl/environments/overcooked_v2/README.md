@@ -1,6 +1,8 @@
 # OvercookedV2
 
-OvercookedV2 is an extended version of the original Overcooked environment. It introduces meaningful partial observability and increased stochasticity to enable more complex coordination challenges.
+OvercookedV2 is an extended version of the original Overcooked environment. It
+introduces meaningful partial observability and increased stochasticity to enable more
+complex coordination challenges.
 
 ## Key Features
 
@@ -22,7 +24,7 @@ WWPWW
 L   R
 WBWXW
 """
-recipes = [[0,0,1], [0,1,1]]
+recipes = [[0, 0, 1], [0, 1, 1]]
 custom_layout = Layout.from_string(layout, possible_recipes=recipes)
 ```
 
@@ -36,7 +38,8 @@ See `layouts.py` for a variety of pre-configured layouts:
 
 ## Observations
 
-Observations are structured as a width x height x num_channels tensor, with partial observability based on the configured view radius.
+Observations are structured as a width x height x num_channels tensor, with partial
+observability based on the configured view radius.
 
 ## Rewards
 
@@ -48,4 +51,3 @@ Observations are structured as a width x height x num_channels tensor, with part
 
 - JIT-compiled rendering pipeline for efficient episode visualization
 - Interactive mode for playing alongside trained policies
-

@@ -336,23 +336,27 @@ class CoinGame(MultiAgentEnv):
                 last_state=jnp.where(reset_inner, jnp.zeros(2), last_state),
             )
 
-            obs = dict(zip(
+            obs = dict(
+                zip(
                     self.agents,
                     [jnp.where(reset_inner, reset_obs[i], obs[i]) for i in obs],
-                ))
+                )
+            )
 
             blue_reward = jnp.where(reset_inner, 0.0, blue_reward)
             red_reward = jnp.where(reset_inner, 0.0, red_reward)
 
             if shared_rewards:
                 # shared reward (social welfare\sum of agents individual rewards)
-                rewards = dict(zip(
+                rewards = dict(
+                    zip(
                         self.agents,
                         (
                             sum((red_reward, blue_reward)),
                             sum((red_reward, blue_reward)),
                         ),
-                    ))
+                    )
+                )
             else:
                 # individual reward
                 rewards = dict(zip(self.agents, (red_reward, blue_reward)))

@@ -470,11 +470,13 @@ class HanabiEnv(HanabiGame):
     @partial(jax.jit, static_argnums=[0])
     def get_board_feats(self, state: State):
         """Get the features of the board."""
+
         # by default the fireworks are incremental, i.e. [1,1,0,0,0] one and two are in the board
         # must be OH of only the highest rank, i.e. [0,1,0,0,0]
         def keep_only_last_one(x):
             return jnp.where(
-                jnp.arange(x.size) < (x.size - 1 - jnp.argmax(jnp.flip(x))),  # last argmax
+                jnp.arange(x.size)
+                < (x.size - 1 - jnp.argmax(jnp.flip(x))),  # last argmax
                 0,
                 x,
             )
@@ -535,6 +537,7 @@ class HanabiEnv(HanabiGame):
         # compute my belief and the beliefs of other players, starting from self cards
         def rel_pos(x):
             return jnp.roll(x, -aidx, axis=0)
+
         belief = jax.vmap(belief_per_hand)(
             rel_pos(state.card_knowledge),
             rel_pos(state.colors_revealed),
@@ -665,10 +668,12 @@ class HanabiEnv(HanabiGame):
 
         def keep_only_last_one(x):
             return jnp.where(
-                jnp.arange(x.size) < (x.size - 1 - jnp.argmax(jnp.flip(x))),  # last argmax
+                jnp.arange(x.size)
+                < (x.size - 1 - jnp.argmax(jnp.flip(x))),  # last argmax
                 0,
                 x,
             )
+
         fireworks = jax.vmap(keep_only_last_one)(state.fireworks)
         fireworks_cards = [
             jnp.zeros((self.num_colors, self.num_ranks)).at[i].set(fireworks[i])
@@ -769,10 +774,12 @@ class HanabiEnv(HanabiGame):
 
         def keep_only_last_one(x):
             return jnp.where(
-                jnp.arange(x.size) < (x.size - 1 - jnp.argmax(jnp.flip(x))),  # last argmax
+                jnp.arange(x.size)
+                < (x.size - 1 - jnp.argmax(jnp.flip(x))),  # last argmax
                 0,
                 x,
             )
+
         fireworks = jax.vmap(keep_only_last_one)(new_state.fireworks)
         fireworks_cards = [
             jnp.zeros((self.num_colors, self.num_ranks)).at[i].set(fireworks[i])

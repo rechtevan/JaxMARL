@@ -160,7 +160,9 @@ class TestHeuristic:
             for _i in range(env.max_steps):
                 key, key_step = jax.random.split(key)
                 actions = get_nothing_actions(env)
-                _obs, state, _reward, done, _infos = env.step_env(key_step, state, actions)
+                _obs, state, _reward, done, _infos = env.step_env(
+                    key_step, state, actions
+                )
 
             assert done["__all__"], (
                 "The environment did not terminate correctly when the maximum time steps is reached."
