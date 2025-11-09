@@ -231,7 +231,7 @@ class GridMapCircleAgents(Map):
                 + self.cell_half_height
             )
 
-            grid_check = self._check_grid(map_c_list, pos, rad, self.map_grid)
+            grid_check = self._check_grid(map_c_list, pos, rad, map_grid)
 
             map_occ = jnp.array(
                 [
