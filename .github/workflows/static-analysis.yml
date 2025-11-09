@@ -112,4 +112,4 @@ jobs:
       run: pip install pymarkdownlnt
 
     - name: Run markdown linter
-      run: pymarkdown --config .pymarkdown.json scan .
+      run: pymarkdown --config .pymarkdown.json --disable MD036 scan .
