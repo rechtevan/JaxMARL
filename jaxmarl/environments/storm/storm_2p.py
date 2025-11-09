@@ -176,7 +176,7 @@ GREEN_COLOUR = (44.0, 160.0, 44.0)
 RED_COLOUR = (214.0, 39.0, 40.0)
 
 
-class InTheGrid_2p(MultiAgentEnv):
+class InTheGrid_2p(MultiAgentEnv):  # noqa: N801
     """
     JAX Compatible version of *inTheMatix environment.
     """

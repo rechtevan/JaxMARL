@@ -641,7 +641,7 @@ class GridMapPolygonAgents(GridMapCircleAgents):
         )
 
         cut = jnp.any(
-            jax.vmap(self._checkGrid, in_axes=(None, None, 0, None))(
+            jax.vmap(self._check_grid, in_axes=(None, None, 0, None))(
                 scaled_coords_appended[:-1],
                 scaled_coords_appended[1:],
                 idx_pairs,
@@ -650,7 +650,7 @@ class GridMapPolygonAgents(GridMapCircleAgents):
         )
 
         inside = jnp.any(
-            jax.vmap(self._checkInsideGrid, in_axes=(None, 0, None))(
+            jax.vmap(self._check_inside_grid, in_axes=(None, 0, None))(
                 scaled_coords, idx_pairs, map_grid
             )
         )
@@ -681,10 +681,10 @@ class GridMapPolygonAgents(GridMapCircleAgents):
             [scaled_coords, scaled_coords[0, :][None]], axis=0
         )
 
-        cut = jax.vmap(self._checkGrid, in_axes=(None, None, 0, None))(
+        cut = jax.vmap(self._check_grid, in_axes=(None, None, 0, None))(
             scaled_coords_appended[:-1], scaled_coords_appended[1:], idx_pairs, map_mask
         )
-        inside = jax.vmap(self._checkInsideGrid, in_axes=(None, 0, None))(
+        inside = jax.vmap(self._check_inside_grid, in_axes=(None, 0, None))(
             scaled_coords, idx_pairs, map_mask
         )
 
@@ -705,8 +705,8 @@ class GridMapPolygonAgents(GridMapCircleAgents):
             jnp.array(1, dtype=map_mask.dtype)
         )
 
-    def _checkGrid(self, x1y1, x2y2, grid_idx, map_grid):
-        def _checkLineLine(x1, y1, x2, y2, x3, y3, x4, y4):
+    def _check_grid(self, x1y1, x2y2, grid_idx, map_grid):
+        def _check_line_line(x1, y1, x2, y2, x3, y3, x4, y4):
             """Check collision between line (x1, y1) -- (x2, y2) and line (x3, y3) -- (x4, y4)"""
             uA = ((x4 - x3) * (y1 - y3) - (y4 - y3) * (x1 - x3)) / (
                 (y4 - y3) * (x2 - x1) - (x4 - x3) * (y2 - y1)
@@ -717,26 +717,26 @@ class GridMapPolygonAgents(GridMapCircleAgents):
             c = (uA >= 0) & (uA <= 1) & (uB >= 0) & (uB <= 1)
             return c.astype(jnp.bool_)
 
-        def _checkLineRect(x1, y1, x2, y2, rx, ry):
+        def _check_line_rect(x1, y1, x2, y2, rx, ry):
             """Check collision between line (x1, y1) -- (x2, y2) and rectangle with bottom left corner at (rx, ry)
             and width and height of 1."""
-            vmap_checkLineLine = jax.vmap(
-                _checkLineLine, in_axes=(None, None, None, None, 0, 0, 0, 0)
+            vmap_check_line_line = jax.vmap(
+                _check_line_line, in_axes=(None, None, None, None, 0, 0, 0, 0)
             )
             x3 = jnp.array([0, 1, 0, 0]) + rx
             y3 = jnp.array([0, 0, 0, 1]) + ry
             x4 = jnp.array([0, 1, 1, 1]) + rx
             y4 = jnp.array([1, 1, 0, 1]) + ry
-            checks = vmap_checkLineLine(x1, y1, x2, y2, x3, y3, x4, y4)
+            checks = vmap_check_line_line(x1, y1, x2, y2, x3, y3, x4, y4)
             return jnp.any(checks)
 
         @partial(jax.vmap, in_axes=(0, 0, None))
-        def _checkSide(x1y1, x2y2, grid_idx):
+        def _check_side(x1y1, x2y2, grid_idx):
             x1, y1 = x1y1
             x2, y2 = x2y2
             ry, rx = grid_idx[0], grid_idx[1]
             filled = map_grid[ry, rx]
-            c = _checkLineRect(x1, y1, x2, y2, rx, ry)
+            c = _check_line_rect(x1, y1, x2, y2, rx, ry)
             return c & filled
 
         valid_idx = (
@@ -745,20 +745,20 @@ class GridMapPolygonAgents(GridMapCircleAgents):
             & (grid_idx[1] >= 0)
             & (grid_idx[1] < self.width)
         )
-        return jnp.any(_checkSide(x1y1, x2y2, grid_idx)) & valid_idx
+        return jnp.any(_check_side(x1y1, x2y2, grid_idx)) & valid_idx
 
-    def _checkInsideGrid(self, sides, grid_idx, map_grid):
+    def _check_inside_grid(self, sides, grid_idx, map_grid):
         """Check if polygon is inside grid cell, NOTE assumes grid cell is of size 1x1"""
 
-        def _checkPolyWithinRect(sides, rx, ry):
+        def _check_poly_within_rect(sides, rx, ry):
             """Check if polygon is within rectangle with bottom left corner at (rx, ry) and width and height of 1."""
 
-            def _checkPointRect(x, y, rx, ry):
+            def _check_point_rect(x, y, rx, ry):
                 """Check if point (x, y) is within rectangle with bottom left corner at (rx, ry) and width and height of 1."""
                 return (x >= rx) & (x <= rx + 1) & (y >= ry) & (y <= ry + 1)
 
-            vmap_checkPointRect = jax.vmap(_checkPointRect, in_axes=(0, 0, None, None))
-            checks = vmap_checkPointRect(sides[:, 0], sides[:, 1], rx, ry)
+            vmap_check_point_rect = jax.vmap(_check_point_rect, in_axes=(0, 0, None, None))
+            checks = vmap_check_point_rect(sides[:, 0], sides[:, 1], rx, ry)
             return jnp.all(checks)
 
         valid_idx = (
@@ -767,7 +767,7 @@ class GridMapPolygonAgents(GridMapCircleAgents):
             & (grid_idx[1] >= 0)
             & (grid_idx[1] < self.width)
         )
-        inside = _checkPolyWithinRect(sides, grid_idx[1], grid_idx[0])
+        inside = _check_poly_within_rect(sides, grid_idx[1], grid_idx[0])
         return inside & map_grid[grid_idx[0], grid_idx[1]] & valid_idx
 
     @partial(jax.jit, static_argnums=[0])
@@ -849,7 +849,7 @@ class GridMapPolygonAgents(GridMapCircleAgents):
             agent_coords = self.agent_coords
 
         @partial(jax.vmap, in_axes=(None, None, 0, 0))
-        def _checkSide(beam_start, beam_end, side_start, side_end):
+        def _check_side(beam_start, beam_end, side_start, side_end):
             """Check collision between line (x1, y1) -- (x2, y2) and line (x3, y3) -- (x4, y4)"""
             x1, y1 = beam_start
             x2, y2 = beam_end
@@ -874,7 +874,7 @@ class GridMapPolygonAgents(GridMapCircleAgents):
         tc = self.transform_coords(pos, theta, agent_coords)
         tc = jnp.concatenate([tc, tc[0, :][None]], axis=0)
 
-        idxs = _checkSide(beam[0], beam[-1], tc[:-1], tc[1:])
+        idxs = _check_side(beam[0], beam[-1], tc[:-1], tc[1:])
         idx = jnp.min(idxs)
         return jax.lax.select(idx == jnp.inf, -1.0, idx).astype(int)
 

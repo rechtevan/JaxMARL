@@ -9,7 +9,7 @@ from jaxmarl.environments.mpe.simple import SimpleMPE, State
 from jaxmarl.environments.spaces import Box
 
 
-def SimpleFacmacMPE3a():
+def SimpleFacmacMPE3a():  # noqa: N802
     return SimpleFacmacMPE(
         num_good_agents=1,
         num_adversaries=3,
@@ -19,7 +19,7 @@ def SimpleFacmacMPE3a():
     )
 
 
-def SimpleFacmacMPE6a():
+def SimpleFacmacMPE6a():  # noqa: N802
     return SimpleFacmacMPE(
         num_good_agents=2,
         num_adversaries=6,
@@ -29,7 +29,7 @@ def SimpleFacmacMPE6a():
     )
 
 
-def SimpleFacmacMPE9a():
+def SimpleFacmacMPE9a():  # noqa: N802
     return SimpleFacmacMPE(
         num_good_agents=3,
         num_adversaries=9,

@@ -594,7 +594,7 @@ def make_train(config, env):
         )
 
         # to include the batch normalization stats
-        class TrainState_(TrainState):
+        class TrainState_(TrainState):  # noqa: N801
             batch_stats: Any
 
         train_state = TrainState_.create(
