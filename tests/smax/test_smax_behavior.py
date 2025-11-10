@@ -291,7 +291,7 @@ def test_scenario_loading(map_name):
     scenario = map_name_to_scenario(map_name)
 
     env = make("SMAX", scenario=scenario)
-    obs, state = env.reset(key)
+    _obs, state = env.reset(key)
 
     assert env.num_allies == scenario.num_allies
     assert env.num_enemies == scenario.num_enemies
@@ -327,8 +327,8 @@ def test_smacv2_position_generation(do_jit):
         key1 = jax.random.PRNGKey(50)
         key2 = jax.random.PRNGKey(51)
 
-        env, _, state1 = create_env(key1, smacv2_position_generation=True)
-        env, _, state2 = create_env(key2, smacv2_position_generation=True)
+        _env, _, state1 = create_env(key1, smacv2_position_generation=True)
+        _env, _, state2 = create_env(key2, smacv2_position_generation=True)
 
         # Different seeds should produce different positions
         assert not jnp.allclose(
@@ -354,7 +354,7 @@ def test_smacv2_unit_type_generation(do_jit):
             num_enemies=5,
             smacv2_unit_type_generation=True,
         )
-        obs, state = env.reset(key)
+        _obs, state = env.reset(key)
 
         # Check that unit types are assigned
         assert state.unit_types.shape == (env.num_agents,)
@@ -535,7 +535,7 @@ def test_different_unit_types_health(do_jit):
             scenario=custom_scenario,
             unit_type_health=jnp.array([45.0, 125.0, 160.0, 150.0]),
         )
-        obs, state = env.reset(key)
+        _obs, state = env.reset(key)
 
         # Different types should have different health values
         unit_types_present = jnp.unique(state.unit_types)
@@ -783,7 +783,7 @@ def test_reset_initializes_correctly(do_jit):
     with jax.disable_jit(do_jit):
         key = jax.random.PRNGKey(70)
         key, key_reset = jax.random.split(key)
-        env, obs, state = create_env(key_reset)
+        env, _obs, state = create_env(key_reset)
 
         # Check state initialization
         assert state.time == 0
@@ -801,8 +801,8 @@ def test_reset_different_seeds(do_jit):
         key1 = jax.random.PRNGKey(71)
         key2 = jax.random.PRNGKey(72)
 
-        env, _, state1 = create_env(key1)
-        env, _, state2 = create_env(key2)
+        _env, _, state1 = create_env(key1)
+        _env, _, state2 = create_env(key2)
 
         # Positions should differ
         assert not jnp.allclose(
@@ -870,7 +870,7 @@ def test_different_attack_ranges(do_jit):
             unit_type_attack_ranges=jnp.array([2.0, 5.0]),  # Different ranges
             unit_type_velocities=jnp.array([1.0, 1.0]),
         )
-        obs, state = env.reset(key)
+        _obs, state = env.reset(key)
 
         # Place ally 0 (short range) and ally 1 (long range) at different distances
         state = state.replace(
@@ -907,7 +907,7 @@ def test_no_nans_in_observations(do_jit):
     with jax.disable_jit(do_jit):
         key = jax.random.PRNGKey(76)
         key, key_reset = jax.random.split(key)
-        env, obs, state = create_env(key_reset)
+        env, _obs, state = create_env(key_reset)
 
         # Run multiple steps
         for _ in range(10):

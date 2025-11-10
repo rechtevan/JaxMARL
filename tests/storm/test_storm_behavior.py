@@ -16,9 +16,9 @@ import jax
 import jax.numpy as jnp
 import pytest
 
-from jaxmarl.environments.storm import InTheMatrix, InTheGrid
-from jaxmarl.environments.storm.storm_2p import InTheGrid_2p
+from jaxmarl.environments.storm import InTheGrid, InTheMatrix
 from jaxmarl.environments.storm.storm import Actions, Items
+from jaxmarl.environments.storm.storm_2p import InTheGrid_2p
 
 
 class TestInTheMatrixBasics:
@@ -69,7 +69,7 @@ class TestInTheMatrixBasics:
         assert state.outer_t == 0
 
         # Check observations are dict
-        assert isinstance(obs, jnp.ndarray)
+        assert isinstance(obs, (jnp.ndarray, dict))
 
 
 class TestMovementMechanics:
@@ -79,14 +79,14 @@ class TestMovementMechanics:
         """Test agents can move forward in all directions."""
         env = InTheMatrix(num_agents=2, num_inner_steps=10)
         rng = jax.random.PRNGKey(42)
-        obs, state = env.reset(rng)
+        _obs, state = env.reset(rng)
 
         initial_pos = state.agent_locs[0].copy()
 
         # Move forward
         actions = jnp.array([Actions.forward, Actions.stay])
         rng, step_rng = jax.random.split(rng)
-        obs, state, rewards, dones, info = env.step_env(step_rng, state, actions)
+        _obs, state, _rewards, _dones, _info = env.step_env(step_rng, state, actions)
 
         # Agent should have moved (unless blocked or at boundary)
         # At minimum, we test that step executes without error
@@ -96,14 +96,14 @@ class TestMovementMechanics:
         """Test agent rotation left."""
         env = InTheMatrix(num_agents=2, num_inner_steps=10)
         rng = jax.random.PRNGKey(42)
-        obs, state = env.reset(rng)
+        _obs, state = env.reset(rng)
 
         initial_dir = state.agent_locs[0, 2]
 
         # Turn left
         actions = jnp.array([Actions.left, Actions.stay])
         rng, step_rng = jax.random.split(rng)
-        obs, state, rewards, dones, info = env.step_env(step_rng, state, actions)
+        _obs, state, _rewards, _dones, _info = env.step_env(step_rng, state, actions)
 
         # Direction should have changed
         new_dir = state.agent_locs[0, 2]
@@ -113,14 +113,14 @@ class TestMovementMechanics:
         """Test agent rotation right."""
         env = InTheMatrix(num_agents=2, num_inner_steps=10)
         rng = jax.random.PRNGKey(42)
-        obs, state = env.reset(rng)
+        _obs, state = env.reset(rng)
 
         initial_dir = state.agent_locs[0, 2]
 
         # Turn right
         actions = jnp.array([Actions.right, Actions.stay])
         rng, step_rng = jax.random.split(rng)
-        obs, state, rewards, dones, info = env.step_env(step_rng, state, actions)
+        _obs, state, _rewards, _dones, _info = env.step_env(step_rng, state, actions)
 
         # Direction should have changed
         new_dir = state.agent_locs[0, 2]
@@ -130,14 +130,14 @@ class TestMovementMechanics:
         """Test stay action keeps agent in place."""
         env = InTheMatrix(num_agents=2, num_inner_steps=10)
         rng = jax.random.PRNGKey(42)
-        obs, state = env.reset(rng)
+        _obs, state = env.reset(rng)
 
         initial_pos = state.agent_locs[0].copy()
 
         # Stay
         actions = jnp.array([Actions.stay, Actions.stay])
         rng, step_rng = jax.random.split(rng)
-        obs, state, rewards, dones, info = env.step_env(step_rng, state, actions)
+        _obs, state, _rewards, _dones, _info = env.step_env(step_rng, state, actions)
 
         # Position should be unchanged
         assert jnp.array_equal(state.agent_locs[0], initial_pos)
@@ -146,7 +146,7 @@ class TestMovementMechanics:
         """Test agents cannot move outside grid boundaries."""
         env = InTheMatrix(num_agents=2, num_inner_steps=10)
         rng = jax.random.PRNGKey(42)
-        obs, state = env.reset(rng)
+        _obs, state = env.reset(rng)
 
         # Manually place agent at edge (0, 0, facing up/0)
         state = state.replace(
@@ -156,7 +156,7 @@ class TestMovementMechanics:
         # Try to move forward (should be blocked by boundary)
         actions = jnp.array([Actions.forward, Actions.stay])
         rng, step_rng = jax.random.split(rng)
-        obs, state, rewards, dones, info = env.step_env(step_rng, state, actions)
+        _obs, state, _rewards, _dones, _info = env.step_env(step_rng, state, actions)
 
         # Agent should still be at edge or have clipped position
         assert state.agent_locs[0, 0] >= 0
@@ -170,7 +170,7 @@ class TestCollisionDetection:
         """Test collision when both agents try to move to same location."""
         env = InTheMatrix(num_agents=2, num_inner_steps=10)
         rng = jax.random.PRNGKey(100)
-        obs, state = env.reset(rng)
+        _obs, state = env.reset(rng)
 
         # Place agents next to each other facing each other
         state = state.replace(
@@ -183,7 +183,7 @@ class TestCollisionDetection:
         # Both try to move forward (into each other)
         actions = jnp.array([Actions.forward, Actions.forward])
         rng, step_rng = jax.random.split(rng)
-        obs, state, rewards, dones, info = env.step_env(step_rng, state, actions)
+        _obs, state, _rewards, _dones, _info = env.step_env(step_rng, state, actions)
 
         # One should have moved, one should have stayed (random resolution)
         # At minimum, they shouldn't be in the exact same cell
@@ -193,7 +193,7 @@ class TestCollisionDetection:
         """Test collision priority when one agent doesn't move."""
         env = InTheMatrix(num_agents=2, num_inner_steps=10)
         rng = jax.random.PRNGKey(101)
-        obs, state = env.reset(rng)
+        _obs, state = env.reset(rng)
 
         # Place agents next to each other
         state = state.replace(
@@ -206,7 +206,7 @@ class TestCollisionDetection:
         # Agent 0 tries to move into agent 1's spot, agent 1 stays
         actions = jnp.array([Actions.forward, Actions.stay])
         rng, step_rng = jax.random.split(rng)
-        obs, state, rewards, dones, info = env.step_env(step_rng, state, actions)
+        _obs, state, _rewards, _dones, _info = env.step_env(step_rng, state, actions)
 
         # Agent 1 should still be at (3, 2)
         assert state.agent_locs[1, 0] == 3
@@ -228,7 +228,7 @@ class TestZappingMechanics:
         """Test zapping forward creates interaction marker on grid."""
         env = InTheMatrix(num_agents=2, num_inner_steps=10)
         rng = jax.random.PRNGKey(200)
-        obs, state = env.reset(rng)
+        _obs, state = env.reset(rng)
 
         # Give agents inventory so they can interact
         state = state.replace(
@@ -252,7 +252,7 @@ class TestZappingMechanics:
         # Both zap forward
         actions = jnp.array([Actions.zap_forward, Actions.zap_forward])
         rng, step_rng = jax.random.split(rng)
-        obs, state, rewards, dones, info = env.step_env(step_rng, state, actions)
+        _obs, state, _rewards, _dones, _info = env.step_env(step_rng, state, actions)
 
         # Should have executed without error
         assert state.inner_t == 1
@@ -261,7 +261,7 @@ class TestZappingMechanics:
         """Test that zapping requires inventory above threshold."""
         env = InTheMatrix(num_agents=2, num_inner_steps=10)
         rng = jax.random.PRNGKey(201)
-        obs, state = env.reset(rng)
+        _obs, state = env.reset(rng)
 
         # Agents start with empty inventory
         assert jnp.all(state.agent_invs == 0)
@@ -269,7 +269,7 @@ class TestZappingMechanics:
         # Try to zap without inventory
         actions = jnp.array([Actions.zap_forward, Actions.zap_forward])
         rng, step_rng = jax.random.split(rng)
-        obs, state, rewards, dones, info = env.step_env(step_rng, state, actions)
+        _obs, state, rewards, _dones, _info = env.step_env(step_rng, state, actions)
 
         # No rewards should be given (no valid interaction)
         assert jnp.all(rewards == 0)
@@ -282,7 +282,7 @@ class TestFreezePenalty:
         """Test that frozen agents cannot move."""
         env = InTheMatrix(num_agents=2, num_inner_steps=20, freeze_penalty=5)
         rng = jax.random.PRNGKey(300)
-        obs, state = env.reset(rng)
+        _obs, state = env.reset(rng)
 
         # Manually set freeze penalty
         state = state.replace(
@@ -294,7 +294,7 @@ class TestFreezePenalty:
         # Try to move while frozen
         actions = jnp.array([Actions.forward, Actions.forward])
         rng, step_rng = jax.random.split(rng)
-        obs, state, rewards, dones, info = env.step_env(step_rng, state, actions)
+        _obs, state, _rewards, _dones, _info = env.step_env(step_rng, state, actions)
 
         # Agent should not have moved (action converted to stay)
         # Position might change due to soft reset, so just check freeze decremented
@@ -304,7 +304,7 @@ class TestFreezePenalty:
         """Test freeze penalty decrements each step."""
         env = InTheMatrix(num_agents=2, num_inner_steps=20, freeze_penalty=5)
         rng = jax.random.PRNGKey(301)
-        obs, state = env.reset(rng)
+        _obs, state = env.reset(rng)
 
         # Set initial freeze
         state = state.replace(
@@ -314,7 +314,7 @@ class TestFreezePenalty:
         # Step without interaction
         actions = jnp.array([Actions.stay, Actions.stay])
         rng, step_rng = jax.random.split(rng)
-        obs, state, rewards, dones, info = env.step_env(step_rng, state, actions)
+        _obs, state, _rewards, _dones, _info = env.step_env(step_rng, state, actions)
 
         # Freeze should have decremented (or soft reset occurred)
         assert state.inner_t == 1
@@ -327,7 +327,7 @@ class TestCoinCollection:
         """Test moving over coin adds it to inventory."""
         env = InTheMatrix(num_agents=2, num_inner_steps=10)
         rng = jax.random.PRNGKey(400)
-        obs, state = env.reset(rng)
+        _obs, state = env.reset(rng)
 
         # Place red coin at (2, 2)
         grid = state.grid.at[2, 2].set(jnp.int16(Items.red_coin))
@@ -347,7 +347,7 @@ class TestCoinCollection:
         # Move forward onto coin
         actions = jnp.array([Actions.forward, Actions.stay])
         rng, step_rng = jax.random.split(rng)
-        obs, state, rewards, dones, info = env.step_env(step_rng, state, actions)
+        _obs, state, _rewards, _dones, _info = env.step_env(step_rng, state, actions)
 
         # Inventory should have increased (red coin is index 0)
         assert state.agent_invs[0, 0] >= initial_inv[0]
@@ -356,7 +356,7 @@ class TestCoinCollection:
         """Test both red and blue coins can be collected."""
         env = InTheMatrix(num_agents=2, num_inner_steps=10)
         rng = jax.random.PRNGKey(401)
-        obs, state = env.reset(rng)
+        _obs, state = env.reset(rng)
 
         # Check that coins exist in the environment
         assert state.red_coins.shape[0] > 0
@@ -371,7 +371,7 @@ class TestMatrixGameRewards:
         payoff = jnp.array([[[3, 0], [5, 1]], [[3, 5], [0, 1]]])
         env = InTheMatrix(num_agents=2, payoff_matrix=payoff)
         rng = jax.random.PRNGKey(500)
-        obs, state = env.reset(rng)
+        _obs, state = env.reset(rng)
 
         # Environment should initialize
         assert state is not None
@@ -380,7 +380,7 @@ class TestMatrixGameRewards:
         """Test rewards are calculated based on inventories."""
         env = InTheMatrix(num_agents=2, num_inner_steps=20, freeze_penalty=5)
         rng = jax.random.PRNGKey(501)
-        obs, state = env.reset(rng)
+        _obs, state = env.reset(rng)
 
         # Set up agents with inventories
         state = state.replace(
@@ -404,7 +404,7 @@ class TestMatrixGameRewards:
         # Both zap each other
         actions = jnp.array([Actions.zap_forward, Actions.zap_forward])
         rng, step_rng = jax.random.split(rng)
-        obs, state, rewards, dones, info = env.step_env(step_rng, state, actions)
+        _obs, state, rewards, _dones, _info = env.step_env(step_rng, state, actions)
 
         # Rewards should be calculated (could be 0 or non-zero depending on logic)
         assert isinstance(rewards, jnp.ndarray)
@@ -417,14 +417,14 @@ class TestStateTransitions:
         """Test inner episode resets after num_inner_steps."""
         env = InTheMatrix(num_agents=2, num_inner_steps=5, num_outer_steps=2)
         rng = jax.random.PRNGKey(600)
-        obs, state = env.reset(rng)
+        _obs, state = env.reset(rng)
 
         actions = jnp.array([Actions.stay, Actions.stay])
 
         # Step through inner episode
         for _ in range(5):
             rng, step_rng = jax.random.split(rng)
-            obs, state, rewards, dones, info = env.step_env(step_rng, state, actions)
+            _obs, state, _rewards, _dones, _info = env.step_env(step_rng, state, actions)
 
         # Should have reset inner_t and incremented outer_t
         assert state.outer_t == 1
@@ -434,27 +434,27 @@ class TestStateTransitions:
         """Test outer episode completion."""
         env = InTheMatrix(num_agents=2, num_inner_steps=2, num_outer_steps=2)
         rng = jax.random.PRNGKey(601)
-        obs, state = env.reset(rng)
+        _obs, state = env.reset(rng)
 
         actions = jnp.array([Actions.stay, Actions.stay])
 
         # Step through both inner and outer episodes
-        for _ in range(4):  # 2 inner steps × 2 outer steps
+        for _ in range(4):  # 2 inner steps x 2 outer steps
             rng, step_rng = jax.random.split(rng)
-            obs, state, rewards, dones, info = env.step_env(step_rng, state, actions)
+            _obs, state, _rewards, dones, _info = env.step_env(step_rng, state, actions)
 
         # Should be done
-        assert dones["__all__"] == True
+        assert dones["__all__"]
 
     def test_coin_ratio_info(self):
         """Test coin_ratio is included in info."""
         env = InTheMatrix(num_agents=2, num_inner_steps=10)
         rng = jax.random.PRNGKey(602)
-        obs, state = env.reset(rng)
+        _obs, state = env.reset(rng)
 
         actions = jnp.array([Actions.stay, Actions.stay])
         rng, step_rng = jax.random.split(rng)
-        obs, state, rewards, dones, info = env.step_env(step_rng, state, actions)
+        _obs, state, _rewards, _dones, info = env.step_env(step_rng, state, actions)
 
         # Info should contain coin_ratio
         assert "coin_ratio" in info
@@ -469,7 +469,7 @@ class TestEdgeCases:
         try:
             env = InTheMatrix(num_agents=1)
             rng = jax.random.PRNGKey(700)
-            obs, state = env.reset(rng)
+            _obs, state = env.reset(rng)
             assert state is not None
         except (ValueError, AssertionError):
             # Expected if single agent not supported
@@ -479,7 +479,7 @@ class TestEdgeCases:
         """Test environment with maximum agents."""
         env = InTheMatrix(num_agents=8)
         rng = jax.random.PRNGKey(701)
-        obs, state = env.reset(rng)
+        _obs, state = env.reset(rng)
 
         assert state.agent_locs.shape[0] == 8
         assert state.agent_invs.shape[0] == 8
@@ -488,7 +488,7 @@ class TestEdgeCases:
         """Test freeze penalty can be set to 0."""
         env = InTheMatrix(num_agents=2, freeze_penalty=0)
         rng = jax.random.PRNGKey(702)
-        obs, state = env.reset(rng)
+        _obs, state = env.reset(rng)
 
         # Should initialize without error
         assert state is not None
@@ -497,7 +497,7 @@ class TestEdgeCases:
         """Test large freeze penalty values."""
         env = InTheMatrix(num_agents=2, freeze_penalty=50)
         rng = jax.random.PRNGKey(703)
-        obs, state = env.reset(rng)
+        _obs, state = env.reset(rng)
 
         assert state is not None
 
@@ -505,7 +505,7 @@ class TestEdgeCases:
         """Test handling of edge case where agents might spawn nearby."""
         env = InTheMatrix(num_agents=2)
         rng = jax.random.PRNGKey(704)
-        obs, state = env.reset(rng)
+        _obs, state = env.reset(rng)
 
         # All agents should have unique positions
         positions = state.agent_locs[:, :2]
@@ -522,7 +522,7 @@ class TestMultipleAgentInteractions:
         """Test three agents attempting to interact simultaneously."""
         env = InTheMatrix(num_agents=3, num_inner_steps=10)
         rng = jax.random.PRNGKey(800)
-        obs, state = env.reset(rng)
+        _obs, state = env.reset(rng)
 
         # Give all agents inventory
         state = state.replace(
@@ -532,7 +532,7 @@ class TestMultipleAgentInteractions:
         # All agents zap
         actions = jnp.array([Actions.zap_forward, Actions.zap_forward, Actions.zap_forward])
         rng, step_rng = jax.random.split(rng)
-        obs, state, rewards, dones, info = env.step_env(step_rng, state, actions)
+        _obs, state, _rewards, _dones, _info = env.step_env(step_rng, state, actions)
 
         # Should execute without error
         assert state.inner_t == 1
@@ -541,7 +541,7 @@ class TestMultipleAgentInteractions:
         """Test chained interactions (A zaps B, B zaps C)."""
         env = InTheMatrix(num_agents=3, num_inner_steps=10)
         rng = jax.random.PRNGKey(801)
-        obs, state = env.reset(rng)
+        _obs, state = env.reset(rng)
 
         # Place agents in a line
         state = state.replace(
@@ -567,7 +567,7 @@ class TestMultipleAgentInteractions:
         # All zap forward
         actions = jnp.array([Actions.zap_forward, Actions.zap_forward, Actions.zap_forward])
         rng, step_rng = jax.random.split(rng)
-        obs, state, rewards, dones, info = env.step_env(step_rng, state, actions)
+        _obs, state, _rewards, _dones, _info = env.step_env(step_rng, state, actions)
 
         # Should handle chained zaps
         assert state.inner_t == 1
@@ -586,20 +586,20 @@ class TestTwoPlayerVariant:
         """Test 2-player reset."""
         env = InTheGrid_2p(num_agents=2)
         rng = jax.random.PRNGKey(900)
-        obs, state = env.reset(rng)
+        obs, _state = env.reset(rng)
 
         # Should return tuple of observations for 2 agents
-        assert isinstance(obs, tuple) or isinstance(obs, dict)
+        assert isinstance(obs, (tuple, dict))
 
     def test_2p_step(self):
         """Test 2-player step function."""
         env = InTheGrid_2p(num_agents=2)
         rng = jax.random.PRNGKey(901)
-        obs, state = env.reset(rng)
+        _obs, state = env.reset(rng)
 
         actions = (Actions.stay, Actions.stay)
         rng, step_rng = jax.random.split(rng)
-        obs, state, rewards, dones, info = env.step_env(step_rng, state, actions)
+        _obs, state, rewards, _dones, _info = env.step_env(step_rng, state, actions)
 
         # Should return rewards for both agents
         assert isinstance(rewards, tuple)
@@ -609,12 +609,12 @@ class TestTwoPlayerVariant:
         """Test 2-player interaction mechanics."""
         env = InTheGrid_2p(num_agents=2, num_inner_steps=10)
         rng = jax.random.PRNGKey(902)
-        obs, state = env.reset(rng)
+        _obs, state = env.reset(rng)
 
         # Both zap forward (interaction action)
         actions = (Actions.zap_forward, Actions.zap_forward)
         rng, step_rng = jax.random.split(rng)
-        obs, state, rewards, dones, info = env.step_env(step_rng, state, actions)
+        _obs, state, _rewards, _dones, _info = env.step_env(step_rng, state, actions)
 
         assert state.inner_t == 1
 
@@ -631,7 +631,7 @@ class TestNPlayerVariant:
         """Test N-player reset."""
         env = InTheGrid(num_agents=4)
         rng = jax.random.PRNGKey(950)
-        obs, state = env.reset(rng)
+        obs, _state = env.reset(rng)
 
         assert isinstance(obs, dict)
         assert "observations" in obs
@@ -641,11 +641,11 @@ class TestNPlayerVariant:
         """Test N-player step."""
         env = InTheGrid(num_agents=3)
         rng = jax.random.PRNGKey(951)
-        obs, state = env.reset(rng)
+        _obs, state = env.reset(rng)
 
         actions = (Actions.stay, Actions.stay, Actions.stay)
         rng, step_rng = jax.random.split(rng)
-        obs, state, rewards, dones, info = env.step_env(step_rng, state, actions)
+        _obs, state, rewards, _dones, _info = env.step_env(step_rng, state, actions)
 
         assert len(rewards) == 3
 
@@ -657,7 +657,7 @@ class TestSoftReset:
         """Test agents respawn after freeze expires."""
         env = InTheMatrix(num_agents=2, num_inner_steps=20, freeze_penalty=2)
         rng = jax.random.PRNGKey(1000)
-        obs, state = env.reset(rng)
+        _obs, state = env.reset(rng)
 
         # Set freeze to 1 (will expire next step)
         state = state.replace(
@@ -669,7 +669,7 @@ class TestSoftReset:
         # Step to expire freeze
         actions = jnp.array([Actions.stay, Actions.stay])
         rng, step_rng = jax.random.split(rng)
-        obs, state, rewards, dones, info = env.step_env(step_rng, state, actions)
+        _obs, state, _rewards, _dones, _info = env.step_env(step_rng, state, actions)
 
         # Freeze should be 0 or decremented
         assert state.inner_t == 1
@@ -678,7 +678,7 @@ class TestSoftReset:
         """Test coins respawn after being collected during soft reset."""
         env = InTheMatrix(num_agents=2, num_inner_steps=20)
         rng = jax.random.PRNGKey(1001)
-        obs, state = env.reset(rng)
+        _obs, state = env.reset(rng)
 
         # Coins should be present initially
         initial_red_coins = state.red_coins.copy()
@@ -692,7 +692,7 @@ class TestZappingDirections:
         """Test zapping 2 spaces ahead."""
         env = InTheMatrix(num_agents=2, num_inner_steps=10)
         rng = jax.random.PRNGKey(1100)
-        obs, state = env.reset(rng)
+        _obs, state = env.reset(rng)
 
         # Give inventory
         state = state.replace(
@@ -701,7 +701,7 @@ class TestZappingDirections:
 
         actions = jnp.array([Actions.zap_ahead, Actions.stay])
         rng, step_rng = jax.random.split(rng)
-        obs, state, rewards, dones, info = env.step_env(step_rng, state, actions)
+        _obs, state, _rewards, _dones, _info = env.step_env(step_rng, state, actions)
 
         assert state.inner_t == 1
 
@@ -709,7 +709,7 @@ class TestZappingDirections:
         """Test zapping diagonally to the right."""
         env = InTheMatrix(num_agents=2, num_inner_steps=10)
         rng = jax.random.PRNGKey(1101)
-        obs, state = env.reset(rng)
+        _obs, state = env.reset(rng)
 
         state = state.replace(
             agent_invs=jnp.array([[1, 1], [1, 1]], dtype=jnp.int8)
@@ -717,7 +717,7 @@ class TestZappingDirections:
 
         actions = jnp.array([Actions.zap_right, Actions.stay])
         rng, step_rng = jax.random.split(rng)
-        obs, state, rewards, dones, info = env.step_env(step_rng, state, actions)
+        _obs, state, _rewards, _dones, _info = env.step_env(step_rng, state, actions)
 
         assert state.inner_t == 1
 
@@ -725,7 +725,7 @@ class TestZappingDirections:
         """Test zapping diagonally to the left."""
         env = InTheMatrix(num_agents=2, num_inner_steps=10)
         rng = jax.random.PRNGKey(1102)
-        obs, state = env.reset(rng)
+        _obs, state = env.reset(rng)
 
         state = state.replace(
             agent_invs=jnp.array([[1, 1], [1, 1]], dtype=jnp.int8)
@@ -733,7 +733,7 @@ class TestZappingDirections:
 
         actions = jnp.array([Actions.zap_left, Actions.stay])
         rng, step_rng = jax.random.split(rng)
-        obs, state, rewards, dones, info = env.step_env(step_rng, state, actions)
+        _obs, state, _rewards, _dones, _info = env.step_env(step_rng, state, actions)
 
         assert state.inner_t == 1
 
@@ -746,8 +746,8 @@ class TestDeterminism:
         env = InTheMatrix(num_agents=2)
         rng = jax.random.PRNGKey(1200)
 
-        obs1, state1 = env.reset(rng)
-        obs2, state2 = env.reset(rng)
+        _obs1, state1 = env.reset(rng)
+        _obs2, state2 = env.reset(rng)
 
         # Should be identical
         assert jnp.array_equal(state1.agent_locs, state2.agent_locs)
@@ -759,15 +759,15 @@ class TestDeterminism:
         rng = jax.random.PRNGKey(1201)
 
         # Run 1
-        obs, state = env.reset(rng)
+        _obs, state = env.reset(rng)
         rng1 = jax.random.PRNGKey(42)
         actions = jnp.array([Actions.forward, Actions.left])
-        obs1, state1, rewards1, dones1, info1 = env.step_env(rng1, state, actions)
+        _obs1, state1, _rewards1, _dones1, _info1 = env.step_env(rng1, state, actions)
 
         # Run 2
-        obs, state = env.reset(rng)
+        _obs, state = env.reset(rng)
         rng2 = jax.random.PRNGKey(42)
-        obs2, state2, rewards2, dones2, info2 = env.step_env(rng2, state, actions)
+        _obs2, state2, _rewards2, _dones2, _info2 = env.step_env(rng2, state, actions)
 
         # Should be identical
         assert jnp.array_equal(state1.agent_locs, state2.agent_locs)
@@ -785,7 +785,7 @@ class TestRenderingMethods:
         """Test render_tile can be called."""
         env = InTheMatrix(num_agents=2)
         rng = jax.random.PRNGKey(1300)
-        obs, state = env.reset(rng)
+        _obs, _state = env.reset(rng)
 
         # Should be able to render a tile
         tile = env.render_tile(obj=Items.empty, tile_size=32)
@@ -800,14 +800,14 @@ class TestCoordinationScenarios:
         """Test two agents trying to collect same coin."""
         env = InTheMatrix(num_agents=2, num_inner_steps=10)
         rng = jax.random.PRNGKey(1400)
-        obs, state = env.reset(rng)
+        _obs, state = env.reset(rng)
 
         # Place coin and two agents nearby
         # (The environment handles this through collision detection)
 
         actions = jnp.array([Actions.forward, Actions.forward])
         rng, step_rng = jax.random.split(rng)
-        obs, state, rewards, dones, info = env.step_env(step_rng, state, actions)
+        _obs, state, _rewards, _dones, _info = env.step_env(step_rng, state, actions)
 
         # Should execute without error
         assert state.inner_t == 1
@@ -820,7 +820,7 @@ class TestCoordinationScenarios:
             payoff_matrix=jnp.array([[[3, 0], [5, 1]], [[3, 5], [0, 1]]])
         )
         rng = jax.random.PRNGKey(1401)
-        obs, state = env.reset(rng)
+        _obs, state = env.reset(rng)
 
         # Set up cooperative scenario (both have same coin type)
         state = state.replace(
@@ -830,7 +830,7 @@ class TestCoordinationScenarios:
         # Should be able to interact
         actions = jnp.array([Actions.zap_forward, Actions.zap_forward])
         rng, step_rng = jax.random.split(rng)
-        obs, state, rewards, dones, info = env.step_env(step_rng, state, actions)
+        _obs, state, _rewards, _dones, _info = env.step_env(step_rng, state, actions)
 
         assert state.inner_t == 1
 
