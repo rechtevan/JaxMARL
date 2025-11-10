@@ -1,18 +1,20 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in
-this repository.
+This file provides guidance to Claude Code (claude.ai/code) when working with
+code in this repository.
 
 ## Repository Context
 
-**Fork Owner**: rechtevan (not upstream FLAIROx) **Purpose**: Code examination, bug
-fixes, enhancements, security improvements, test development, and coverage improvements
-**GitHub Issues**: Create issues in rechtevan's repository, not upstream
+**Fork Owner**: rechtevan (not upstream FLAIROx) **Purpose**: Code examination,
+bug fixes, enhancements, security improvements, test development, and coverage
+improvements **GitHub Issues**: Create issues in rechtevan's repository, not
+upstream
 
 ## Local Development Conventions
 
-**`.local/` Directory**: Used for AI-generated analysis, scripts, reports, and other
-files that should NOT be committed to git. This directory is in `.gitignore`.
+**`.local/` Directory**: Used for AI-generated analysis, scripts, reports, and
+other files that should NOT be committed to git. This directory is in
+`.gitignore`.
 
 Use `.local/` for:
 
@@ -34,10 +36,10 @@ Use `.local/` for:
 
 ## Project Overview
 
-JaxMARL is a Multi-Agent Reinforcement Learning (MARL) library in JAX that combines
-ease-of-use with GPU-enabled efficiency. It provides JAX-native implementations of MARL
-environments and baseline algorithms, enabling thorough evaluation of MARL methods with
-end-to-end JIT compilation.
+JaxMARL is a Multi-Agent Reinforcement Learning (MARL) library in JAX that
+combines ease-of-use with GPU-enabled efficiency. It provides JAX-native
+implementations of MARL environments and baseline algorithms, enabling thorough
+evaluation of MARL methods with end-to-end JIT compilation.
 
 ## Installation & Setup
 
@@ -131,10 +133,85 @@ Coverage targets (80-90%+) apply to **core production code only**:
 - ❌ Debug/development code (`if __name__ == "__main__"`)
 
 **Rationale**: Coverage focuses on core functionality that's used in production
-(environments, algorithms). Visualization, interactive tools, and experimental code are
-tested manually and don't need automated coverage tracking.
+(environments, algorithms). Visualization, interactive tools, and experimental
+code are tested manually and don't need automated coverage tracking.
 
 ## Code Quality and Linting
+
+### Code Documentation Standards
+
+**Python uses docstrings, not Doxygen** (Doxygen is for C/C++).
+
+**Recommended Style: Google-style docstrings** (common in ML/JAX projects):
+
+```python
+def step(self, key: chex.PRNGKey, state: State, actions: dict) -> tuple:
+    """Execute one environment step with given actions.
+
+    Args:
+        key: JAX random key for stochastic operations
+        state: Current environment state
+        actions: Dictionary mapping agent names to actions
+
+    Returns:
+        tuple: (observations, state, rewards, dones, infos)
+
+    Raises:
+        ValueError: If actions dict doesn't match agent names
+    """
+```
+
+**Alternative: NumPy-style** (scientific computing standard):
+
+```python
+def step(self, key, state, actions):
+    """
+    Execute one environment step.
+
+    Parameters
+    ----------
+    key : chex.PRNGKey
+        JAX random key for stochastic operations
+    state : State
+        Current environment state
+    actions : dict
+        Agent names mapped to actions
+
+    Returns
+    -------
+    observations : dict
+        Agent observations after step
+    state : State
+        Updated environment state
+    """
+```
+
+**Documentation Tools**:
+
+```bash
+# Audit docstring coverage
+pip install interrogate
+interrogate jaxmarl/ --verbose
+
+# Check docstring style
+pip install pydocstyle
+pydocstyle jaxmarl/
+
+# Generate API docs (optional)
+pip install sphinx sphinx-rtd-theme
+sphinx-quickstart docs/
+sphinx-build -b html docs/ docs/_build/
+```
+
+**Documentation Requirements**:
+
+- All public environment APIs must have docstrings
+- All `__init__`, `reset()`, `step()` methods documented
+- State dataclasses documented with field descriptions
+- Module-level docstrings for each file
+- Type hints in function signatures
+
+**Status**: See issue #35 for documentation improvement plan
 
 ### Python Code
 
@@ -180,8 +257,8 @@ pre-commit run --all-files
 
 **Using Pre-commit Hooks**:
 
-Pre-commit hooks automatically run quality checks before each commit, ensuring code
-quality and consistency.
+Pre-commit hooks automatically run quality checks before each commit, ensuring
+code quality and consistency.
 
 ```bash
 # One-time setup: Install pre-commit hooks
@@ -267,7 +344,8 @@ pymarkdown scan .
 
 **Configuration files**:
 
-- `pyproject.toml` - Contains [tool.ruff], [tool.mypy], and [tool.mdformat] sections
+- `pyproject.toml` - Contains [tool.ruff], [tool.mypy], and [tool.mdformat]
+  sections
 - `.pymarkdown.json` - PyMarkdown linter rules and settings
 - `.pre-commit-config.yaml` - Pre-commit hook configuration
 
@@ -275,7 +353,8 @@ pymarkdown scan .
 
 ### Automated Workflows
 
-The repository uses GitHub Actions for continuous integration and security scanning:
+The repository uses GitHub Actions for continuous integration and security
+scanning:
 
 **CodeQL Security Scanning** (GitHub Default):
 
@@ -327,8 +406,8 @@ The repository uses GitHub Actions for continuous integration and security scann
 
 ## Running Baselines
 
-All baseline algorithms use Hydra for configuration management. Config files are located
-in `baselines/<ALGORITHM>/config/`.
+All baseline algorithms use Hydra for configuration management. Config files are
+located in `baselines/<ALGORITHM>/config/`.
 
 **Run IPPO:**
 
@@ -361,10 +440,10 @@ python baselines/QLearning/shaq.py
 
 JaxMARL follows a hybrid PettingZoo/Gymnax-inspired API with JAX-first design:
 
-- **Environment registration:** `jaxmarl/registration.py` - Central registry using
-  `make(env_id, **kwargs)`
-- **Base class:** `jaxmarl/environments/multi_agent_env.py` - `MultiAgentEnv` abstract
-  class
+- **Environment registration:** `jaxmarl/registration.py` - Central registry
+  using `make(env_id, **kwargs)`
+- **Base class:** `jaxmarl/environments/multi_agent_env.py` - `MultiAgentEnv`
+  abstract class
 - **Key methods:**
   - `reset(key)` → `(obs_dict, state)`
   - `step(key, state, actions_dict)` →
@@ -374,8 +453,10 @@ JaxMARL follows a hybrid PettingZoo/Gymnax-inspired API with JAX-first design:
 **Important conventions:**
 
 - Actions, observations, rewards, and dones are dictionaries keyed by agent name
-- Done dictionary includes special `"__all__"` key indicating episode termination
-- Parallel structure: all agents act at each timestep (async games use dummy actions)
+- Done dictionary includes special `"__all__"` key indicating episode
+  termination
+- Parallel structure: all agents act at each timestep (async games use dummy
+  actions)
 - Auto-reset on episode end (controllable via `reset_state` parameter)
 
 ### Environment Structure
@@ -383,7 +464,8 @@ JaxMARL follows a hybrid PettingZoo/Gymnax-inspired API with JAX-first design:
 All environments are in `jaxmarl/environments/`:
 
 - `mpe/` - Multi-Agent Particle Environments (communication-oriented tasks)
-- `smax/` - Simplified Multi-Agent Challenge (StarCraft-like without game engine)
+- `smax/` - Simplified Multi-Agent Challenge (StarCraft-like without game
+  engine)
 - `overcooked/` and `overcooked_v2/` - Cooperative cooking tasks
 - `mabrax/` - Multi-agent continuous control (Brax-based)
 - `hanabi/` - Cooperative card game (partially observable)
@@ -394,7 +476,8 @@ All environments are in `jaxmarl/environments/`:
 
 ### Baseline Algorithms
 
-Located in `baselines/`, following CleanRL's single-file implementation philosophy:
+Located in `baselines/`, following CleanRL's single-file implementation
+philosophy:
 
 **IPPO (Independent PPO):**
 
@@ -444,7 +527,8 @@ Requirements from CONTRIBUTING.md:
 
 1. Implement `MultiAgentEnv` interface
 2. Unit tests demonstrating correctness (pytest format)
-3. If porting from existing implementation, add tests showing transition correspondence
+3. If porting from existing implementation, add tests showing transition
+   correspondence
 4. Training results for IPPO and MAPPO over 20 seeds
 5. Config files saved to `baselines/`
 6. README explaining the environment
@@ -472,13 +556,15 @@ Requirements from CONTRIBUTING.md:
 Use these strings with `make(env_id)`:
 
 **MPE:** `MPE_simple_v3`, `MPE_simple_tag_v3`, `MPE_simple_world_comm_v3`,
-`MPE_simple_spread_v3`, `MPE_simple_crypto_v3`, `MPE_simple_speaker_listener_v4`,
-`MPE_simple_push_v3`, `MPE_simple_adversary_v3`, `MPE_simple_reference_v3`,
-`MPE_simple_facmac_v1` (and 3a, 6a, 9a variants)
+`MPE_simple_spread_v3`, `MPE_simple_crypto_v3`,
+`MPE_simple_speaker_listener_v4`, `MPE_simple_push_v3`,
+`MPE_simple_adversary_v3`, `MPE_simple_reference_v3`, `MPE_simple_facmac_v1`
+(and 3a, 6a, 9a variants)
 
 **SMAX:** `SMAX`, `HeuristicEnemySMAX`, `LearnedPolicyEnemySMAX`
 
-**MABrax:** `ant_4x2`, `halfcheetah_6x1`, `hopper_3x1`, `humanoid_9|8`, `walker2d_2x3`
+**MABrax:** `ant_4x2`, `halfcheetah_6x1`, `hopper_3x1`, `humanoid_9|8`,
+`walker2d_2x3`
 
 **STORM:** `storm`, `storm_2p`, `storm_np`
 
@@ -498,7 +584,8 @@ Use these strings with `make(env_id)`:
 
 ## Code Style Notes
 
-- Baselines are single-file implementations (no shared modules between algorithms)
+- Baselines are single-file implementations (no shared modules between
+  algorithms)
 - Environment-specific hyperparameters go in Hydra config files
 - Use `functools.partial` with `jax.jit` for static arguments
 - PRNG key splitting is explicit everywhere
@@ -506,9 +593,9 @@ Use these strings with `make(env_id)`:
 
 ## Licensing
 
-**Project License**: Apache License 2.0 **Fork Copyright**: Booz Allen Hamilton (for
-contributions to rechtevan/JaxMARL) **Original Copyright**: 2023 FLAIR (upstream
-FLAIROx/JaxMARL)
+**Project License**: Apache License 2.0 **Fork Copyright**: Booz Allen Hamilton
+(for contributions to rechtevan/JaxMARL) **Original Copyright**: 2023 FLAIR
+(upstream FLAIROx/JaxMARL)
 
 ### License Requirements
 
@@ -520,11 +607,12 @@ FLAIROx/JaxMARL)
 
 **Specific requirements:**
 
-- **All code written**: Source code, tests, documentation → Apache 2.0 license, Booz
-  Allen Hamilton copyright
+- **All code written**: Source code, tests, documentation → Apache 2.0 license,
+  Booz Allen Hamilton copyright
 - **Runtime dependencies**: Must use Apache 2.0, MIT, BSD, or similar permissive
   licenses
-- **Dev dependencies**: Can use any OSI-approved license (pytest, ruff, mypy, etc.)
+- **Dev dependencies**: Can use any OSI-approved license (pytest, ruff, mypy,
+  etc.)
 - **Avoid**: GPL, LGPL, AGPL for runtime dependencies (copyleft incompatible)
 
 ### When Suggesting Dependencies
@@ -552,16 +640,16 @@ All currently recommended quality improvement tools are Apache 2.0 compatible:
 
 **POLICY: Industry Standard Approach (Option A)**
 
-This repository follows industry standard practices for multi-company open source
-contributions:
+This repository follows industry standard practices for multi-company open
+source contributions:
 
-✅ **NOTICE file** - Lists major contributors (FLAIR, Booz Allen Hamilton) ✅ **Git
-history** - Provides detailed attribution (use corporate email) ✅ **LICENSE file** -
-Apache 2.0 covers all code ❌ **NO copyright headers** - Not required, matches existing
-codebase
+✅ **NOTICE file** - Lists major contributors (FLAIR, Booz Allen Hamilton) ✅
+**Git history** - Provides detailed attribution (use corporate email) ✅
+**LICENSE file** - Apache 2.0 covers all code ❌ **NO copyright headers** - Not
+required, matches existing codebase
 
-This is the same approach used by Kubernetes, TensorFlow, Linux Kernel, and hundreds of
-other multi-company Apache 2.0 projects.
+This is the same approach used by Kubernetes, TensorFlow, Linux Kernel, and
+hundreds of other multi-company Apache 2.0 projects.
 
 #### General Rule: DO NOT ADD HEADERS
 
