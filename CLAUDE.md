@@ -10,6 +10,23 @@ bug fixes, enhancements, security improvements, test development, and coverage
 improvements **GitHub Issues**: Create issues in rechtevan's repository, not
 upstream
 
+**Important for Fork Contributors**: If you fork this repository to your own
+account, set your fork as the default repository for GitHub CLI to avoid
+creating issues in the upstream repository:
+
+```bash
+# Set YOUR fork as default (replace YOUR_USERNAME)
+cd /path/to/JaxMARL
+gh repo set-default YOUR_USERNAME/JaxMARL
+
+# Verify it's set correctly
+gh repo view --json nameWithOwner
+# Should show: "nameWithOwner": "YOUR_USERNAME/JaxMARL"
+```
+
+This ensures `gh issue create` and other commands work with YOUR fork, not
+upstream.
+
 ## Local Development Conventions
 
 **`.local/` Directory**: Used for AI-generated analysis, scripts, reports, and
