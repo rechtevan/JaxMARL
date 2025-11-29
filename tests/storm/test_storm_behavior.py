@@ -69,7 +69,7 @@ class TestInTheMatrixBasics:
         assert state.outer_t == 0
 
         # Check observations are dict
-        assert isinstance(obs, (jnp.ndarray, dict))
+        assert isinstance(obs, jnp.ndarray | dict)
 
 
 class TestMovementMechanics:
@@ -174,10 +174,13 @@ class TestCollisionDetection:
 
         # Place agents next to each other facing each other
         state = state.replace(
-            agent_locs=jnp.array([
-                [2, 2, 1],  # Agent 0 at (2,2) facing right
-                [3, 2, 3],  # Agent 1 at (3,2) facing left
-            ], dtype=jnp.int16)
+            agent_locs=jnp.array(
+                [
+                    [2, 2, 1],  # Agent 0 at (2,2) facing right
+                    [3, 2, 3],  # Agent 1 at (3,2) facing left
+                ],
+                dtype=jnp.int16,
+            )
         )
 
         # Both try to move forward (into each other)
@@ -197,10 +200,13 @@ class TestCollisionDetection:
 
         # Place agents next to each other
         state = state.replace(
-            agent_locs=jnp.array([
-                [2, 2, 1],  # Agent 0 at (2,2) facing right
-                [3, 2, 0],  # Agent 1 at (3,2)
-            ], dtype=jnp.int16)
+            agent_locs=jnp.array(
+                [
+                    [2, 2, 1],  # Agent 0 at (2,2) facing right
+                    [3, 2, 0],  # Agent 1 at (3,2)
+                ],
+                dtype=jnp.int16,
+            )
         )
 
         # Agent 0 tries to move into agent 1's spot, agent 1 stays
@@ -231,16 +237,17 @@ class TestZappingMechanics:
         _obs, state = env.reset(rng)
 
         # Give agents inventory so they can interact
-        state = state.replace(
-            agent_invs=jnp.array([[1, 1], [1, 1]], dtype=jnp.int8)
-        )
+        state = state.replace(agent_invs=jnp.array([[1, 1], [1, 1]], dtype=jnp.int8))
 
         # Place agents facing each other 1 step apart
         state = state.replace(
-            agent_locs=jnp.array([
-                [2, 2, 1],  # Agent 0 at (2,2) facing right
-                [3, 2, 3],  # Agent 1 at (3,2) facing left
-            ], dtype=jnp.int16)
+            agent_locs=jnp.array(
+                [
+                    [2, 2, 1],  # Agent 0 at (2,2) facing right
+                    [3, 2, 3],  # Agent 1 at (3,2) facing left
+                ],
+                dtype=jnp.int16,
+            )
         )
 
         # Update grid to match positions
@@ -285,9 +292,7 @@ class TestFreezePenalty:
         _obs, state = env.reset(rng)
 
         # Manually set freeze penalty
-        state = state.replace(
-            freeze=jnp.array([[5, -1], [-1, 5]], dtype=jnp.int16)
-        )
+        state = state.replace(freeze=jnp.array([[5, -1], [-1, 5]], dtype=jnp.int16))
 
         initial_pos = state.agent_locs[0].copy()
 
@@ -307,9 +312,7 @@ class TestFreezePenalty:
         _obs, state = env.reset(rng)
 
         # Set initial freeze
-        state = state.replace(
-            freeze=jnp.array([[5, -1], [-1, 5]], dtype=jnp.int16)
-        )
+        state = state.replace(freeze=jnp.array([[5, -1], [-1, 5]], dtype=jnp.int16))
 
         # Step without interaction
         actions = jnp.array([Actions.stay, Actions.stay])
@@ -338,7 +341,9 @@ class TestCoinCollection:
         state = state.replace(agent_locs=agent_locs)
 
         # Update grid to remove agent from old position
-        grid = grid.at[state.agent_locs[0, 0], state.agent_locs[0, 1]].set(jnp.int16(Items.empty))
+        grid = grid.at[state.agent_locs[0, 0], state.agent_locs[0, 1]].set(
+            jnp.int16(Items.empty)
+        )
         grid = grid.at[1, 2].set(jnp.int16(5))  # Place agent
         state = state.replace(grid=grid)
 
@@ -383,16 +388,17 @@ class TestMatrixGameRewards:
         _obs, state = env.reset(rng)
 
         # Set up agents with inventories
-        state = state.replace(
-            agent_invs=jnp.array([[2, 0], [0, 2]], dtype=jnp.int8)
-        )
+        state = state.replace(agent_invs=jnp.array([[2, 0], [0, 2]], dtype=jnp.int8))
 
         # Place agents next to each other with inventory
         state = state.replace(
-            agent_locs=jnp.array([
-                [2, 2, 1],  # Agent 0 facing right
-                [3, 2, 3],  # Agent 1 facing left
-            ], dtype=jnp.int16)
+            agent_locs=jnp.array(
+                [
+                    [2, 2, 1],  # Agent 0 facing right
+                    [3, 2, 3],  # Agent 1 facing left
+                ],
+                dtype=jnp.int16,
+            )
         )
 
         # Update grid
@@ -424,7 +430,9 @@ class TestStateTransitions:
         # Step through inner episode
         for _ in range(5):
             rng, step_rng = jax.random.split(rng)
-            _obs, state, _rewards, _dones, _info = env.step_env(step_rng, state, actions)
+            _obs, state, _rewards, _dones, _info = env.step_env(
+                step_rng, state, actions
+            )
 
         # Should have reset inner_t and incremented outer_t
         assert state.outer_t == 1
@@ -530,7 +538,9 @@ class TestMultipleAgentInteractions:
         )
 
         # All agents zap
-        actions = jnp.array([Actions.zap_forward, Actions.zap_forward, Actions.zap_forward])
+        actions = jnp.array(
+            [Actions.zap_forward, Actions.zap_forward, Actions.zap_forward]
+        )
         rng, step_rng = jax.random.split(rng)
         _obs, state, _rewards, _dones, _info = env.step_env(step_rng, state, actions)
 
@@ -545,17 +555,18 @@ class TestMultipleAgentInteractions:
 
         # Place agents in a line
         state = state.replace(
-            agent_locs=jnp.array([
-                [2, 2, 1],  # Agent 0 facing right
-                [3, 2, 1],  # Agent 1 facing right
-                [4, 2, 3],  # Agent 2 facing left
-            ], dtype=jnp.int16)
+            agent_locs=jnp.array(
+                [
+                    [2, 2, 1],  # Agent 0 facing right
+                    [3, 2, 1],  # Agent 1 facing right
+                    [4, 2, 3],  # Agent 2 facing left
+                ],
+                dtype=jnp.int16,
+            )
         )
 
         # Give inventory
-        state = state.replace(
-            agent_invs=jnp.ones((3, 2), dtype=jnp.int8)
-        )
+        state = state.replace(agent_invs=jnp.ones((3, 2), dtype=jnp.int8))
 
         # Update grid
         grid = jnp.zeros((8, 8), dtype=jnp.int16)
@@ -565,7 +576,9 @@ class TestMultipleAgentInteractions:
         state = state.replace(grid=grid)
 
         # All zap forward
-        actions = jnp.array([Actions.zap_forward, Actions.zap_forward, Actions.zap_forward])
+        actions = jnp.array(
+            [Actions.zap_forward, Actions.zap_forward, Actions.zap_forward]
+        )
         rng, step_rng = jax.random.split(rng)
         _obs, state, _rewards, _dones, _info = env.step_env(step_rng, state, actions)
 
@@ -589,7 +602,7 @@ class TestTwoPlayerVariant:
         obs, _state = env.reset(rng)
 
         # Should return tuple of observations for 2 agents
-        assert isinstance(obs, (tuple, dict))
+        assert isinstance(obs, tuple | dict)
 
     def test_2p_step(self):
         """Test 2-player step function."""
@@ -660,9 +673,7 @@ class TestSoftReset:
         _obs, state = env.reset(rng)
 
         # Set freeze to 1 (will expire next step)
-        state = state.replace(
-            freeze=jnp.array([[1, -1], [-1, 1]], dtype=jnp.int16)
-        )
+        state = state.replace(freeze=jnp.array([[1, -1], [-1, 1]], dtype=jnp.int16))
 
         old_pos = state.agent_locs.copy()
 
@@ -695,9 +706,7 @@ class TestZappingDirections:
         _obs, state = env.reset(rng)
 
         # Give inventory
-        state = state.replace(
-            agent_invs=jnp.array([[1, 1], [1, 1]], dtype=jnp.int8)
-        )
+        state = state.replace(agent_invs=jnp.array([[1, 1], [1, 1]], dtype=jnp.int8))
 
         actions = jnp.array([Actions.zap_ahead, Actions.stay])
         rng, step_rng = jax.random.split(rng)
@@ -711,9 +720,7 @@ class TestZappingDirections:
         rng = jax.random.PRNGKey(1101)
         _obs, state = env.reset(rng)
 
-        state = state.replace(
-            agent_invs=jnp.array([[1, 1], [1, 1]], dtype=jnp.int8)
-        )
+        state = state.replace(agent_invs=jnp.array([[1, 1], [1, 1]], dtype=jnp.int8))
 
         actions = jnp.array([Actions.zap_right, Actions.stay])
         rng, step_rng = jax.random.split(rng)
@@ -727,9 +734,7 @@ class TestZappingDirections:
         rng = jax.random.PRNGKey(1102)
         _obs, state = env.reset(rng)
 
-        state = state.replace(
-            agent_invs=jnp.array([[1, 1], [1, 1]], dtype=jnp.int8)
-        )
+        state = state.replace(agent_invs=jnp.array([[1, 1], [1, 1]], dtype=jnp.int8))
 
         actions = jnp.array([Actions.zap_left, Actions.stay])
         rng, step_rng = jax.random.split(rng)
@@ -779,7 +784,7 @@ class TestRenderingMethods:
     def test_render_method_exists(self):
         """Test render method exists."""
         env = InTheMatrix(num_agents=2)
-        assert hasattr(env, 'render')
+        assert hasattr(env, "render")
 
     def test_render_tile_method(self):
         """Test render_tile can be called."""
@@ -817,15 +822,13 @@ class TestCoordinationScenarios:
         env = InTheMatrix(
             num_agents=2,
             num_inner_steps=20,
-            payoff_matrix=jnp.array([[[3, 0], [5, 1]], [[3, 5], [0, 1]]])
+            payoff_matrix=jnp.array([[[3, 0], [5, 1]], [[3, 5], [0, 1]]]),
         )
         rng = jax.random.PRNGKey(1401)
         _obs, state = env.reset(rng)
 
         # Set up cooperative scenario (both have same coin type)
-        state = state.replace(
-            agent_invs=jnp.array([[2, 0], [2, 0]], dtype=jnp.int8)
-        )
+        state = state.replace(agent_invs=jnp.array([[2, 0], [2, 0]], dtype=jnp.int8))
 
         # Should be able to interact
         actions = jnp.array([Actions.zap_forward, Actions.zap_forward])

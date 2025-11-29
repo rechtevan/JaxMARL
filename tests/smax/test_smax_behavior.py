@@ -98,9 +98,7 @@ def test_push_units_away(do_jit):
         state = state.replace(unit_positions=unit_positions)
 
         # Get initial distance
-        dist_before = jnp.linalg.norm(
-            state.unit_positions[0] - state.unit_positions[1]
-        )
+        dist_before = jnp.linalg.norm(state.unit_positions[0] - state.unit_positions[1])
 
         # Apply pushing
         new_state = env._push_units_away(state)
@@ -232,7 +230,9 @@ def test_weapon_cooldown_prevents_attack(do_jit):
         )
 
         # Set weapon cooldown for unit 0
-        state = state.replace(unit_weapon_cooldowns=state.unit_weapon_cooldowns.at[0].set(0.5))
+        state = state.replace(
+            unit_weapon_cooldowns=state.unit_weapon_cooldowns.at[0].set(0.5)
+        )
 
         # Try to attack
         key, key_actions = jax.random.split(key)
@@ -245,9 +245,9 @@ def test_weapon_cooldown_prevents_attack(do_jit):
         _, new_state, _, _, _ = env.step(key_step, state, actions)
 
         # Enemy health should not decrease (attack blocked by cooldown)
-        assert (
-            new_state.unit_health[env.num_allies] == initial_health
-        ), "Attack should be blocked by cooldown"
+        assert new_state.unit_health[env.num_allies] == initial_health, (
+            "Attack should be blocked by cooldown"
+        )
 
 
 @pytest.mark.parametrize("do_jit", [True, False])
@@ -261,7 +261,9 @@ def test_weapon_cooldown_decreases(do_jit):
         # Set initial cooldown
         initial_cooldown = 0.5
         state = state.replace(
-            unit_weapon_cooldowns=state.unit_weapon_cooldowns.at[0].set(initial_cooldown)
+            unit_weapon_cooldowns=state.unit_weapon_cooldowns.at[0].set(
+                initial_cooldown
+            )
         )
 
         # Take a step with no attack
@@ -273,9 +275,9 @@ def test_weapon_cooldown_decreases(do_jit):
         _, new_state, _, _, _ = env.step(key_step, state, actions)
 
         # Cooldown should decrease
-        assert (
-            new_state.unit_weapon_cooldowns[0] < initial_cooldown
-        ), "Cooldown should decrease"
+        assert new_state.unit_weapon_cooldowns[0] < initial_cooldown, (
+            "Cooldown should decrease"
+        )
 
 
 # ========== Scenario Tests ==========
@@ -331,9 +333,9 @@ def test_smacv2_position_generation(do_jit):
         _env, _, state2 = create_env(key2, smacv2_position_generation=True)
 
         # Different seeds should produce different positions
-        assert not jnp.allclose(
-            state1.unit_positions, state2.unit_positions
-        ), "SMACv2 positions should vary with seed"
+        assert not jnp.allclose(state1.unit_positions, state2.unit_positions), (
+            "SMACv2 positions should vary with seed"
+        )
 
 
 @pytest.mark.parametrize("do_jit", [True, False])
@@ -542,9 +544,8 @@ def test_different_unit_types_health(do_jit):
         if len(unit_types_present) > 1:
             health_values = state.unit_health[: env.num_agents]
             # Should have at least some variation in health
-            assert (
-                jnp.max(health_values) > jnp.min(health_values)
-                or jnp.all(state.unit_types == state.unit_types[0])
+            assert jnp.max(health_values) > jnp.min(health_values) or jnp.all(
+                state.unit_types == state.unit_types[0]
             )
 
 
@@ -675,9 +676,7 @@ def test_get_world_state_dead_unit(do_jit):
 
         # First unit's features should be zero
         first_unit_features = world_state[: len(env.own_features)]
-        assert jnp.all(
-            first_unit_features == 0.0
-        ), "Dead unit features should be zero"
+        assert jnp.all(first_unit_features == 0.0), "Dead unit features should be zero"
 
 
 # ========== Observation Edge Cases ==========
@@ -697,9 +696,9 @@ def test_obs_unit_list_dead_observer(do_jit):
         obs = env.get_obs(state)
 
         # Dead unit should see nothing
-        assert jnp.allclose(
-            obs["ally_0"], jnp.zeros_like(obs["ally_0"])
-        ), "Dead unit should see nothing"
+        assert jnp.allclose(obs["ally_0"], jnp.zeros_like(obs["ally_0"])), (
+            "Dead unit should see nothing"
+        )
 
 
 @pytest.mark.parametrize("do_jit", [True, False])
@@ -716,9 +715,9 @@ def test_obs_conic_dead_observer(do_jit):
         obs = env.get_obs(state)
 
         # Dead unit should see nothing
-        assert jnp.allclose(
-            obs["ally_0"], jnp.zeros_like(obs["ally_0"])
-        ), "Dead unit should see nothing in conic obs"
+        assert jnp.allclose(obs["ally_0"], jnp.zeros_like(obs["ally_0"])), (
+            "Dead unit should see nothing in conic obs"
+        )
 
 
 @pytest.mark.parametrize("do_jit", [True, False])
@@ -805,9 +804,9 @@ def test_reset_different_seeds(do_jit):
         _env, _, state2 = create_env(key2)
 
         # Positions should differ
-        assert not jnp.allclose(
-            state1.unit_positions, state2.unit_positions
-        ), "Different seeds should produce different positions"
+        assert not jnp.allclose(state1.unit_positions, state2.unit_positions), (
+            "Different seeds should produce different positions"
+        )
 
 
 # ========== Step Function Integration Tests ==========
