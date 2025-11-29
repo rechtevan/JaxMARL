@@ -19,19 +19,29 @@ import jax.numpy as jnp
 import pytest
 
 from jaxmarl.environments.jaxnav import JaxNav
-from jaxmarl.environments.jaxnav.jaxnav_env import State, discrete_act_map, wrap, cart2pol
-from jaxmarl.environments.jaxnav.jaxnav_utils import pol2cart, unitvec, rot_mat, euclid_dist
-from jaxmarl.environments.jaxnav.maps.grid_map import (
-    GridMapCircleAgents,
-    GridMapPolygonAgents,
-    GridMapBarn,
+from jaxmarl.environments.jaxnav.jaxnav_env import (
+    State,
+    cart2pol,
+    discrete_act_map,
+    wrap,
 )
-from jaxmarl.environments.jaxnav.maps.map import Map
 from jaxmarl.environments.jaxnav.jaxnav_graph_utils import (
-    grid_to_graph,
     component_mask_with_pos,
+    grid_to_graph,
     shortest_path_len,
 )
+from jaxmarl.environments.jaxnav.jaxnav_utils import (
+    euclid_dist,
+    pol2cart,
+    rot_mat,
+    unitvec,
+)
+from jaxmarl.environments.jaxnav.maps.grid_map import (
+    GridMapBarn,
+    GridMapCircleAgents,
+    GridMapPolygonAgents,
+)
+from jaxmarl.environments.jaxnav.maps.map import Map
 
 
 # ===== Environment Initialization and Reset Tests =====
@@ -77,7 +87,7 @@ def test_environment_reset(num_agents):
     assert state.goal.shape == (num_agents, 2)
     assert not state.ep_done
     assert state.step == 0
-    assert jnp.all(state.done == False)
+    assert jnp.all(jnp.logical_not(state.done))
     assert jnp.all(state.vel == 0.0)
 
 
@@ -126,7 +136,7 @@ def test_differential_drive_forward_motion():
 
     # Action: move forward (v=1.0, omega=0.0)
     action = jnp.array([1.0, 0.0])
-    new_pos, new_theta, new_vel = env.update_state(
+    new_pos, _new_theta, new_vel = env.update_state(
         initial_state.pos[0],
         initial_state.theta[0],
         initial_state.vel[0],
@@ -273,12 +283,14 @@ def test_lidar_sense_straight_wall():
     )
 
     # Create simple state with agent facing wall
-    map_data = jnp.array([
-        [1, 1, 1, 1, 1],
-        [1, 0, 0, 0, 1],
-        [1, 0, 0, 0, 1],
-        [1, 1, 1, 1, 1],
-    ])
+    map_data = jnp.array(
+        [
+            [1, 1, 1, 1, 1],
+            [1, 0, 0, 0, 1],
+            [1, 0, 0, 0, 1],
+            [1, 1, 1, 1, 1],
+        ]
+    )
 
     state = State(
         pos=jnp.array([[2.5, 1.5]]),
@@ -299,8 +311,12 @@ def test_lidar_sense_straight_wall():
 
     # Center beam should detect wall at ~0.5 units
     center_idx = len(ranges) // 2
-    assert ranges[center_idx] < 1.0, f"Center lidar range {ranges[center_idx]} too large"
-    assert ranges[center_idx] > 0.3, f"Center lidar range {ranges[center_idx]} too small"
+    assert ranges[center_idx] < 1.0, (
+        f"Center lidar range {ranges[center_idx]} too large"
+    )
+    assert ranges[center_idx] > 0.3, (
+        f"Center lidar range {ranges[center_idx]} too small"
+    )
 
 
 def test_lidar_max_range():
@@ -392,13 +408,15 @@ def test_map_collision_detection_circle():
     """Test collision detection with map for circle agents."""
     map_obj = GridMapCircleAgents(num_agents=1, rad=0.3, map_size=(5, 5))
 
-    map_data = jnp.array([
-        [1, 1, 1, 1, 1],
-        [1, 0, 0, 0, 1],
-        [1, 0, 1, 0, 1],
-        [1, 0, 0, 0, 1],
-        [1, 1, 1, 1, 1],
-    ])
+    map_data = jnp.array(
+        [
+            [1, 1, 1, 1, 1],
+            [1, 0, 0, 0, 1],
+            [1, 0, 1, 0, 1],
+            [1, 0, 0, 0, 1],
+            [1, 1, 1, 1, 1],
+        ]
+    )
 
     # No collision in free space
     collision = map_obj.check_circle_map_collision(jnp.array([2.5, 1.5]), map_data)
@@ -417,13 +435,15 @@ def test_map_collision_detection_polygon():
     """Test collision detection for polygon agents."""
     map_obj = GridMapPolygonAgents(num_agents=1, rad=0.3, map_size=(5, 5))
 
-    map_data = jnp.array([
-        [1, 1, 1, 1, 1],
-        [1, 0, 0, 0, 1],
-        [1, 0, 1, 0, 1],
-        [1, 0, 0, 0, 1],
-        [1, 1, 1, 1, 1],
-    ])
+    map_data = jnp.array(
+        [
+            [1, 1, 1, 1, 1],
+            [1, 0, 0, 0, 1],
+            [1, 0, 1, 0, 1],
+            [1, 0, 0, 0, 1],
+            [1, 1, 1, 1, 1],
+        ]
+    )
 
     # No collision
     collision = map_obj.check_agent_map_collision(
@@ -477,12 +497,14 @@ def test_collision_during_step():
     key = jax.random.PRNGKey(42)
 
     # Create state where agent will collide with wall
-    map_data = jnp.array([
-        [1, 1, 1, 1, 1],
-        [1, 0, 0, 0, 1],
-        [1, 0, 0, 0, 1],
-        [1, 1, 1, 1, 1],
-    ])
+    map_data = jnp.array(
+        [
+            [1, 1, 1, 1, 1],
+            [1, 0, 0, 0, 1],
+            [1, 0, 0, 0, 1],
+            [1, 1, 1, 1, 1],
+        ]
+    )
 
     state = State(
         pos=jnp.array([[0.8, 1.5]]),  # Very close to wall
@@ -501,7 +523,7 @@ def test_collision_during_step():
 
     # Move toward wall
     actions = {"agent_0": jnp.array([1.0, 0.0])}
-    _, new_state, _, dones, info = env.step_env(key, state, actions)
+    _, new_state, _, _dones, info = env.step_env(key, state, actions)
 
     # Should detect collision
     assert new_state.move_term[0] or info["MapC"] > 0
@@ -560,7 +582,7 @@ def test_goal_reached_episode_termination():
 
     # Move toward goal
     actions = {"agent_0": jnp.array([1.0, 0.0])}
-    _, new_state, rewards, dones, info = env.step_env(key, state, actions)
+    _, new_state, rewards, dones, _info = env.step_env(key, state, actions)
 
     # Check goal reached
     assert new_state.goal_reached[0] or dones["agent_0"]
@@ -622,17 +644,17 @@ def test_observation_normalization():
     """Test that observations are normalized when enabled."""
     env = JaxNav(num_agents=1, normalise_obs=True, lidar_num_beams=50)
     key = jax.random.PRNGKey(0)
-    obs, state = env.reset(key)
+    obs, _state = env.reset(key)
 
     obs_array = obs["agent_0"]
 
     # Lidar should be in range [-0.5, 0.5]
-    lidar = obs_array[:env.lidar_num_beams]
+    lidar = obs_array[: env.lidar_num_beams]
     assert jnp.all(lidar >= -0.6)  # Small tolerance
     assert jnp.all(lidar <= 0.6)
 
     # Velocity should be normalized
-    vel = obs_array[env.lidar_num_beams:env.lidar_num_beams + 2]
+    vel = obs_array[env.lidar_num_beams : env.lidar_num_beams + 2]
     assert jnp.all(jnp.abs(vel) <= 1.0)
 
 
@@ -716,8 +738,16 @@ def test_reward_goal_reached():
     old_move_term = False
 
     reward, _ = env.compute_reward(
-        obs, new_pos, old_pos, action, goal,
-        collision, goal_reached, done, old_goal_reached, old_move_term
+        obs,
+        new_pos,
+        old_pos,
+        action,
+        goal,
+        collision,
+        goal_reached,
+        done,
+        old_goal_reached,
+        old_move_term,
     )
 
     assert reward > 0
@@ -740,8 +770,16 @@ def test_reward_collision():
     old_move_term = False
 
     reward, _ = env.compute_reward(
-        obs, new_pos, old_pos, action, goal,
-        collision, goal_reached, done, old_goal_reached, old_move_term
+        obs,
+        new_pos,
+        old_pos,
+        action,
+        goal,
+        collision,
+        goal_reached,
+        done,
+        old_goal_reached,
+        old_move_term,
     )
 
     assert reward < 0
@@ -758,8 +796,7 @@ def test_reward_approaching_goal():
     action = jnp.array([1.0, 0.0])
 
     reward, _ = env.compute_reward(
-        obs, new_pos, old_pos, action, goal,
-        False, False, False, False, False
+        obs, new_pos, old_pos, action, goal, False, False, False, False, False
     )
 
     # Should get positive reward for approaching
@@ -777,8 +814,7 @@ def test_reward_time_penalty():
     goal = jnp.array([5.0, 5.0])
 
     reward, _ = env.compute_reward(
-        obs, pos, pos, action, goal,
-        False, False, False, False, False
+        obs, pos, pos, action, goal, False, False, False, False, False
     )
 
     # Should be approximately the time penalty
@@ -806,8 +842,7 @@ def test_reward_lidar_proximity_penalty():
     goal = jnp.array([5.0, 5.0])
 
     reward, _ = env.compute_reward(
-        obs, pos, pos, action, goal,
-        False, False, False, False, False
+        obs, pos, pos, action, goal, False, False, False, False, False
     )
 
     # Should include lidar penalty
@@ -822,13 +857,13 @@ def test_max_steps_termination():
     max_steps = 10
     env = JaxNav(num_agents=1, max_steps=max_steps)
     key = jax.random.PRNGKey(0)
-    obs, state = env.reset(key)
+    _obs, state = env.reset(key)
 
     # Run until max steps
     for step in range(max_steps):
         actions = {"agent_0": jnp.array([0.1, 0.0])}
         key, step_key = jax.random.split(key)
-        obs, state, _, dones, _ = env.step_env(step_key, state, actions)
+        _obs, state, _, dones, _ = env.step_env(step_key, state, actions)
 
         if step < max_steps - 1:
             # Should not be done yet
@@ -866,7 +901,7 @@ def test_evaporating_mode():
     )
 
     actions = {"agent_0": jnp.array([0.0, 0.0]), "agent_1": jnp.array([0.5, 0.0])}
-    _, new_state, _, dones, _ = env.step_env(key, state, actions)
+    _, new_state, _, _dones, _ = env.step_env(key, state, actions)
 
     # First agent should be done, second not
     if new_state.goal_reached[0]:
@@ -902,7 +937,7 @@ def test_map_fill_ratio():
     num_samples = 10
     total_fill = 0
 
-    for i in range(num_samples):
+    for _i in range(num_samples):
         key, subkey = jax.random.split(key)
         map_data = map_obj.sample_map(subkey)
 
@@ -930,7 +965,7 @@ def test_grid_sample_test_case():
     )
     key = jax.random.PRNGKey(0)
 
-    map_data, test_case = map_obj.grid_sample_test_case(key)
+    _map_data, test_case = map_obj.grid_sample_test_case(key)
 
     # Test case should have correct shape
     assert test_case.shape == (2, 2, 3)  # [num_agents, 2 (start/goal), 3 (x,y,theta)]
@@ -949,12 +984,14 @@ def test_grid_sample_test_case():
 
 def test_polygon_agent_map():
     """Test polygon agent map initialization."""
-    agent_coords = jnp.array([
-        [-0.25, -0.25],
-        [-0.25, 0.25],
-        [0.25, 0.25],
-        [0.25, -0.25],
-    ])
+    agent_coords = jnp.array(
+        [
+            [-0.25, -0.25],
+            [-0.25, 0.25],
+            [0.25, 0.25],
+            [0.25, -0.25],
+        ]
+    )
 
     map_obj = GridMapPolygonAgents(
         num_agents=2,
@@ -981,7 +1018,7 @@ def test_barn_map_smoothing():
     key = jax.random.PRNGKey(0)
 
     # Should be able to sample without errors
-    map_data, test_case = map_obj.sample_test_case(key)
+    map_data, _test_case = map_obj.sample_test_case(key)
     assert map_data.shape == (20, 20)
 
 
@@ -990,11 +1027,13 @@ def test_barn_map_smoothing():
 
 def test_grid_to_graph_conversion():
     """Test conversion of grid map to graph representation."""
-    grid = jnp.array([
-        [1, 1, 1],
-        [1, 0, 1],
-        [1, 1, 1],
-    ])
+    grid = jnp.array(
+        [
+            [1, 1, 1],
+            [1, 0, 1],
+            [1, 1, 1],
+        ]
+    )
 
     A = grid_to_graph(grid)
 
@@ -1005,13 +1044,15 @@ def test_grid_to_graph_conversion():
 
 def test_component_mask():
     """Test connected component detection."""
-    grid = jnp.array([
-        [1, 1, 1, 1, 1],
-        [1, 0, 0, 0, 1],
-        [1, 0, 1, 0, 1],
-        [1, 0, 0, 0, 1],
-        [1, 1, 1, 1, 1],
-    ])
+    grid = jnp.array(
+        [
+            [1, 1, 1, 1, 1],
+            [1, 0, 0, 0, 1],
+            [1, 0, 1, 0, 1],
+            [1, 0, 0, 0, 1],
+            [1, 1, 1, 1, 1],
+        ]
+    )
 
     # Start position in free space
     pos = jnp.array([1, 1])  # [x, y]
@@ -1030,13 +1071,15 @@ def test_dikstra_path():
     """Test Dijkstra pathfinding on grid map."""
     map_obj = GridMapCircleAgents(num_agents=1, rad=0.3, map_size=(7, 7))
 
-    map_data = jnp.array([
-        [1, 1, 1, 1, 1, 1, 1],
-        [1, 0, 0, 0, 0, 0, 1],
-        [1, 0, 1, 1, 1, 0, 1],
-        [1, 0, 0, 0, 0, 0, 1],
-        [1, 1, 1, 1, 1, 1, 1],
-    ])
+    map_data = jnp.array(
+        [
+            [1, 1, 1, 1, 1, 1, 1],
+            [1, 0, 0, 0, 0, 0, 1],
+            [1, 0, 1, 1, 1, 0, 1],
+            [1, 0, 0, 0, 0, 0, 1],
+            [1, 1, 1, 1, 1, 1, 1],
+        ]
+    )
 
     start = jnp.array([1.5, 1.5])
     goal = jnp.array([5.5, 3.5])
@@ -1053,13 +1096,15 @@ def test_passable_check():
     """Test passability checking between two points."""
     map_obj = GridMapCircleAgents(num_agents=1, rad=0.3, map_size=(7, 7))
 
-    map_data = jnp.array([
-        [1, 1, 1, 1, 1, 1, 1],
-        [1, 0, 0, 0, 0, 0, 1],
-        [1, 0, 1, 1, 1, 0, 1],
-        [1, 0, 0, 0, 0, 0, 1],
-        [1, 1, 1, 1, 1, 1, 1],
-    ])
+    map_data = jnp.array(
+        [
+            [1, 1, 1, 1, 1, 1, 1],
+            [1, 0, 0, 0, 0, 0, 1],
+            [1, 0, 1, 1, 1, 0, 1],
+            [1, 0, 0, 0, 0, 0, 1],
+            [1, 1, 1, 1, 1, 1, 1],
+        ]
+    )
 
     # Path around obstacle
     pos1 = jnp.array([1.5, 1.5])
@@ -1184,7 +1229,7 @@ def test_full_episode_rollout():
 
     obs, state = env.reset(key)
 
-    for step in range(50):
+    for _step in range(50):
         # Random actions
         key, *action_keys = jax.random.split(key, env.num_agents + 1)
         actions = {
@@ -1193,7 +1238,7 @@ def test_full_episode_rollout():
         }
 
         key, step_key = jax.random.split(key)
-        obs, state, rewards, dones, info = env.step_env(step_key, state, actions)
+        obs, state, rewards, dones, _info = env.step_env(step_key, state, actions)
 
         # Check validity of outputs
         assert len(obs) == env.num_agents
@@ -1218,7 +1263,7 @@ def test_set_state_and_restore():
     _, stepped_state, _, _, _ = env.step_env(step_key, initial_state, actions)
 
     # Restore to stepped state
-    obs, restored_state = env.set_state(stepped_state)
+    _obs, restored_state = env.set_state(stepped_state)
 
     # Should match
     assert jnp.allclose(restored_state.pos, stepped_state.pos)
@@ -1259,7 +1304,7 @@ def test_mixed_agent_states():
         "agent_2": jnp.array([0.7, -0.1]),
     }
 
-    _, new_state, rewards, _, _ = env.step_env(key, state, actions)
+    _, new_state, _rewards, _, _ = env.step_env(key, state, actions)
 
     # Done agent should not move
     if env.evaporating:
@@ -1334,7 +1379,7 @@ def test_info_by_agent_flag():
     _, _, _, _, info = env1.step_env(key, state, actions)
 
     # Info should be per-agent
-    assert isinstance(info["GoalR"], jnp.ndarray) or isinstance(info["GoalR"], bool)
+    assert isinstance(info["GoalR"], jnp.ndarray | bool)
 
     # With info_by_agent=False
     env2 = JaxNav(num_agents=2, info_by_agent=False)

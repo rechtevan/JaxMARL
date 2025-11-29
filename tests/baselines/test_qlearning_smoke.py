@@ -19,7 +19,7 @@ Tests focus on core Q-learning features:
 import os
 import sys
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 import chex
 import flashbax as fbx
@@ -29,6 +29,7 @@ import jax.numpy as jnp
 import pytest
 from hydra import compose, initialize_config_dir
 from omegaconf import OmegaConf
+
 
 # Add baselines to path
 baselines_path = Path(__file__).parent.parent.parent / "baselines"
@@ -41,7 +42,9 @@ class TestQlearningConfigLoading:
     @pytest.fixture
     def config_dir(self):
         """Get the absolute path to QLearning config directory."""
-        return str(Path(__file__).parent.parent.parent / "baselines" / "QLearning" / "config")
+        return str(
+            Path(__file__).parent.parent.parent / "baselines" / "QLearning" / "config"
+        )
 
     def test_base_config_loads(self, config_dir):
         """Test loading base QLearning config."""
@@ -290,12 +293,14 @@ class TestQlearningExploration:
         q_vals = jnp.ones((batch_size, num_actions))
 
         # Only first 3 actions are available
-        valid_actions = jnp.array([
-            [1, 1, 1, 0, 0, 0],
-            [1, 1, 1, 0, 0, 0],
-            [1, 1, 1, 0, 0, 0],
-            [1, 1, 1, 0, 0, 0],
-        ])
+        valid_actions = jnp.array(
+            [
+                [1, 1, 1, 0, 0, 0],
+                [1, 1, 1, 0, 0, 0],
+                [1, 1, 1, 0, 0, 0],
+                [1, 1, 1, 0, 0, 0],
+            ]
+        )
 
         # Mask unavailable actions
         unavail = 1 - valid_actions
@@ -326,9 +331,10 @@ class TestQlearningDataTypes:
 
     def test_custom_train_state(self):
         """Test CustomTrainState initialization."""
-        from QLearning.vdn_ff import CustomTrainState
-        import optax
         import copy
+
+        import optax
+        from QLearning.vdn_ff import CustomTrainState
 
         # Create a simple network
         network = nn.Dense(5)
@@ -358,14 +364,18 @@ class TestQlearningShortTraining:
     def setup_wandb(self):
         """Initialize wandb in disabled mode."""
         import wandb
+
         wandb.init(mode="disabled", project="test", entity="test")
         yield
         wandb.finish()
 
-    @pytest.mark.skip(reason="VDN requires complete environment setup - tested via manual runs")
+    @pytest.mark.skip(
+        reason="VDN requires complete environment setup - tested via manual runs"
+    )
     def test_vdn_ff_short_training_mpe(self):
         """Test VDN FF on MPE for 100 timesteps."""
         from QLearning.vdn_ff import make_train
+
         from jaxmarl import make
 
         env = make("MPE_simple_spread_v3")
@@ -392,10 +402,13 @@ class TestQlearningShortTraining:
 
         assert out is not None
 
-    @pytest.mark.skip(reason="QMIX requires complete environment setup - tested via manual runs")
+    @pytest.mark.skip(
+        reason="QMIX requires complete environment setup - tested via manual runs"
+    )
     def test_qmix_rnn_short_training_smax(self):
         """Test QMIX RNN on SMAX for 100 timesteps."""
         from QLearning.qmix_rnn import make_train
+
         from jaxmarl import make
 
         env = make("SMAX", map_name="2s3z")
@@ -423,10 +436,13 @@ class TestQlearningShortTraining:
 
         assert out is not None
 
-    @pytest.mark.skip(reason="IQL requires complete environment setup - tested via manual runs")
+    @pytest.mark.skip(
+        reason="IQL requires complete environment setup - tested via manual runs"
+    )
     def test_iql_rnn_short_training_smax(self):
         """Test IQL RNN on SMAX for 100 timesteps."""
         from QLearning.iql_rnn import make_train
+
         from jaxmarl import make
 
         env = make("SMAX", map_name="2s3z")
@@ -461,6 +477,7 @@ class TestQlearningUtilityFunctions:
     def test_batchify_vdn(self):
         """Test batchify function from VDN."""
         from QLearning.vdn_ff import make_train
+
         from jaxmarl import make
 
         env = make("MPE_simple_spread_v3")
@@ -486,12 +503,12 @@ class TestQlearningUtilityFunctions:
         batched_actions = jnp.ones((num_agents, num_envs, action_dim))
 
         # Unbatchify to dict
-        unbatched = {
-            agent: batched_actions[i] for i, agent in enumerate(env.agents)
-        }
+        unbatched = {agent: batched_actions[i] for i, agent in enumerate(env.agents)}
 
         assert len(unbatched) == num_agents
-        assert all(unbatched[agent].shape == (num_envs, action_dim) for agent in env.agents)
+        assert all(
+            unbatched[agent].shape == (num_envs, action_dim) for agent in env.agents
+        )
 
 
 class TestQlearningTargetNetworks:
@@ -499,8 +516,9 @@ class TestQlearningTargetNetworks:
 
     def test_target_network_copy(self):
         """Test copying network params to target network."""
-        from QLearning.vdn_ff import QNetwork
         import copy
+
+        from QLearning.vdn_ff import QNetwork
 
         network = QNetwork(action_dim=5)
         rng = jax.random.PRNGKey(0)
@@ -513,6 +531,7 @@ class TestQlearningTargetNetworks:
         target_params = copy.deepcopy(params)
 
         assert target_params is not None
+
         # Verify they're initially identical by checking nested structure
         def compare_params(p1, p2):
             """Recursively compare nested param structures."""

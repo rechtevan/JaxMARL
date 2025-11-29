@@ -23,6 +23,7 @@ import pytest
 from hydra import compose, initialize_config_dir
 from omegaconf import OmegaConf
 
+
 # Add baselines to path
 baselines_path = Path(__file__).parent.parent.parent / "baselines"
 sys.path.insert(0, str(baselines_path))
@@ -34,7 +35,9 @@ class TestMAPPOConfigLoading:
     @pytest.fixture
     def config_dir(self):
         """Get the absolute path to MAPPO config directory."""
-        return str(Path(__file__).parent.parent.parent / "baselines" / "MAPPO" / "config")
+        return str(
+            Path(__file__).parent.parent.parent / "baselines" / "MAPPO" / "config"
+        )
 
     def test_mappo_rnn_smax_config(self, config_dir):
         """Test loading SMAX RNN config."""
@@ -150,7 +153,9 @@ class TestMAPPONetworkInitialization:
         assert params is not None
 
         # Test forward pass
-        new_hidden, pi = network.apply(params, hidden, (dummy_obs, dummy_dones, dummy_avail))
+        new_hidden, pi = network.apply(
+            params, hidden, (dummy_obs, dummy_dones, dummy_avail)
+        )
         assert new_hidden is not None
         assert pi is not None
 
@@ -177,7 +182,9 @@ class TestMAPPONetworkInitialization:
         assert params is not None
 
         # Test forward pass
-        new_hidden, value = network.apply(params, hidden, (dummy_world_state, dummy_dones))
+        new_hidden, value = network.apply(
+            params, hidden, (dummy_world_state, dummy_dones)
+        )
         assert new_hidden is not None
         assert value is not None
         assert value.shape == (seq_len, batch_size)
@@ -214,6 +221,7 @@ class TestMAPPOShortTraining:
     def setup_wandb(self):
         """Initialize wandb in disabled mode before each test."""
         import wandb
+
         # Initialize wandb in disabled mode for all tests
         wandb.init(mode="disabled", project="test", entity="test")
         yield
@@ -253,7 +261,9 @@ class TestMAPPOShortTraining:
         # Should complete without errors
         assert out is not None
 
-    @pytest.mark.skip(reason="SMAX RNN has shape mismatch in GRU carry reset - tested via manual runs")
+    @pytest.mark.skip(
+        reason="SMAX RNN has shape mismatch in GRU carry reset - tested via manual runs"
+    )
     def test_mappo_rnn_smax_short_training(self):
         """Test MAPPO RNN on SMAX for 100 timesteps."""
         from MAPPO.mappo_rnn_smax import make_train
@@ -432,7 +442,9 @@ class TestMAPPOHydraIntegration:
 
     def test_config_override(self):
         """Test that Hydra overrides work correctly."""
-        config_dir = str(Path(__file__).parent.parent.parent / "baselines" / "MAPPO" / "config")
+        config_dir = str(
+            Path(__file__).parent.parent.parent / "baselines" / "MAPPO" / "config"
+        )
 
         with initialize_config_dir(config_dir=config_dir, version_base=None):
             # Load base config
@@ -441,8 +453,7 @@ class TestMAPPOHydraIntegration:
 
             # Load with override
             cfg_override = compose(
-                config_name="mappo_homogenous_ff_hanabi",
-                overrides=["LR=0.001"]
+                config_name="mappo_homogenous_ff_hanabi", overrides=["LR=0.001"]
             )
 
             assert cfg_override["LR"] == 0.001
@@ -450,12 +461,14 @@ class TestMAPPOHydraIntegration:
 
     def test_multiple_overrides(self):
         """Test multiple simultaneous Hydra overrides."""
-        config_dir = str(Path(__file__).parent.parent.parent / "baselines" / "MAPPO" / "config")
+        config_dir = str(
+            Path(__file__).parent.parent.parent / "baselines" / "MAPPO" / "config"
+        )
 
         with initialize_config_dir(config_dir=config_dir, version_base=None):
             cfg = compose(
                 config_name="mappo_homogenous_ff_hanabi",
-                overrides=["LR=0.001", "NUM_ENVS=8", "TOTAL_TIMESTEPS=1000"]
+                overrides=["LR=0.001", "NUM_ENVS=8", "TOTAL_TIMESTEPS=1000"],
             )
 
             assert cfg["LR"] == 0.001
@@ -464,12 +477,14 @@ class TestMAPPOHydraIntegration:
 
     def test_rnn_config_override(self):
         """Test Hydra overrides on RNN config."""
-        config_dir = str(Path(__file__).parent.parent.parent / "baselines" / "MAPPO" / "config")
+        config_dir = str(
+            Path(__file__).parent.parent.parent / "baselines" / "MAPPO" / "config"
+        )
 
         with initialize_config_dir(config_dir=config_dir, version_base=None):
             cfg = compose(
                 config_name="mappo_homogenous_rnn_smax",
-                overrides=["GRU_HIDDEN_DIM=32", "FC_DIM_SIZE=32"]
+                overrides=["GRU_HIDDEN_DIM=32", "FC_DIM_SIZE=32"],
             )
 
             assert cfg["GRU_HIDDEN_DIM"] == 32
@@ -482,6 +497,7 @@ class TestMAPPOCentralizedCriticFeature:
     def test_world_state_wrapper_smax(self):
         """Test that SMAX world state wrapper creates centralized state."""
         from MAPPO.mappo_rnn_smax import SMAXWorldStateWrapper
+
         from jaxmarl.environments.smax import HeuristicEnemySMAX, map_name_to_scenario
 
         scenario = map_name_to_scenario("2s3z")
@@ -489,7 +505,7 @@ class TestMAPPOCentralizedCriticFeature:
         wrapped_env = SMAXWorldStateWrapper(env, obs_with_agent_id=True)
 
         rng = jax.random.PRNGKey(0)
-        obs, state = wrapped_env.reset(rng)
+        obs, _state = wrapped_env.reset(rng)
 
         # Verify world_state key exists (created by wrapper)
         assert "world_state" in obs
@@ -499,13 +515,14 @@ class TestMAPPOCentralizedCriticFeature:
     def test_world_state_wrapper_mpe(self):
         """Test that MPE world state wrapper creates centralized state."""
         from MAPPO.mappo_rnn_mpe import MPEWorldStateWrapper
+
         import jaxmarl
 
         env = jaxmarl.make("MPE_simple_spread_v3")
         wrapped_env = MPEWorldStateWrapper(env)
 
         rng = jax.random.PRNGKey(0)
-        obs, state = wrapped_env.reset(rng)
+        obs, _state = wrapped_env.reset(rng)
 
         # Verify world_state key exists
         assert "world_state" in obs
@@ -515,13 +532,14 @@ class TestMAPPOCentralizedCriticFeature:
     def test_world_state_wrapper_hanabi(self):
         """Test that Hanabi world state wrapper creates centralized state."""
         from MAPPO.mappo_ff_hanabi import HanabiWorldStateWrapper
+
         import jaxmarl
 
         env = jaxmarl.make("hanabi")
         wrapped_env = HanabiWorldStateWrapper(env)
 
         rng = jax.random.PRNGKey(0)
-        obs, state = wrapped_env.reset(rng)
+        obs, _state = wrapped_env.reset(rng)
 
         # Verify world_state key exists
         assert "world_state" in obs

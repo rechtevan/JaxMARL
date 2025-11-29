@@ -20,6 +20,7 @@ import pytest
 from hydra import compose, initialize_config_dir
 from omegaconf import OmegaConf
 
+
 # Add baselines to path
 baselines_path = Path(__file__).parent.parent.parent / "baselines"
 sys.path.insert(0, str(baselines_path))
@@ -31,7 +32,9 @@ class TestIPPOConfigLoading:
     @pytest.fixture
     def config_dir(self):
         """Get the absolute path to IPPO config directory."""
-        return str(Path(__file__).parent.parent.parent / "baselines" / "IPPO" / "config")
+        return str(
+            Path(__file__).parent.parent.parent / "baselines" / "IPPO" / "config"
+        )
 
     def test_ippo_rnn_smax_config(self, config_dir):
         """Test loading SMAX RNN config."""
@@ -163,14 +166,16 @@ class TestIPPONetworkInitialization:
         assert params is not None
 
         # Test forward pass
-        new_hidden, pi, value = network.apply(params, hidden, (dummy_obs, dummy_dones, dummy_avail))
+        new_hidden, pi, value = network.apply(
+            params, hidden, (dummy_obs, dummy_dones, dummy_avail)
+        )
         assert new_hidden is not None
         assert pi is not None
         assert value.shape == (seq_len, batch_size)
 
     def test_actorcritic_cnn_initialization(self):
         """Test CNN ActorCritic network initialization."""
-        from IPPO.ippo_cnn_overcooked import ActorCritic, CNN
+        from IPPO.ippo_cnn_overcooked import CNN, ActorCritic
 
         network = ActorCritic(action_dim=6, activation="tanh")
         rng = jax.random.PRNGKey(0)
@@ -213,6 +218,7 @@ class TestIPPOShortTraining:
     def setup_wandb(self):
         """Initialize wandb in disabled mode before each test."""
         import wandb
+
         # Initialize wandb in disabled mode for all tests
         wandb.init(mode="disabled", project="test", entity="test")
         yield
@@ -351,10 +357,13 @@ class TestIPPOShortTraining:
 
         assert out is not None
 
-    @pytest.mark.skip(reason="Overcooked environment has complex initialization - tested via manual runs")
+    @pytest.mark.skip(
+        reason="Overcooked environment has complex initialization - tested via manual runs"
+    )
     def test_ippo_cnn_overcooked_short_training(self):
         """Test IPPO CNN on Overcooked for 100 timesteps."""
         from IPPO.ippo_cnn_overcooked import make_train
+
         from jaxmarl.environments.overcooked import overcooked_layouts
 
         config = {
@@ -384,10 +393,13 @@ class TestIPPOShortTraining:
 
         assert out is not None
 
-    @pytest.mark.skip(reason="Overcooked environment has complex initialization - tested via manual runs")
+    @pytest.mark.skip(
+        reason="Overcooked environment has complex initialization - tested via manual runs"
+    )
     def test_ippo_ff_overcooked_short_training(self):
         """Test IPPO FF on Overcooked for 100 timesteps."""
         from IPPO.ippo_ff_overcooked import make_train
+
         from jaxmarl.environments.overcooked import overcooked_layouts
 
         config = {
@@ -497,7 +509,9 @@ class TestIPPOHydraIntegration:
 
     def test_config_override(self):
         """Test that Hydra overrides work correctly."""
-        config_dir = str(Path(__file__).parent.parent.parent / "baselines" / "IPPO" / "config")
+        config_dir = str(
+            Path(__file__).parent.parent.parent / "baselines" / "IPPO" / "config"
+        )
 
         with initialize_config_dir(config_dir=config_dir, version_base=None):
             # Load base config
@@ -505,22 +519,21 @@ class TestIPPOHydraIntegration:
             base_lr = cfg["LR"]
 
             # Load with override
-            cfg_override = compose(
-                config_name="ippo_ff_mpe",
-                overrides=["LR=0.001"]
-            )
+            cfg_override = compose(config_name="ippo_ff_mpe", overrides=["LR=0.001"])
 
             assert cfg_override["LR"] == 0.001
             assert cfg_override["LR"] != base_lr
 
     def test_multiple_overrides(self):
         """Test multiple simultaneous Hydra overrides."""
-        config_dir = str(Path(__file__).parent.parent.parent / "baselines" / "IPPO" / "config")
+        config_dir = str(
+            Path(__file__).parent.parent.parent / "baselines" / "IPPO" / "config"
+        )
 
         with initialize_config_dir(config_dir=config_dir, version_base=None):
             cfg = compose(
                 config_name="ippo_ff_mpe",
-                overrides=["LR=0.001", "NUM_ENVS=8", "TOTAL_TIMESTEPS=1000"]
+                overrides=["LR=0.001", "NUM_ENVS=8", "TOTAL_TIMESTEPS=1000"],
             )
 
             assert cfg["LR"] == 0.001
