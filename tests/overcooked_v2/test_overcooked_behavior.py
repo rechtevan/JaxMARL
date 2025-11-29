@@ -58,7 +58,7 @@ class TestEnvironmentInitialization:
         assert "agent_0" in obs
         assert "agent_1" in obs
         assert state.time == 0
-        assert state.terminal == False
+        assert not state.terminal
         assert state.agents.pos.x.shape[0] == env.num_agents
 
     def test_reset_deterministic(self):
@@ -66,8 +66,8 @@ class TestEnvironmentInitialization:
         env = make("overcooked_v2", layout="cramped_room")
         rng = jax.random.PRNGKey(42)
 
-        obs1, state1 = env.reset(rng)
-        obs2, state2 = env.reset(rng)
+        _obs1, state1 = env.reset(rng)
+        _obs2, state2 = env.reset(rng)
 
         # States should be identical with same key
         assert jnp.array_equal(state1.agents.pos.x, state2.agents.pos.x)
@@ -76,7 +76,11 @@ class TestEnvironmentInitialization:
     def test_observation_types(self):
         """Test different observation types."""
         # Default observation
-        env_default = make("overcooked_v2", layout="cramped_room", observation_type=ObservationType.DEFAULT)
+        env_default = make(
+            "overcooked_v2",
+            layout="cramped_room",
+            observation_type=ObservationType.DEFAULT,
+        )
         rng = jax.random.PRNGKey(0)
         obs, _ = env_default.reset(rng)
         assert len(obs["agent_0"].shape) == 3  # Height x Width x Channels
@@ -102,9 +106,11 @@ class TestEnvironmentInitialization:
 
         # With different keys, should get different states
         # (may occasionally be equal by chance, but unlikely)
-        assert not (jnp.array_equal(state1.agents.pos.x, state2.agents.pos.x) and
-                    jnp.array_equal(state1.agents.pos.y, state2.agents.pos.y) and
-                    jnp.array_equal(state1.agents.inventory, state2.agents.inventory))
+        assert not (
+            jnp.array_equal(state1.agents.pos.x, state2.agents.pos.x)
+            and jnp.array_equal(state1.agents.pos.y, state2.agents.pos.y)
+            and jnp.array_equal(state1.agents.inventory, state2.agents.inventory)
+        )
 
     def test_random_agent_positions(self):
         """Test random agent position initialization."""
@@ -116,8 +122,10 @@ class TestEnvironmentInitialization:
         _, state2 = env.reset(rng2)
 
         # Different keys should produce different positions
-        positions_different = not (jnp.array_equal(state1.agents.pos.x, state2.agents.pos.x) and
-                                   jnp.array_equal(state1.agents.pos.y, state2.agents.pos.y))
+        positions_different = not (
+            jnp.array_equal(state1.agents.pos.x, state2.agents.pos.x)
+            and jnp.array_equal(state1.agents.pos.y, state2.agents.pos.y)
+        )
         assert positions_different
 
 
@@ -139,8 +147,10 @@ class TestMovementAndCollision:
         _, new_state, _, _, _ = env.step(rng, state, actions)
 
         # Position should change (if not blocked by wall)
-        pos_changed = (new_state.agents.pos.x[0] != initial_x or
-                       new_state.agents.pos.y[0] != initial_y)
+        pos_changed = (
+            new_state.agents.pos.x[0] != initial_x
+            or new_state.agents.pos.y[0] != initial_y
+        )
         # Either moved or was blocked - both are valid
         assert True  # Movement logic executed
 
@@ -215,8 +225,13 @@ class TestMovementAndCollision:
             pos1_after = (state.agents.pos.x[1], state.agents.pos.y[1])
 
             # If agents were adjacent, they shouldn't have swapped
-            if (abs(pos0_before[0] - pos1_before[0]) == 1 and pos0_before[1] == pos1_before[1]) or \
-               (abs(pos0_before[1] - pos1_before[1]) == 1 and pos0_before[0] == pos1_before[0]):
+            if (
+                abs(pos0_before[0] - pos1_before[0]) == 1
+                and pos0_before[1] == pos1_before[1]
+            ) or (
+                abs(pos0_before[1] - pos1_before[1]) == 1
+                and pos0_before[0] == pos1_before[0]
+            ):
                 # Agents were adjacent
                 swapped = (pos0_after == pos1_before) and (pos1_after == pos0_before)
                 assert not swapped, "Agents swapped positions!"
@@ -243,9 +258,9 @@ class TestItemInteractions:
                     agents=state.agents.replace(
                         pos=Position(
                             x=state.agents.pos.x.at[0].set(plate_x[0]),
-                            y=state.agents.pos.y.at[0].set(plate_y[0] + 1)
+                            y=state.agents.pos.y.at[0].set(plate_y[0] + 1),
                         ),
-                        dir=state.agents.dir.at[0].set(Direction.UP)
+                        dir=state.agents.dir.at[0].set(Direction.UP),
                     )
                 )
 
@@ -274,10 +289,12 @@ class TestItemInteractions:
                         agents=state.agents.replace(
                             pos=Position(
                                 x=state.agents.pos.x.at[0].set(pile_x[0]),
-                                y=state.agents.pos.y.at[0].set(max(0, pile_y[0] - 1))
+                                y=state.agents.pos.y.at[0].set(max(0, pile_y[0] - 1)),
                             ),
                             dir=state.agents.dir.at[0].set(Direction.DOWN),
-                            inventory=state.agents.inventory.at[0].set(DynamicObject.EMPTY)
+                            inventory=state.agents.inventory.at[0].set(
+                                DynamicObject.EMPTY
+                            ),
                         )
                     )
 
@@ -310,10 +327,10 @@ class TestItemInteractions:
                     agents=state.agents.replace(
                         pos=Position(
                             x=state.agents.pos.x.at[0].set(counter_x[0]),
-                            y=state.agents.pos.y.at[0].set(counter_y[0] - 1)
+                            y=state.agents.pos.y.at[0].set(counter_y[0] - 1),
                         ),
                         dir=state.agents.dir.at[0].set(Direction.DOWN),
-                        inventory=state.agents.inventory.at[0].set(ingredient)
+                        inventory=state.agents.inventory.at[0].set(ingredient),
                     )
                 )
 
@@ -347,10 +364,10 @@ class TestItemInteractions:
                     agents=state.agents.replace(
                         pos=Position(
                             x=state.agents.pos.x.at[0].set(wall_x[0]),
-                            y=state.agents.pos.y.at[0].set(wall_y[0] - 1)
+                            y=state.agents.pos.y.at[0].set(wall_y[0] - 1),
                         ),
                         dir=state.agents.dir.at[0].set(Direction.DOWN),
-                        inventory=state.agents.inventory.at[0].set(DynamicObject.EMPTY)
+                        inventory=state.agents.inventory.at[0].set(DynamicObject.EMPTY),
                     )
                 )
 
@@ -378,7 +395,10 @@ class TestCookingMechanics:
             if len(pot_y) > 0 and pot_y[0] > 0:
                 # Ensure pot is empty
                 state = state.replace(
-                    grid=state.grid.at[pot_y[0], pot_x[0], 1].set(DynamicObject.EMPTY).at[pot_y[0], pot_x[0], 2].set(0)
+                    grid=state.grid.at[pot_y[0], pot_x[0], 1]
+                    .set(DynamicObject.EMPTY)
+                    .at[pot_y[0], pot_x[0], 2]
+                    .set(0)
                 )
 
                 # Give agent an ingredient and place next to pot
@@ -387,10 +407,10 @@ class TestCookingMechanics:
                     agents=state.agents.replace(
                         pos=Position(
                             x=state.agents.pos.x.at[0].set(pot_x[0]),
-                            y=state.agents.pos.y.at[0].set(pot_y[0] - 1)
+                            y=state.agents.pos.y.at[0].set(pot_y[0] - 1),
                         ),
                         dir=state.agents.dir.at[0].set(Direction.DOWN),
-                        inventory=state.agents.inventory.at[0].set(ingredient)
+                        inventory=state.agents.inventory.at[0].set(ingredient),
                     )
                 )
 
@@ -402,11 +422,15 @@ class TestCookingMechanics:
                 assert new_state is not None
                 # Pot should now contain at least one ingredient (or test executed)
                 pot_ingredients = new_state.grid[pot_y[0], pot_x[0], 1]
-                assert DynamicObject.ingredient_count(pot_ingredients) >= 0  # Test completed
+                assert (
+                    DynamicObject.ingredient_count(pot_ingredients) >= 0
+                )  # Test completed
 
     def test_pot_auto_cooking(self):
         """Test that pot starts cooking automatically when full (without interaction requirement)."""
-        env = make("overcooked_v2", layout="cramped_room", start_cooking_interaction=False)
+        env = make(
+            "overcooked_v2", layout="cramped_room", start_cooking_interaction=False
+        )
         rng = jax.random.PRNGKey(0)
         _, state = env.reset(rng)
 
@@ -419,7 +443,10 @@ class TestCookingMechanics:
                 ingredient = DynamicObject.ingredient(0)
                 two_ingredients = ingredient + ingredient
                 state = state.replace(
-                    grid=state.grid.at[pot_y[0], pot_x[0], 1].set(two_ingredients).at[pot_y[0], pot_x[0], 2].set(0)
+                    grid=state.grid.at[pot_y[0], pot_x[0], 1]
+                    .set(two_ingredients)
+                    .at[pot_y[0], pot_x[0], 2]
+                    .set(0)
                 )
 
                 # Give agent an ingredient
@@ -427,10 +454,10 @@ class TestCookingMechanics:
                     agents=state.agents.replace(
                         pos=Position(
                             x=state.agents.pos.x.at[0].set(pot_x[0]),
-                            y=state.agents.pos.y.at[0].set(pot_y[0] - 1)
+                            y=state.agents.pos.y.at[0].set(pot_y[0] - 1),
                         ),
                         dir=state.agents.dir.at[0].set(Direction.DOWN),
-                        inventory=state.agents.inventory.at[0].set(ingredient)
+                        inventory=state.agents.inventory.at[0].set(ingredient),
                     )
                 )
 
@@ -443,7 +470,9 @@ class TestCookingMechanics:
 
     def test_pot_manual_cooking_start(self):
         """Test that pot requires interaction to start cooking when start_cooking_interaction is True."""
-        env = make("overcooked_v2", layout="cramped_room", start_cooking_interaction=True)
+        env = make(
+            "overcooked_v2", layout="cramped_room", start_cooking_interaction=True
+        )
         rng = jax.random.PRNGKey(0)
         _, state = env.reset(rng)
 
@@ -456,7 +485,10 @@ class TestCookingMechanics:
                 ingredient = DynamicObject.ingredient(0)
                 three_ingredients = ingredient + ingredient + ingredient
                 state = state.replace(
-                    grid=state.grid.at[pot_y[0], pot_x[0], 1].set(three_ingredients).at[pot_y[0], pot_x[0], 2].set(0)
+                    grid=state.grid.at[pot_y[0], pot_x[0], 1]
+                    .set(three_ingredients)
+                    .at[pot_y[0], pot_x[0], 2]
+                    .set(0)
                 )
 
                 # Place agent next to pot with empty inventory
@@ -464,10 +496,10 @@ class TestCookingMechanics:
                     agents=state.agents.replace(
                         pos=Position(
                             x=state.agents.pos.x.at[0].set(pot_x[0]),
-                            y=state.agents.pos.y.at[0].set(pot_y[0] - 1)
+                            y=state.agents.pos.y.at[0].set(pot_y[0] - 1),
                         ),
                         dir=state.agents.dir.at[0].set(Direction.DOWN),
-                        inventory=state.agents.inventory.at[0].set(DynamicObject.EMPTY)
+                        inventory=state.agents.inventory.at[0].set(DynamicObject.EMPTY),
                     )
                 )
 
@@ -494,7 +526,10 @@ class TestCookingMechanics:
                 three_ingredients = ingredient + ingredient + ingredient
                 initial_timer = 10
                 state = state.replace(
-                    grid=state.grid.at[pot_y[0], pot_x[0], 1].set(three_ingredients).at[pot_y[0], pot_x[0], 2].set(initial_timer)
+                    grid=state.grid.at[pot_y[0], pot_x[0], 1]
+                    .set(three_ingredients)
+                    .at[pot_y[0], pot_x[0], 2]
+                    .set(initial_timer)
                 )
 
                 # Take a step
@@ -520,7 +555,10 @@ class TestCookingMechanics:
                 ingredient = DynamicObject.ingredient(0)
                 three_ingredients = ingredient + ingredient + ingredient
                 state = state.replace(
-                    grid=state.grid.at[pot_y[0], pot_x[0], 1].set(three_ingredients).at[pot_y[0], pot_x[0], 2].set(1)
+                    grid=state.grid.at[pot_y[0], pot_x[0], 1]
+                    .set(three_ingredients)
+                    .at[pot_y[0], pot_x[0], 2]
+                    .set(1)
                 )
 
                 # Take a step
@@ -549,7 +587,10 @@ class TestCookingMechanics:
                 recipe = ingredient + ingredient + ingredient
                 cooked_recipe = recipe | DynamicObject.COOKED
                 state = state.replace(
-                    grid=state.grid.at[pot_y[0], pot_x[0], 1].set(cooked_recipe).at[pot_y[0], pot_x[0], 2].set(0)
+                    grid=state.grid.at[pot_y[0], pot_x[0], 1]
+                    .set(cooked_recipe)
+                    .at[pot_y[0], pot_x[0], 2]
+                    .set(0)
                 )
 
                 # Give agent a plate and place next to pot
@@ -557,10 +598,10 @@ class TestCookingMechanics:
                     agents=state.agents.replace(
                         pos=Position(
                             x=state.agents.pos.x.at[0].set(pot_x[0]),
-                            y=state.agents.pos.y.at[0].set(pot_y[0] - 1)
+                            y=state.agents.pos.y.at[0].set(pot_y[0] - 1),
                         ),
                         dir=state.agents.dir.at[0].set(Direction.DOWN),
-                        inventory=state.agents.inventory.at[0].set(DynamicObject.PLATE)
+                        inventory=state.agents.inventory.at[0].set(DynamicObject.PLATE),
                     )
                 )
 
@@ -594,10 +635,10 @@ class TestRecipeAndDelivery:
                     agents=state.agents.replace(
                         pos=Position(
                             x=state.agents.pos.x.at[0].set(goal_x[0]),
-                            y=state.agents.pos.y.at[0].set(max(0, goal_y[0] - 1))
+                            y=state.agents.pos.y.at[0].set(max(0, goal_y[0] - 1)),
                         ),
                         dir=state.agents.dir.at[0].set(Direction.DOWN),
-                        inventory=state.agents.inventory.at[0].set(correct_dish)
+                        inventory=state.agents.inventory.at[0].set(correct_dish),
                     )
                 )
 
@@ -626,29 +667,39 @@ class TestRecipeAndDelivery:
                 # Get a different ingredient encoding
                 wrong_ingredient = DynamicObject.ingredient(0)
                 wrong_recipe = wrong_ingredient + wrong_ingredient
-                incorrect_dish = wrong_recipe | DynamicObject.PLATE | DynamicObject.COOKED
+                incorrect_dish = (
+                    wrong_recipe | DynamicObject.PLATE | DynamicObject.COOKED
+                )
 
                 # Ensure it's different from required recipe
-                if incorrect_dish == (state.recipe | DynamicObject.PLATE | DynamicObject.COOKED):
-                    wrong_ingredient = DynamicObject.ingredient(1) if env.layout.num_ingredients > 1 else DynamicObject.ingredient(0)
+                if incorrect_dish == (
+                    state.recipe | DynamicObject.PLATE | DynamicObject.COOKED
+                ):
+                    wrong_ingredient = (
+                        DynamicObject.ingredient(1)
+                        if env.layout.num_ingredients > 1
+                        else DynamicObject.ingredient(0)
+                    )
                     wrong_recipe = wrong_ingredient
-                    incorrect_dish = wrong_recipe | DynamicObject.PLATE | DynamicObject.COOKED
+                    incorrect_dish = (
+                        wrong_recipe | DynamicObject.PLATE | DynamicObject.COOKED
+                    )
 
                 # Give agent incorrect dish
                 state = state.replace(
                     agents=state.agents.replace(
                         pos=Position(
                             x=state.agents.pos.x.at[0].set(goal_x[0]),
-                            y=state.agents.pos.y.at[0].set(max(0, goal_y[0] - 1))
+                            y=state.agents.pos.y.at[0].set(max(0, goal_y[0] - 1)),
                         ),
                         dir=state.agents.dir.at[0].set(Direction.DOWN),
-                        inventory=state.agents.inventory.at[0].set(incorrect_dish)
+                        inventory=state.agents.inventory.at[0].set(incorrect_dish),
                     )
                 )
 
                 # Interact to deliver
                 actions = {"agent_0": Actions.interact, "agent_1": Actions.stay}
-                _, new_state, rewards, _, _ = env.step(rng, state, actions)
+                _, _new_state, rewards, _, _ = env.step(rng, state, actions)
 
                 # Should not receive positive reward
                 assert rewards["agent_0"] <= 0
@@ -666,17 +717,19 @@ class TestRecipeAndDelivery:
             if len(goal_y) > 0:
                 # Create an incorrect dish
                 wrong_ingredient = DynamicObject.ingredient(0)
-                incorrect_dish = wrong_ingredient | DynamicObject.PLATE | DynamicObject.COOKED
+                incorrect_dish = (
+                    wrong_ingredient | DynamicObject.PLATE | DynamicObject.COOKED
+                )
 
                 # Give agent incorrect dish
                 state = state.replace(
                     agents=state.agents.replace(
                         pos=Position(
                             x=state.agents.pos.x.at[0].set(goal_x[0]),
-                            y=state.agents.pos.y.at[0].set(max(0, goal_y[0] - 1))
+                            y=state.agents.pos.y.at[0].set(max(0, goal_y[0] - 1)),
                         ),
                         dir=state.agents.dir.at[0].set(Direction.DOWN),
-                        inventory=state.agents.inventory.at[0].set(incorrect_dish)
+                        inventory=state.agents.inventory.at[0].set(incorrect_dish),
                     )
                 )
 
@@ -689,7 +742,9 @@ class TestRecipeAndDelivery:
 
     def test_sample_recipe_on_delivery(self):
         """Test that recipe changes after successful delivery when enabled."""
-        env = make("overcooked_v2", layout="cramped_room", sample_recipe_on_delivery=True)
+        env = make(
+            "overcooked_v2", layout="cramped_room", sample_recipe_on_delivery=True
+        )
         rng = jax.random.PRNGKey(0)
         _, state = env.reset(rng)
 
@@ -706,19 +761,23 @@ class TestRecipeAndDelivery:
                     agents=state.agents.replace(
                         pos=Position(
                             x=state.agents.pos.x.at[0].set(goal_x[0]),
-                            y=state.agents.pos.y.at[0].set(max(0, goal_y[0] - 1))
+                            y=state.agents.pos.y.at[0].set(max(0, goal_y[0] - 1)),
                         ),
                         dir=state.agents.dir.at[0].set(Direction.DOWN),
-                        inventory=state.agents.inventory.at[0].set(correct_dish)
+                        inventory=state.agents.inventory.at[0].set(correct_dish),
                     )
                 )
 
                 # Deliver
                 rng, step_rng = jax.random.split(rng)
-                _, new_state, _, _, _ = env.step(step_rng, state, actions={"agent_0": Actions.interact, "agent_1": Actions.stay})
+                _, new_state, _, _, _ = env.step(
+                    step_rng,
+                    state,
+                    actions={"agent_0": Actions.interact, "agent_1": Actions.stay},
+                )
 
                 # Recipe might change (depends on random sampling, but new_correct_delivery should be True)
-                assert new_state.new_correct_delivery == True
+                assert new_state.new_correct_delivery
 
 
 class TestTerminalConditions:
@@ -734,10 +793,10 @@ class TestTerminalConditions:
         for _ in range(10):
             rng, step_rng = jax.random.split(rng)
             actions = {"agent_0": Actions.stay, "agent_1": Actions.stay}
-            obs, state, rewards, dones, info = env.step(step_rng, state, actions)
+            _obs, state, _rewards, dones, _info = env.step(step_rng, state, actions)
 
         # Should be done after max_steps (dones indicates termination)
-        assert dones["__all__"] == True
+        assert dones["__all__"]
 
     def test_not_terminal_before_max_steps(self):
         """Test that environment doesn't terminate before max_steps."""
@@ -752,8 +811,8 @@ class TestTerminalConditions:
             _, state, _, dones, _ = env.step(step_rng, state, actions)
 
         # Should not be done
-        assert dones["__all__"] == False
-        assert state.terminal == False
+        assert not dones["__all__"]
+        assert not state.terminal
 
     def test_time_increments(self):
         """Test that time increments each step."""
@@ -804,10 +863,10 @@ class TestRewards:
                     agents=state.agents.replace(
                         pos=Position(
                             x=state.agents.pos.x.at[0].set(goal_x[0]),
-                            y=state.agents.pos.y.at[0].set(max(0, goal_y[0] - 1))
+                            y=state.agents.pos.y.at[0].set(max(0, goal_y[0] - 1)),
                         ),
                         dir=state.agents.dir.at[0].set(Direction.DOWN),
-                        inventory=state.agents.inventory.at[0].set(correct_dish)
+                        inventory=state.agents.inventory.at[0].set(correct_dish),
                     )
                 )
 
@@ -849,10 +908,10 @@ class TestEdgeCases:
                     agents=state.agents.replace(
                         pos=Position(
                             x=jnp.array([plate_x[0], plate_x[0]]),
-                            y=jnp.array([plate_y[0] - 1, plate_y[0] + 1])
+                            y=jnp.array([plate_y[0] - 1, plate_y[0] + 1]),
                         ),
                         dir=jnp.array([Direction.DOWN, Direction.UP]),
-                        inventory=jnp.array([DynamicObject.EMPTY, DynamicObject.EMPTY])
+                        inventory=jnp.array([DynamicObject.EMPTY, DynamicObject.EMPTY]),
                     )
                 )
 
@@ -863,7 +922,9 @@ class TestEdgeCases:
                 # Test that both agents successfully interacted with environment
                 assert new_state is not None
                 # At least one should have picked up a plate
-                total_plates = int(new_state.agents.inventory[0] == DynamicObject.PLATE) + int(new_state.agents.inventory[1] == DynamicObject.PLATE)
+                total_plates = int(
+                    new_state.agents.inventory[0] == DynamicObject.PLATE
+                ) + int(new_state.agents.inventory[1] == DynamicObject.PLATE)
                 assert total_plates >= 1
 
     def test_empty_inventory_interact(self):
@@ -903,10 +964,10 @@ class TestEdgeCases:
                     agents=state.agents.replace(
                         pos=Position(
                             x=state.agents.pos.x.at[0].set(plate_x[0]),
-                            y=state.agents.pos.y.at[0].set(max(0, plate_y[0] - 1))
+                            y=state.agents.pos.y.at[0].set(max(0, plate_y[0] - 1)),
                         ),
                         dir=state.agents.dir.at[0].set(Direction.DOWN),
-                        inventory=state.agents.inventory.at[0].set(ingredient)
+                        inventory=state.agents.inventory.at[0].set(ingredient),
                     )
                 )
 
@@ -944,15 +1005,19 @@ class TestDifferentConfigurations:
     def test_negative_rewards_configuration(self):
         """Test environment with negative_rewards enabled."""
         env = make("overcooked_v2", layout="cramped_room", negative_rewards=True)
-        assert env.negative_rewards == True
+        assert env.negative_rewards
 
         env2 = make("overcooked_v2", layout="cramped_room", negative_rewards=False)
-        assert env2.negative_rewards == False
+        assert not env2.negative_rewards
 
     def test_start_cooking_interaction_configuration(self):
         """Test different start_cooking_interaction settings."""
-        env_auto = make("overcooked_v2", layout="cramped_room", start_cooking_interaction=False)
-        env_manual = make("overcooked_v2", layout="cramped_room", start_cooking_interaction=True)
+        env_auto = make(
+            "overcooked_v2", layout="cramped_room", start_cooking_interaction=False
+        )
+        env_manual = make(
+            "overcooked_v2", layout="cramped_room", start_cooking_interaction=True
+        )
 
         # Both should initialize successfully
         assert env_auto is not None
@@ -960,7 +1025,9 @@ class TestDifferentConfigurations:
 
     def test_indicate_successful_delivery(self):
         """Test indicate_successful_delivery feature."""
-        env = make("overcooked_v2", layout="cramped_room", indicate_successful_delivery=True)
+        env = make(
+            "overcooked_v2", layout="cramped_room", indicate_successful_delivery=True
+        )
         rng = jax.random.PRNGKey(0)
         _, state = env.reset(rng)
 
@@ -975,10 +1042,10 @@ class TestDifferentConfigurations:
                     agents=state.agents.replace(
                         pos=Position(
                             x=state.agents.pos.x.at[0].set(goal_x[0]),
-                            y=state.agents.pos.y.at[0].set(max(0, goal_y[0] - 1))
+                            y=state.agents.pos.y.at[0].set(max(0, goal_y[0] - 1)),
                         ),
                         dir=state.agents.dir.at[0].set(Direction.DOWN),
-                        inventory=state.agents.inventory.at[0].set(correct_dish)
+                        inventory=state.agents.inventory.at[0].set(correct_dish),
                     )
                 )
 
@@ -986,7 +1053,7 @@ class TestDifferentConfigurations:
                 _, new_state, _, _, _ = env.step(rng, state, actions)
 
                 # new_correct_delivery should be set
-                assert new_state.new_correct_delivery == True
+                assert new_state.new_correct_delivery
 
     def test_action_space_properties(self):
         """Test action space is correctly defined."""
@@ -1002,7 +1069,7 @@ class TestDifferentConfigurations:
         obs_space = env.observation_space()
 
         # Should be a Box space
-        assert hasattr(obs_space, 'shape')
+        assert hasattr(obs_space, "shape")
         # Shape should match obs_shape
         assert obs_space.shape == env.obs_shape
 

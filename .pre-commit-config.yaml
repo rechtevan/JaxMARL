@@ -45,7 +45,7 @@ repos:
     rev: v0.16.0
     hooks:
       - id: markdownlint-cli2
-        args: [--fix]
+        args: [--config, .markdownlint-cli2.yaml, --fix]
 
   # Standard pre-commit hooks for general file hygiene
   - repo: https://github.com/pre-commit/pre-commit-hooks
