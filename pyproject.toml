@@ -134,6 +134,7 @@ dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 "tests/**/*.py" = [
     "F401",   # Unused imports
     "F841",   # Unused variable
+    "RUF059", # Unpacked variable never used (common in tests)
 ]
 # Baseline algorithms often have complex implementations
 "baselines/**/*.py" = [
