@@ -32,9 +32,15 @@ config:
   # MD036: Emphasis used instead of heading - disabled (intentional style choice)
   MD036: false
 
+  # MD040: Fenced code language - disabled (some code blocks intentionally unspecified)
+  MD040: false
+
   # MD041: First line in file should be top-level heading - disabled
   # (Some files start with comments or badges)
   MD041: false
+
+  # MD045: Images should have alt text - disabled (upstream code doesn't always have)
+  MD045: false
 
   # MD046: Code block style - use fenced (```) not indented
   MD046:

@@ -1,11 +1,12 @@
 # Markdown formatting configuration for JaxMARL
 # Used by mdformat via pre-commit hooks
 
-# Wrap text at 88 characters (match Python line length)
-wrap = 88
+# Keep line wrapping as-is (don't rewrap)
+# This preserves long URLs, badge lines, and table formatting
+wrap = "keep"
 
-# Add line numbers to code blocks
-number = true
+# Don't add line numbers (causes inconsistencies)
+number = false
 
 # Format code blocks using black style (via mdformat-black plugin)
 # This ensures Python code in markdown matches our Python formatting

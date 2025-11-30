@@ -38,7 +38,7 @@ repos:
           - mdformat-gfm  # GitHub Flavored Markdown
           - mdformat-black  # Format Python code blocks with black style
           - mdformat-config  # Read config from .mdformat.toml
-        args: [--number, --wrap, "80"]
+        # Config is read from .mdformat.toml - no args needed
 
   # Markdown linting - enforce style and correctness
   - repo: https://github.com/DavidAnson/markdownlint-cli2
