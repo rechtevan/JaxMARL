@@ -16,14 +16,18 @@ pip install jaxmarl
 If you would like to also run the algorithms, install the source code as follows:
 
 1. Clone the repository:
+
    ```sh
    git clone https://github.com/FLAIROx/JaxMARL.git && cd JaxMARL
    ```
-2. Install requirements:
+
+1. Install requirements:
+
    ```sh
    pip install -e .[algs] && export PYTHONPATH=./JaxMARL:$PYTHONPATH
    ```
-3. For the fastest start, we reccoment using our Dockerfile, the usage of which is
+
+1. For the fastest start, we reccoment using our Dockerfile, the usage of which is
    outlined below.
 
 ## Development 🔨

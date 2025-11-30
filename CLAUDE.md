@@ -543,22 +543,22 @@ Located in `jaxmarl/wrappers/`:
 Requirements from CONTRIBUTING.md:
 
 1. Implement `MultiAgentEnv` interface
-2. Unit tests demonstrating correctness (pytest format)
-3. If porting from existing implementation, add tests showing transition
+1. Unit tests demonstrating correctness (pytest format)
+1. If porting from existing implementation, add tests showing transition
    correspondence
-4. Training results for IPPO and MAPPO over 20 seeds
-5. Config files saved to `baselines/`
-6. README explaining the environment
+1. Training results for IPPO and MAPPO over 20 seeds
+1. Config files saved to `baselines/`
+1. README explaining the environment
 
 ### Adding a New Algorithm
 
 Requirements from CONTRIBUTING.md:
 
 1. Single-file implementation following CleanRL philosophy
-2. Hydra config file in `baselines/<ALGORITHM>/config/`
-3. Performance results on ≥3 environments with ≥20 seeds per result
-4. Compare to existing implementations if applicable
-5. README with implementation details and usage
+1. Hydra config file in `baselines/<ALGORITHM>/config/`
+1. Performance results on ≥3 environments with ≥20 seeds per result
+1. Compare to existing implementations if applicable
+1. README with implementation details and usage
 
 ### Testing Requirements
 
@@ -637,8 +637,8 @@ Use these strings with `make(env_id)`:
 Before recommending a new dependency, verify:
 
 1. **Check license**: Use MIT, Apache 2.0, or BSD licensed packages
-2. **Runtime vs dev**: Stricter requirements for runtime dependencies
-3. **Document in pyproject.toml**: Add appropriate license classifiers
+1. **Runtime vs dev**: Stricter requirements for runtime dependencies
+1. **Document in pyproject.toml**: Add appropriate license classifiers
 
 ### Approved Tool Licenses (Current)
 
@@ -684,8 +684,8 @@ hundreds of other multi-company Apache 2.0 projects.
 Only add copyright headers if:
 
 1. Creating substantial new components (new algorithms, new environments)
-2. Legal/compliance requires it for your organization
-3. Upstream files already have headers (preserve and append)
+1. Legal/compliance requires it for your organization
+1. Upstream files already have headers (preserve and append)
 
 **For NEW substantial files** (if headers required):
 

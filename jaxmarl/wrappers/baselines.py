@@ -296,9 +296,9 @@ class SMAXLogWrapper(JaxMARLWrapper):
 
 def get_space_dim(space):
     # get the proper action/obs space from Discrete-MultiDiscrete-Box spaces
-    if isinstance(space, (DiscreteGymnax, Discrete)):
+    if isinstance(space, DiscreteGymnax | Discrete):
         return space.n
-    elif isinstance(space, (BoxGymnax, Box, MultiDiscrete)):
+    elif isinstance(space, BoxGymnax | Box | MultiDiscrete):
         return np.prod(space.shape)
     else:
         print(space)

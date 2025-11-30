@@ -1,47 +1,10 @@
-# Markdown linting configuration for markdownlint-cli2
-# Documentation: https://github.com/DavidAnson/markdownlint
+# Markdownlint-cli2 options configuration for JaxMARL
+# Documentation: https://github.com/DavidAnson/markdownlint-cli2
+# NOTE: Lint rule settings are in .markdownlint.json
 
 # Ignore specific files/patterns
 ignores:
   - "**/node_modules/**"
-  - "**/CHANGELOG.md"  # May have auto-generated content
-  - ".local/**"  # AI-generated analysis files
-
-# Rule configuration
-config:
-  # Default state for all rules
-  default: true
-
-  # MD007: Unordered list indentation - use 2 spaces
-  MD007:
-    indent: 2
-
-  # MD013: Line length - disabled (handled by mdformat, tables can be wide)
-  MD013: false
-
-  # MD024: Multiple headings with same content - allow in different sections
-  MD024:
-    allow_different_nesting: true
-
-  # MD033: Allow inline HTML (sometimes needed for complex tables/formatting)
-  MD033: false
-
-  # MD034: Bare URLs - disabled (sometimes needed for clarity)
-  MD034: false
-
-  # MD036: Emphasis used instead of heading - disabled (intentional style choice)
-  MD036: false
-
-  # MD040: Fenced code language - disabled (some code blocks intentionally unspecified)
-  MD040: false
-
-  # MD041: First line in file should be top-level heading - disabled
-  # (Some files start with comments or badges)
-  MD041: false
-
-  # MD045: Images should have alt text - disabled (upstream code doesn't always have)
-  MD045: false
-
-  # MD046: Code block style - use fenced (```) not indented
-  MD046:
-    style: "fenced"
+  - "**/CHANGELOG.md"
+  - ".local/**"
+  - "site/**"

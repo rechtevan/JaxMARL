@@ -76,7 +76,7 @@ viz = JaxNavVisualizer(env, obs_list, env_state_list)
 viz.animate("test.gif")
 ```
 
-## TODOs:
+## TODOs
 
 - remove `self.rad` dependence for non circular agents
 - more unit tests

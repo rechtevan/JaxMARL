@@ -70,7 +70,7 @@ conversion of the original R2D2 OBL model in this way:
    `git clone https://huggingface.co/mttga/obl-r2d2-flax` (ensure to have git lfs
    installed). You can also use the script:
    `bash jaxmarl/environments/hanabi/models/download_r2d2_obl.sh`
-2. Load the parameters, import the agent wrapper and use it with JaxMarl Hanabi:
+1. Load the parameters, import the agent wrapper and use it with JaxMarl Hanabi:
 
 ```python
 !git clone https://huggingface.co/mttga/obl-r2d2-flax

@@ -130,8 +130,8 @@ git log --format="%an <%ae>" <filename> | sort | uniq -c
 Only add copyright headers if:
 
 1. Your organization requires it for legal/compliance
-2. Creating substantial new components (new algorithms, environments)
-3. File already has copyright headers (preserve existing, then append yours)
+1. Creating substantial new components (new algorithms, environments)
+1. File already has copyright headers (preserve existing, then append yours)
 
 **For substantial NEW files** (if headers required):
 

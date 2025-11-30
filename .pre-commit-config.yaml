@@ -40,12 +40,8 @@ repos:
           - mdformat-config  # Read config from .mdformat.toml
         # Config is read from .mdformat.toml - no args needed
 
-  # Markdown linting - enforce style and correctness
-  - repo: https://github.com/DavidAnson/markdownlint-cli2
-    rev: v0.16.0
-    hooks:
-      - id: markdownlint-cli2
-        args: [--config, .markdownlint-cli2.yaml, --fix]
+  # NOTE: markdownlint-cli2 runs in CI only (see .github/workflows/static-analysis.yml)
+  # Pre-commit has issues reading the config files; CI runs it with proper environment
 
   # Standard pre-commit hooks for general file hygiene
   - repo: https://github.com/pre-commit/pre-commit-hooks

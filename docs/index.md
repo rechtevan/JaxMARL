@@ -1,4 +1,4 @@
-# Welcome to JaxMARL!
+# Welcome to JaxMARL
 
 <div class="collage">
     <div class="column" align="centre">
@@ -26,7 +26,7 @@ tasks and against relevant baselines. We also introduce SMAX, a vectorised, simp
 version of the popular StarCraft Multi-Agent Challenge, which removes the need to run
 the StarCraft II game engine.
 
-## What we provide:
+## What we provide
 
 - **9 MARL environments** fully implemented in JAX - these span cooperative,
   competitive, and mixed games; discrete and continuous state and action spaces; and

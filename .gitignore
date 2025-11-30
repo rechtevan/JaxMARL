@@ -23,3 +23,9 @@ models/
 .coverage
 .coverage.*
 htmlcov/
+
+# Generated documentation site (mkdocs output)
+site/
+
+# Cache directories
+.cache/
